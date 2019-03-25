@@ -1,5 +1,9 @@
 
 public class Piece {
-      int nBlocks;
-
+      private int nBlocks;
+      private int k;
+      private int size;
+      public Piece(int size){
+          this.size=size;
+      }
 }
