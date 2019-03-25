@@ -16,7 +16,6 @@ public class Main {
     }
 
     private static void init() {
-        KeyDictionary.init();
         Info.initPeerID();
         Info.initPort();
     }

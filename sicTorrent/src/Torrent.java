@@ -95,16 +95,14 @@ public class Torrent {
 
 
         files = new ArrayList<>();
-/*
+
         if (parcel.getLength().size() == 1) {
-            filemode = FileMode.SINGLEFILE;
-            files.add(new Pair<>(parcel.getLength().get(0), parcel.getPath().get(0)));
+            files.add(new DownloadFile(parcel.getLength().get(0), parcel.getPath().get(0)));
         } else {
-            filemode = FileMode.MULTIFILE;
             for (int i = 0; i < parcel.getLength().size(); i++)
-                files.add(new Pair<>(parcel.getLength().get(i), parcel.getPath().get(i)));
+                files.add(new DownloadFile(parcel.getLength().get(i), parcel.getPath().get(i)));
         }
-        */
+
         peers = new HashMap<>();
 
     }

@@ -6,7 +6,7 @@ import java.util.Stack;
 public class KeyDictionary {
     private static HashMap<String, ValueType> keys;
 
-    public static void init() {
+   static{
         keys = new HashMap<>();
         keys.put("announce", ValueType.STRING);
         keys.put("announce-list", ValueType.STRING);
