@@ -16,10 +16,9 @@ public class Torrent {
     private String createdby;
     private String publisher;
     private String publisherurl;
-    private ArrayList<byte[]> hashes;
+    private ArrayList<Piece> pieces;
     private String name;
-    private FileMode filemode;
-    private ArrayList<Pair<Long, String>> files; //length path
+    private ArrayList<DownloadFile> files; //length path
     private TrackerManager trackermanager;
     private HashMap<String, Integer> peers;
 
@@ -87,10 +86,16 @@ public class Torrent {
         createdby = parcel.getCreatedBy();
         publisher = parcel.getPublisher();
         publisherurl = parcel.getPublisherURL();
-        hashes = parcel.getHashValues();
+        pieces=new ArrayList<>();
+        for (int i=0;i<parcel.getHashValues().size()-1;i++){
+            pieces.add(new Piece(piecelength,parcel.getHashValues().get(i)));
+        }
+        pieces.add(new Piece((int)((piecelength*parcel.getHashValues().size())-length),parcel.getHashValues().get(parcel.getHashValues().size()-1)));
         name = parcel.getName();
-        files = new ArrayList<>();
 
+
+        files = new ArrayList<>();
+/*
         if (parcel.getLength().size() == 1) {
             filemode = FileMode.SINGLEFILE;
             files.add(new Pair<>(parcel.getLength().get(0), parcel.getPath().get(0)));
@@ -99,6 +104,7 @@ public class Torrent {
             for (int i = 0; i < parcel.getLength().size(); i++)
                 files.add(new Pair<>(parcel.getLength().get(i), parcel.getPath().get(i)));
         }
+        */
         peers = new HashMap<>();
 
     }
