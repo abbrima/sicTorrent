@@ -100,10 +100,13 @@ public class Torrent {
             files.add(new DownloadFile(parcel.getLength().get(0), parcel.getPath().get(0)));
         } else {
             for (int i = 0; i < parcel.getLength().size(); i++)
-                files.add(new DownloadFile(parcel.getLength().get(i), parcel.getPath().get(i)));
+                files.add(new DownloadFile(parcel.getLength().get(i),new String(name+"/"+parcel.getPath().get(i))));
         }
 
         peers = new HashMap<>();
+
+    }
+    private void mapPiecesToFiles(){
 
     }
 }
