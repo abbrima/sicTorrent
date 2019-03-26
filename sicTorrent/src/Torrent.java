@@ -107,13 +107,26 @@ public class Torrent {
 
         peers = new HashMap<>();
         mapPiecesToFiles();
-        //for (int i=0;i<pieces.size();i++)
-        //{System.out.println(i+1); pieces.get(i).print();}
+        for (int i=0;i<pieces.size();i++)
+        {System.out.println(i+1); pieces.get(i).print();}
     }
     private void mapPiecesToFiles(){
-        int fileIt=0; DownloadFile currentFile=files.get(0); long offset;
+        int fileIt=0; DownloadFile currentFile=files.get(0); long offset=0;
         for (int i=0;i<pieces.size();i++){
-            Piece p=pieces.get(i);
+            Piece p=pieces.get(i); int mappedsize=0;
+            while (mappedsize<p.getLength()){
+                currentFile = files.get(fileIt);
+                long fits=currentFile.getLength()-offset;
+                if (fits>p.getLength()-mappedsize){
+                    p.addFileEntry(currentFile,offset,(int)(p.getLength()-mappedsize),mappedsize);
+                    offset+=p.getLength()-mappedsize;
+                    mappedsize=p.getLength();
+                }
+                else{
+                    p.addFileEntry(currentFile,offset,(int)fits,mappedsize);
+                    fileIt++; offset=0; mappedsize+=fits;
+                }
+            }
         }
     }
 }
