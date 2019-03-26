@@ -9,7 +9,7 @@ import java.util.Random;
 
 public class Main {
     public static void main(String args[]) throws Exception {
-        byte arr[] = TorrentFileReader.readFile("files/fb.torrent");
+        byte arr[] = TorrentFileReader.readFile("files/kilses.torrent");
         init();
         Torrent torrent = new Torrent(bCoder.decode(arr, ParcelType.TORRENT));
         torrent.test();

@@ -9,6 +9,16 @@ public class Piece {
     public int getDownloaded(){return downloaded;}
     public int getLength(){return length;}
     private ArrayList<DataLocation> blockTable;
+    public void setLength(int s){this.length=s;}
+
+    public void print(){
+        for (DataLocation d:blockTable){
+            System.out.print("File: " + d.file.getPath()+" OffsetInFile: " + d.offsetInFile+" Length: " + d.length
+            +" OffsetInPiece: " + d.offsetInPiece);
+            System.out.println("");
+        }
+        System.out.println("\n-----------------\n");
+    }
 
     public Piece(int length,byte hash[]){
         this.length=length;
@@ -23,6 +33,9 @@ public class Piece {
     public void applyBytes(byte[] bytes,int offset){
 
 
+    }
+    public void addFileEntry(DownloadFile file,long offsetInFile,int length,int offsetInPiece){
+        blockTable.add(new DataLocation(file,offsetInFile,length,offsetInPiece));
     }
 
 }

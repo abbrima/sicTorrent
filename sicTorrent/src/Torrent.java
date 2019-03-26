@@ -3,6 +3,7 @@ import javafx.util.Pair;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 
 public class Torrent {
     private byte infohash[];
@@ -87,10 +88,11 @@ public class Torrent {
         publisher = parcel.getPublisher();
         publisherurl = parcel.getPublisherURL();
         pieces=new ArrayList<>();
-        for (int i=0;i<parcel.getHashValues().size()-1;i++){
+        for (int i=0;i<parcel.getHashValues().size();i++){
             pieces.add(new Piece(piecelength,parcel.getHashValues().get(i)));
         }
-        pieces.add(new Piece((int)((piecelength*parcel.getHashValues().size())-length),parcel.getHashValues().get(parcel.getHashValues().size()-1)));
+        long t=pieces.size()*piecelength;
+        pieces.get(pieces.size()-1).setLength((int)(pieces.get(pieces.size()-1).getLength()-(t-length)));
         name = parcel.getName();
 
 
@@ -104,9 +106,14 @@ public class Torrent {
         }
 
         peers = new HashMap<>();
-
+        mapPiecesToFiles();
+        //for (int i=0;i<pieces.size();i++)
+        //{System.out.println(i+1); pieces.get(i).print();}
     }
     private void mapPiecesToFiles(){
-
+        int fileIt=0; DownloadFile currentFile=files.get(0); long offset;
+        for (int i=0;i<pieces.size();i++){
+            Piece p=pieces.get(i);
+        }
     }
 }
