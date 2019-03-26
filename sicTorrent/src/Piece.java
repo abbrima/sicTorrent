@@ -8,6 +8,7 @@ public class Piece {
     private int downloaded;
     private byte hash[];
     private PieceStatus status;
+    private Torrent torrent;
 
     public PieceStatus getStatus() {
         return status;
@@ -36,12 +37,13 @@ public class Piece {
         System.out.println("\n-----------------\n");
     }
 
-    public Piece(int length, byte hash[],int index) {
+    public Piece(int length, byte hash[],int index,Torrent torrent) {
         this.length = length;
         this.hash = hash;
         status = PieceStatus.UNFINISHED;
         blockTable = new ArrayList<>();
         this.index=index;
+        this.torrent=torrent;
     }
 
     public byte[] getBlock(int offset, int size) {
@@ -51,10 +53,14 @@ public class Piece {
 
     public void applyBytes(byte[] bytes, int offset) {
         downloaded += bytes.length;
+        torrent.addToDownloaded(bytes.length);
+
+
     }
 
     public BlockRequest requestBlock(){
         int left=length-downloaded;
+        this.status=PieceStatus.GETTING;
         if (left<Info.MaxBlockSize){
             return new BlockRequest(left,downloaded,index);
         }

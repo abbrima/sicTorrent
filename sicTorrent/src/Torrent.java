@@ -23,6 +23,8 @@ public class Torrent {
     private TrackerManager trackermanager;
     private HashMap<String, Integer> peers;
 
+    public long getLeft(){return length-downloaded;}
+    public void addToDownloaded(int l){downloaded+=l;}
     public void test() {
         System.out.println("ANNOUNCING: \n\n");
         trackermanager.announceAll();
@@ -89,7 +91,7 @@ public class Torrent {
         publisherurl = parcel.getPublisherURL();
         pieces=new ArrayList<>();
         for (int i=0;i<parcel.getHashValues().size();i++){
-            pieces.add(new Piece(piecelength,parcel.getHashValues().get(i),i));
+            pieces.add(new Piece(piecelength,parcel.getHashValues().get(i),i,this));
         }
         long t=pieces.size()*piecelength;
         pieces.get(pieces.size()-1).setLength((int)(pieces.get(pieces.size()-1).getLength()-(t-length)));
