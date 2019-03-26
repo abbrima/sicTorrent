@@ -1,3 +1,3 @@
 public class Parameters {
-    public static String downloadDir="downloads/";
+    public static String downloadDir="Downloads/";
 }
