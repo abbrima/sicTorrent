@@ -89,7 +89,7 @@ public class Torrent {
         publisherurl = parcel.getPublisherURL();
         pieces=new ArrayList<>();
         for (int i=0;i<parcel.getHashValues().size();i++){
-            pieces.add(new Piece(piecelength,parcel.getHashValues().get(i)));
+            pieces.add(new Piece(piecelength,parcel.getHashValues().get(i),i));
         }
         long t=pieces.size()*piecelength;
         pieces.get(pieces.size()-1).setLength((int)(pieces.get(pieces.size()-1).getLength()-(t-length)));

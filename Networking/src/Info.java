@@ -2,6 +2,7 @@ import java.util.Random;
 
 public class Info {
     private static String peerID;
+    public static int MaxBlockSize=16384;
     public static String getPeerID(){return peerID;}
     public static void initPeerID(){
         peerID = new String();
