@@ -22,14 +22,22 @@ public class Main {
         for (Map.Entry<String, Integer> entry : peersList.entrySet()) {
             InetAddress n = InetAddress.getByName(entry.getKey());
             System.out.println(entry.getKey() + "," + entry.getValue());
-            handshake.sendHandshake(entry.getKey(), entry.getValue(),torrent.getInfoHash());
+            handshake.sendHandshake(entry.getKey(), entry.getValue(), torrent.getInfoHash());
         }
-        //   handshake.sendHandshake();
 
     }
 
     private static void init() {
         Info.initPeerID();
+        try {
+            Server server = new Server();
+            Thread t = new Thread(server);
+            t.setDaemon(true);
+            t.start();
+        } catch (Exception e) {
+            System.out.println("ERROR CREATING SERVER");
+        }
+
     }
 }
 

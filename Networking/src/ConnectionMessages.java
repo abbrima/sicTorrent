@@ -12,15 +12,10 @@ enum MessageType
 }
 public class ConnectionMessages {
 
-    public boolean am_choking=true; //client is choking the peer
-    public boolean am_interested=false; //client is interested in peer
-    public boolean peer_choking=true;   //peer is chocking client
-    public boolean peer_interested=false; // peer is interested
-
-    public byte[] makeHandshake(byte [] info_Hash, byte [] reserved )
+    public static byte[] makeHandshake(byte [] info_Hash, byte [] reserved )
     {
         byte pstrlen=19;
-        String pstr="BitTorrent protocol";
+        String pstr=new String("BitTorrent protocol");
         reserved = new byte[8];
 
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -28,14 +23,14 @@ public class ConnectionMessages {
         try
         {
             ostream.writeByte(pstrlen);
-            ostream.writeBytes(pstr);
-            ostream.write(reserved);
+            ostream.write(pstr.getBytes(StandardCharsets.UTF_8));
+            ostream.writeByte(0);
             ostream.write(info_Hash);
             ostream.write(Info.getPeerID().getBytes(StandardCharsets.UTF_8));
-        }catch (IOException e){System.out.println("EEE");}
+        }catch (IOException e){}
         return baos.toByteArray();
     }
-    public byte [] MakeMessage(MessageType type) throws IOException
+    public static byte [] MakeMessage(MessageType type) throws IOException
     {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         DataOutputStream ostream = new DataOutputStream(baos);
@@ -57,7 +52,7 @@ public class ConnectionMessages {
         }
         return baos.toByteArray();
     }
-    public byte [] MakeHave(int index) throws IOException{
+    public static byte [] MakeHave(int index) throws IOException{
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         DataOutputStream ostream = new DataOutputStream(baos);
         ostream.writeInt(5);
@@ -66,7 +61,7 @@ public class ConnectionMessages {
         return baos.toByteArray();
     }
     //private byte [] MakeBitfield()
-    public byte [] MakeRequest(int index, int begin, int length) throws IOException
+    public static byte [] MakeRequest(int index, int begin, int length) throws IOException
     {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         DataOutputStream ostream = new DataOutputStream(baos);
@@ -77,7 +72,7 @@ public class ConnectionMessages {
         ostream.writeInt(length);
         return baos.toByteArray();
     }
-    public byte [] MakePiece(int index, int begin , byte [] block ) throws IOException{
+    public static byte [] MakePiece(int index, int begin , byte [] block ) throws IOException{
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         DataOutputStream ostream = new DataOutputStream(baos);
         ostream.writeInt(9+block.length);
@@ -87,7 +82,7 @@ public class ConnectionMessages {
         ostream.write(block, begin ,block.length);
         return baos.toByteArray();
     }
-    public byte [] MakeCancel(int index, int begin, int length) throws IOException{
+    public static byte [] MakeCancel(int index, int begin, int length) throws IOException{
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         DataOutputStream ostream = new DataOutputStream(baos);
         ostream.writeInt(13);
