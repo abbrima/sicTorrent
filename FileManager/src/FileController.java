@@ -3,7 +3,7 @@ public class FileController {
     throws FileNotFoundException{
 
     }
-    public static byte[] getBytesFromFile(DownloadFile file,long offset,long lenth)
+    public static byte[] readBytesFromFile(DownloadFile file,long offset,long lenth)
         throws FileNotFoundException{
 
         return null;

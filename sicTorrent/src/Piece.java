@@ -31,6 +31,9 @@ public class Piece {
         this.length = s;
     }
 
+    public void dropRequest(){
+        this.status=PieceStatus.UNFINISHED;
+    }
     public void print() {
         for (DataLocation d : blockTable) {
             System.out.print("File: " + d.file.getPath() + " OffsetInFile: " + d.offsetInFile + " Length: " + d.length
@@ -49,15 +52,36 @@ public class Piece {
         this.torrent = torrent;
     }
 
-    public byte[] getBlock(int offset, int size) {
-        byte arr[] = new byte[size];
-        return null;
+    public byte[] getBlock(int offset, int size) throws FileNotFoundException {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        int readBytes = 0, fileOffset = 0;
+        while (readBytes < size) {
+            for (int i = 0; i < blockTable.size(); i++) {
+                if (readBytes == size) break;
+                DataLocation loc = blockTable.get(i);
+                fileOffset = (offset - loc.offsetInPiece) + readBytes;
+                if (i == blockTable.size() - 1) {
+                    FileController.readBytesFromFile(loc.file,loc.offsetInFile+fileOffset,size-readBytes);
+                    readBytes=size;
+                } else {
+                    if (offset >= blockTable.get(i + 1).offsetInPiece)
+                        continue;
+                    else {
+                        int readable = Math.min(blockTable.get(i + 1).offsetInPiece - offset - readBytes, size - readBytes);
+                        baos.writeBytes(FileController.readBytesFromFile(loc.file, loc.offsetInFile + fileOffset, readable));
+                        readBytes+=readable;
+                    }
+                }
+            }
+        }
+        return baos.toByteArray();
     }
 
     public void applyBytes(byte[] bytes, int offset) throws FileNotFoundException {
         int appliedBytes = 0, fileOffset = 0;
         while (appliedBytes < bytes.length) {
             for (int i = 0; i < blockTable.size(); i++) {
+                if (appliedBytes == bytes.length) break;
                 DataLocation loc = blockTable.get(i);
                 fileOffset = (offset - loc.offsetInPiece) + appliedBytes;
                 if (i == blockTable.size() - 1) {
@@ -67,7 +91,7 @@ public class Piece {
                     if (offset >= blockTable.get(i + 1).offsetInPiece) {
                         continue;
                     } else {
-                        int writable = Math.max(blockTable.get(i + 1).offsetInPiece - offset - appliedBytes, bytes.length - appliedBytes);
+                        int writable = Math.min(blockTable.get(i + 1).offsetInPiece - offset - appliedBytes, bytes.length - appliedBytes);
                         FileController.writeBytesToFile(Arrays.copyOfRange(bytes, appliedBytes, appliedBytes + writable), loc.file, loc.offsetInFile + fileOffset);
                         appliedBytes += writable;
                     }
@@ -76,32 +100,39 @@ public class Piece {
         }
         downloaded += bytes.length;
         torrent.addToDownloaded(bytes.length);
-
         if (downloaded == length)
             this.validate();
+        else
+            status=PieceStatus.UNFINISHED;
     }
 
     private void validate() throws FileNotFoundException {
         try {
             MessageDigest hasher = MessageDigest.getInstance("SHA-1");
-            byte arr[]=hasher.digest(readPiece());
-            if (Arrays.equals(arr,hash))
-                status=PieceStatus.HAVE;
-            else
-            { status=PieceStatus.UNFINISHED; torrent.addToDownloaded(-length); downloaded=0;}
+            byte arr[] = hasher.digest(readPiece());
+            if (Arrays.equals(arr, hash))
+                status = PieceStatus.HAVE;
+            else {
+                status = PieceStatus.UNFINISHED;
+                torrent.addToDownloaded(-length);
+                downloaded = 0;
+            }
         } catch (NoSuchAlgorithmException e) {
             e.printStackTrace();
         }
     }
-    private byte[] readPiece() throws FileNotFoundException{
+
+    private byte[] readPiece() throws FileNotFoundException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        for (int i=0;i<blockTable.size();i++){
+        for (int i = 0; i < blockTable.size(); i++) {
             DataLocation loc = blockTable.get(i);
-            baos.writeBytes(FileController.getBytesFromFile(loc.file,loc.offsetInFile,loc.length));
+            baos.writeBytes(FileController.readBytesFromFile(loc.file, loc.offsetInFile, loc.length));
         }
         return baos.toByteArray();
     }
-    public BlockRequest requestBlock() {
+
+    public synchronized BlockRequest requestBlock() {
+        if (Thread.interrupted()){return null;}
         int left = length - downloaded;
         this.status = PieceStatus.GETTING;
         if (left < Info.MaxBlockSize) {
