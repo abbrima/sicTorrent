@@ -132,6 +132,7 @@ public class Piece {
     }
 
     public synchronized BlockRequest requestBlock() {
+        if (Thread.interrupted()){return null;}
         int left = length - downloaded;
         this.status = PieceStatus.GETTING;
         if (left < Info.MaxBlockSize) {
