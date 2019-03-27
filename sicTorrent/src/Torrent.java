@@ -30,6 +30,8 @@ public class Torrent {
         System.out.println("\n\n#seeds: "+peers.size());
     }
 
+    public byte[] getInfoHash(){return infohash;}
+
     class TrackerManager {
         public void announceAll() {
             for (Tracker tracker : trackerlist) {

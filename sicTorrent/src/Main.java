@@ -22,7 +22,7 @@ public class Main {
         for (Map.Entry<String, Integer> entry : peersList.entrySet()) {
             InetAddress n = InetAddress.getByName(entry.getKey());
             System.out.println(entry.getKey() + "," + entry.getValue());
-            handshake.sendHandshake(entry.getKey(), entry.getValue(), bCoder.decode(arr, ParcelType.TORRENT).getInfoHash());
+            handshake.sendHandshake(entry.getKey(), entry.getValue(),torrent.getInfoHash());
         }
         //   handshake.sendHandshake();
 
