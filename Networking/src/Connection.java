@@ -16,7 +16,6 @@ public class Connection {
             }
             Socket s = new Socket(ip, port);
             s.setSoTimeout(1000 * 15);
-            System.out.println(s.isConnected());
             OutputStream Handshake = s.getOutputStream();
             byte[] R = new byte[8];
             ByteArrayOutputStream request = connect.MakeHandshake(info_hash, R);
