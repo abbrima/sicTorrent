@@ -6,6 +6,7 @@
       <module fileurl="file://$PROJECT_DIR$/FileManager/FileManager.iml" filepath="$PROJECT_DIR$/FileManager/FileManager.iml" />
       <module fileurl="file://$PROJECT_DIR$/Networking/Networking.iml" filepath="$PROJECT_DIR$/Networking/Networking.iml" />
       <module fileurl="file://$PROJECT_DIR$/Trackers/Trackers.iml" filepath="$PROJECT_DIR$/Trackers/Trackers.iml" />
+      <module fileurl="file://$PROJECT_DIR$/Utils/Utils.iml" filepath="$PROJECT_DIR$/Utils/Utils.iml" />
       <module fileurl="file://$PROJECT_DIR$/sicTorrent/sicTorrent.iml" filepath="$PROJECT_DIR$/sicTorrent/sicTorrent.iml" />
     </modules>
   </component>
