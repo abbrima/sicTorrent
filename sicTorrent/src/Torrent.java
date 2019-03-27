@@ -1,5 +1,4 @@
 
-
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -126,5 +125,8 @@ public class Torrent {
                 }
             }
         }
+    }
+    public HashMap<String, Integer> getPeers(){
+        return peers;
     }
 }

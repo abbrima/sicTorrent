@@ -1,3 +1,4 @@
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -9,12 +10,12 @@ enum MessageType
 }
 public class ConnectionMessages {
 
-    int am_choking=1; //client is choking the peer
-    int am_interested=0; //client is interested in peer
-    int peer_choking=1;   //peer is chocking client
-    int peer_interested=0; // peer is interested
+    boolean am_choking=true; //client is choking the peer
+    boolean am_interested=false; //client is interested in peer
+    boolean peer_choking=true;   //peer is chocking client
+    boolean peer_interested=false; // peer is interested
 
-    private byte [] MakeHandshake(byte info_Hash, byte [] reserved )
+    public ByteArrayOutputStream MakeHandshake(byte [] info_Hash, byte [] reserved )
     {
         byte pstrlen=19;
         String pstr="BitTorrent protocol";
@@ -27,10 +28,11 @@ public class ConnectionMessages {
             ostream.writeByte(pstrlen);
             ostream.writeBytes(pstr);
             ostream.write(reserved,0,8);
-            ostream.writeByte(info_Hash);
+            String IH = new String(info_Hash);
+            ostream.writeBytes(IH);
             ostream.writeBytes(Info.getPeerID());
         }catch (IOException e){}
-        return baos.toByteArray();
+        return baos;
     }
     private byte [] MakeMessage(MessageType type) throws IOException
     {
