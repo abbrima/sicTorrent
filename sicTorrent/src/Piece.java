@@ -126,7 +126,7 @@ public class Piece {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         for (int i = 0; i < blockTable.size(); i++) {
             DataLocation loc = blockTable.get(i);
-            baos.writeBytes(FileController.getBytesFromFile(loc.file, loc.offsetInFile, loc.length));
+            baos.writeBytes(FileController.readBytesFromFile(loc.file, loc.offsetInFile, loc.length));
         }
         return baos.toByteArray();
     }
