@@ -23,10 +23,11 @@ public class Torrent {
     public long getLeft(){return length-downloaded;}
     public void addToDownloaded(int l){downloaded+=l;}
     public void test() {
+        trackerlist.get(2).disable();
         System.out.println("ANNOUNCING: \n\n");
         trackermanager.announceAll();
-        System.out.println("\n\nSCRAPING: \n\n");
-        trackermanager.scrapeAll();
+        //System.out.println("\n\nSCRAPING: \n\n");
+        //trackermanager.scrapeAll();
         System.out.println("\n\n#seeds: "+peers.size());
     }
 

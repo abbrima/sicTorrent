@@ -15,7 +15,7 @@ public abstract class Tracker {
         leeches = 0;
         interval = -1;
     }
-
+    public void disable(){status=TrackerStatus.DISABLED;}
     public static Tracker createTracker(String s) throws InvalidTrackerException {
         URL url;
         try {

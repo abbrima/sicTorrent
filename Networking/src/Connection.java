@@ -12,13 +12,14 @@ public class Connection {
     public void sendHandshake(String ip, int port, byte [] info_hash)throws IOException {
         try {
             if (port < 1 || port > 65535) {
-                throw new Exception("Port is invalid !");
+                throw new Exception("Port is invalid !"+port);
             }
+            InetAddress address = InetAddress.getByName(ip);
             Socket s = new Socket(ip, port);
-            s.setSoTimeout(1000 * 15);
+            s.setSoTimeout(100 * 15);
             DataOutputStream ostream = new DataOutputStream(s.getOutputStream());
             byte[] reserved = new byte[8];
-            byte[] request = connect.MakeHandshake(info_hash, reserved);
+            byte[] request = connect.makeHandshake(info_hash, reserved);
             ostream.write(request);
             System.out.println("connection has been made");
         }catch(Exception e){
