@@ -19,14 +19,12 @@ public class Main {
 
         Connection handshake = new Connection();
 
-        for(Map.Entry<String, Integer> entry : peersList.entrySet()) {
-            String key = entry.getKey();
-            int value = entry.getValue();
-            InetAddress n = InetAddress.getByName(key);
-            System.out.println(key +","+ value);
-            handshake.sendHandshake(key, value, bCoder.decode(arr, ParcelType.TORRENT).getInfoHash());
+        for (Map.Entry<String, Integer> entry : peersList.entrySet()) {
+            InetAddress n = InetAddress.getByName(entry.getKey());
+            System.out.println(entry.getKey() + "," + entry.getValue());
+            handshake.sendHandshake(entry.getKey(), entry.getValue(), bCoder.decode(arr, ParcelType.TORRENT).getInfoHash());
         }
-     //   handshake.sendHandshake();
+        //   handshake.sendHandshake();
 
     }
 
