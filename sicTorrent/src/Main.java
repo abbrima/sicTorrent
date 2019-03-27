@@ -30,7 +30,6 @@ public class Main {
 
     private static void init() {
         Info.initPeerID();
-        Info.initPort();
     }
 }
 

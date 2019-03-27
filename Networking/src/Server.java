@@ -23,6 +23,7 @@ public class Server implements Runnable {
         if (n>8){
             server = new ServerSocket(); port=server.getLocalPort();
         }
+        Info.setPort(port);
     }
     public void run() {
         while (true) {

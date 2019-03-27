@@ -11,10 +11,11 @@ public class Info {
         for (int i=0;i<12;i++)
             peerID+=Integer.toString(rand.nextInt(10));
     }
+
+
     private static int port;
-    public static void initPort(){
-        Random rand = new Random();
-        port = rand.nextInt(9)+6881;
+    public static void setPort(int p){
+        port=p;
     }
     public static int getPort(){return port;}
 
