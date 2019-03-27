@@ -1,9 +1,7 @@
 
-import javafx.util.Pair;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 
 public class Torrent {
     private byte infohash[];
@@ -40,7 +38,7 @@ public class Torrent {
                     try {
 
                         for (Pair<String, Integer> pair : tracker.announce(infohash, uploaded, downloaded, length, AnnounceEvent.STARTED)) {
-                            peers.put(pair.getKey(),pair.getValue());
+                            peers.put(pair.getFirst(),pair.getSecond());
 
                         }
                         System.out.println(tracker.getUri() + " Succeeded!");

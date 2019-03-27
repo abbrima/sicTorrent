@@ -124,7 +124,7 @@ public class bCoder {
        Stack<Character> stack = new Stack<>();
        Stack<String> KeyStack = new Stack<>();
        long IntValue;  char c;KVMode kvmode = KVMode.VALUE;
-       i=new Integer(0);
+       i=0;
        KeyStack.push("MAIN");
        while (i<arr.length)
        {
