@@ -1,5 +1,6 @@
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 public class Piece {
     private int index;
@@ -50,13 +51,37 @@ public class Piece {
         return null;
     }
 
-    public void applyBytes(byte[] bytes, int offset) {
-        downloaded += bytes.length;
+    public void applyBytes(byte[] bytes, int offset) throws FileNotFoundException {
+        int appliedBytes=0,fileOffset=0;
+        while (appliedBytes<bytes.length){
+            for (int i=0;i<blockTable.size();i++){
+                DataLocation loc = blockTable.get(i);
+                fileOffset=(offset-loc.offsetInPiece)+appliedBytes;
+                if (i==blockTable.size()-1){
+                    FileController.writeBytesToFile(Arrays.copyOfRange(bytes,appliedBytes,bytes.length),loc.file,loc.offsetInFile+fileOffset);
+                    appliedBytes=bytes.length;
+                }
+                else{
+                    if (offset>=blockTable.get(i+1).offsetInPiece){
+                        continue;
+                    }
+                    else{
+                        int writable=Math.max(blockTable.get(i+1).offsetInPiece-offset-appliedBytes,bytes.length-appliedBytes);
+                        FileController.writeBytesToFile(Arrays.copyOfRange(bytes,appliedBytes,appliedBytes+writable),loc.file,loc.offsetInFile+fileOffset);
+                        appliedBytes+=writable;
+                    }
+                }
+            }
+        }
+        downloaded+=bytes.length;
         torrent.addToDownloaded(bytes.length);
 
+        if (downloaded==length)
+            this.validate();
+    }
+    private void validate(){
 
     }
-
     public BlockRequest requestBlock(){
         int left=length-downloaded;
         this.status=PieceStatus.GETTING;

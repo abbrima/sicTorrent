@@ -107,7 +107,6 @@ public class Torrent {
 
         peers = new HashMap<>();
         mapPiecesToFiles();
-
     }
     private void mapPiecesToFiles(){
         int fileIt=0; DownloadFile currentFile=files.get(0); long offset=0;
