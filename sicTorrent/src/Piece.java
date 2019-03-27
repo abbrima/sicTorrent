@@ -50,7 +50,7 @@ public class Piece {
     }
 
     public byte[] getBlock(int offset, int size) {
-
+        byte arr[] = new byte[size];
         return null;
     }
 
