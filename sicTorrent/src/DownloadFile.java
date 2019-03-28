@@ -2,6 +2,7 @@ public class DownloadFile {
     private long length;
     private String path;
 
+
     public long getLength(){return length;}
     public String getPath(){return path;}
 
@@ -9,4 +10,6 @@ public class DownloadFile {
         this.length=length;
         this.path=path;
     }
+
+
 }

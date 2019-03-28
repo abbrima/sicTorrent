@@ -6,12 +6,13 @@ import java.net.Socket;
 import java.net.SocketAddress;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
 
 public class Main {
     public static void main(String args[]) throws Exception {
-        byte arr[] = TorrentFileReader.readFile("files/fb.torrent");
+       /* byte arr[] = TorrentFileReader.readFile("files/fb.torrent");
         init();
         Torrent torrent = new Torrent(bCoder.decode(arr, ParcelType.TORRENT));
         torrent.test();
@@ -25,6 +26,7 @@ public class Main {
             handshake.sendHandshake(entry.getKey(), entry.getValue(), torrent.getInfoHash());
         }
 
+        */
     }
 
     private static void init() {
@@ -41,4 +43,3 @@ public class Main {
     }
 }
 
-//Remember to change request intervals from 15 to 1500
