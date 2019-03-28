@@ -1,12 +1,13 @@
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.Serializable;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-public class Piece {
+public class Piece implements Serializable {
     private int index;
     private int length;
     private int downloaded;
@@ -147,7 +148,7 @@ public class Piece {
     }
 }
 
-class DataLocation {
+class DataLocation implements Serializable {
     public DownloadFile file;
     public long offsetInFile;
     public int length;
@@ -161,6 +162,6 @@ class DataLocation {
     }
 }
 
-enum PieceStatus {
+enum PieceStatus implements Serializable {
     HAVE, UNFINISHED, GETTING
 }

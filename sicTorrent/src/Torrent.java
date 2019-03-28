@@ -1,8 +1,9 @@
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-public class Torrent {
+public class Torrent implements Serializable {
     private byte infohash[];
     private long downloaded, uploaded;
     private long length;
@@ -17,7 +18,7 @@ public class Torrent {
     private ArrayList<Piece> pieces;
     private String name;
     private ArrayList<DownloadFile> files; //length path
-    private TrackerManager trackermanager;
+    private transient TrackerManager trackermanager;
     private HashMap<String, Integer> peers;
 
     public long getLeft(){return length-downloaded;}

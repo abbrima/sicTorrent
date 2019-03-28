@@ -1,4 +1,6 @@
-public class DownloadFile {
+import java.io.Serializable;
+
+public class DownloadFile implements Serializable {
     private long length;
     private String path;
 

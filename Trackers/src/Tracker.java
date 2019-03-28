@@ -8,7 +8,7 @@ import java.util.concurrent.TimeoutException;
 
 import static java.lang.Math.pow;
 
-public abstract class Tracker {
+public abstract class Tracker implements Serializable {
     public Tracker() {
         status=TrackerStatus.NONE;
         seeds = 0;
