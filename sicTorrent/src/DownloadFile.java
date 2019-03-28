@@ -9,6 +9,7 @@ public class DownloadFile {
     public DownloadFile(long length,String path){
         this.length=length;
         this.path=path;
+        try{FileController.createFile(this);} catch(Exception e){e.printStackTrace();}
     }
 
 

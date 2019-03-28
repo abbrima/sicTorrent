@@ -1,6 +1,7 @@
 import java.io.BufferedWriter;
 import java.io.DataOutputStream;
 import java.io.File;
+import java.io.RandomAccessFile;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.net.SocketAddress;
@@ -12,12 +13,12 @@ import java.util.*;
 
 public class Main {
     public static void main(String args[]) throws Exception {
-       /* byte arr[] = TorrentFileReader.readFile("files/fb.torrent");
+        byte arr[] = TorrentFileReader.readFile("files/fb.torrent");
         init();
         Torrent torrent = new Torrent(bCoder.decode(arr, ParcelType.TORRENT));
         torrent.test();
         HashMap<String, Integer> peersList = torrent.getPeers();
-
+          /*
         Connection handshake = new Connection();
 
         for (Map.Entry<String, Integer> entry : peersList.entrySet()) {
@@ -25,8 +26,8 @@ public class Main {
             System.out.println(entry.getKey() + "," + entry.getValue());
             handshake.sendHandshake(entry.getKey(), entry.getValue(), torrent.getInfoHash());
         }
-
         */
+
     }
 
     private static void init() {

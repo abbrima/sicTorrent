@@ -1,5 +1,6 @@
 
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
@@ -52,7 +53,7 @@ public class Piece {
         this.torrent = torrent;
     }
 
-    public byte[] getBlock(int offset, int size) throws FileNotFoundException {
+    public byte[] getBlock(int offset, int size) throws FileNotFoundException, IOException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         int readBytes = 0, fileOffset = 0;
         while (readBytes < size) {
@@ -77,7 +78,7 @@ public class Piece {
         return baos.toByteArray();
     }
 
-    public void applyBytes(byte[] bytes, int offset) throws FileNotFoundException {
+    public void applyBytes(byte[] bytes, int offset) throws FileNotFoundException,IOException {
         int appliedBytes = 0, fileOffset = 0;
         while (appliedBytes < bytes.length) {
             for (int i = 0; i < blockTable.size(); i++) {
@@ -106,7 +107,7 @@ public class Piece {
             status=PieceStatus.UNFINISHED;
     }
 
-    private void validate() throws FileNotFoundException {
+    private void validate() throws FileNotFoundException,IOException {
         try {
             MessageDigest hasher = MessageDigest.getInstance("SHA-1");
             byte arr[] = hasher.digest(readPiece());
@@ -122,7 +123,7 @@ public class Piece {
         }
     }
 
-    private byte[] readPiece() throws FileNotFoundException {
+    private byte[] readPiece() throws FileNotFoundException,IOException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         for (int i = 0; i < blockTable.size(); i++) {
             DataLocation loc = blockTable.get(i);

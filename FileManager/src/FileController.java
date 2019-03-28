@@ -1,24 +1,38 @@
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.RandomAccessFile;
+import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
 public class FileController {
     public static void writeBytesToFile(byte[] arr, DownloadFile file, long offset)
             throws FileNotFoundException, IOException {
-
-
+        File fl = new File(Parameters.downloadDir+file.getPath());
+        if (!fl.exists()) throw new FileNotFoundException();
+        RandomAccessFile raf = new RandomAccessFile(fl,"rw");
+        raf.seek(offset);
+        raf.write(arr);
     }
 
-    public static byte[] readBytesFromFile(DownloadFile file, long offset, long lenth)
+    public static byte[] readBytesFromFile(DownloadFile file, long offset, long length)
             throws FileNotFoundException, IOException {
-
-        return null;
+        byte arr[]=new byte[(int)length]; File fl = new File(Parameters.downloadDir+file.getPath());
+        if (!fl.exists()) throw new FileNotFoundException();
+        RandomAccessFile raf = new RandomAccessFile(fl,"r");
+        raf.seek(offset);
+        raf.readFully(arr);
+        return arr;
     }
 
-    public static void createFile(DownloadFile file) throws IOException {
+    public static void createFile(DownloadFile file) throws IOException,FileNotFoundException {
         Pair<String, String> pair = splitPath(file.getPath());
         Files.createDirectories(Paths.get(Parameters.downloadDir+pair.getFirst()));
-        Files.createFile(Paths.get(Parameters.downloadDir+pair.getFirst()+pair.getSecond()));
+        try{Files.createFile(Paths.get(Parameters.downloadDir+pair.getFirst()+pair.getSecond()));
+        File fl = new File(Parameters.downloadDir+file.getPath());
+        if (!fl.exists()){throw new FileNotFoundException();}
+        }catch(FileAlreadyExistsException e){}
     }
 
     private static Pair<String, String> splitPath(String path) {
