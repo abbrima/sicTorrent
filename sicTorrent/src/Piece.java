@@ -15,6 +15,9 @@ public class Piece implements Serializable {
     private PieceStatus status;
     private Torrent torrent;
 
+
+    public int getIndex(){return index;}
+    public void doNotDownload(){this.status=PieceStatus.DONOTDOWNLOAD;}
     public PieceStatus getStatus() {
         return status;
     }
@@ -163,5 +166,5 @@ class DataLocation implements Serializable {
 }
 
 enum PieceStatus implements Serializable {
-    HAVE, UNFINISHED, GETTING
+    HAVE, UNFINISHED, GETTING, DONOTDOWNLOAD
 }

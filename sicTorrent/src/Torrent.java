@@ -21,18 +21,6 @@ public class Torrent implements Serializable {
     private transient TrackerManager trackermanager;
     private HashMap<String, Integer> peers;
 
-    public long getLeft(){return length-downloaded;}
-    public void addToDownloaded(int l){downloaded+=l;}
-    public void test() {
-        trackerlist.get(2).disable();
-        System.out.println("ANNOUNCING: \n\n");
-        trackermanager.announceAll();
-        //System.out.println("\n\nSCRAPING: \n\n");
-        //trackermanager.scrapeAll();
-        System.out.println("\n\n#seeds: "+peers.size());
-    }
-
-    public byte[] getInfoHash(){return infohash;}
 
     class TrackerManager {
         public void announceAll() {
@@ -63,6 +51,28 @@ public class Torrent implements Serializable {
             }
         }
     }
+
+    public void test() {
+        //trackerlist.get(2).disable();
+        //System.out.println("ANNOUNCING: \n\n");
+        //trackermanager.announceAll();
+        //System.out.println("\n\nSCRAPING: \n\n");
+        //trackermanager.scrapeAll();
+        System.out.println("\n\n#seeds: "+peers.size());
+
+        for (DownloadFile fl:files){
+            ArrayList<Piece> list = fl.getPieces();
+            System.out.println(list.get(0).getIndex() + "   " + list.get(list.size()-1).getIndex());
+        }
+    }
+
+    public long getLeft(){return length-downloaded;}
+    public void addToDownloaded(int l){downloaded+=l;}
+    public byte[] getInfoHash(){return infohash;}
+    public HashMap<String, Integer> getPeers(){
+        return peers;
+    }
+
 
     public Torrent(Parcel parcel) {
         trackerlist = new ArrayList<>();
@@ -129,8 +139,20 @@ public class Torrent implements Serializable {
                 }
             }
         }
-    }
-    public HashMap<String, Integer> getPeers(){
-        return peers;
+        offset=0; int pieceIt=0;
+        for (fileIt=0; fileIt<files.size();fileIt++){
+            DownloadFile file=files.get(fileIt); ArrayList<Piece> list=new ArrayList<>();
+            if (offset>0){
+                list.add(pieces.get(pieceIt++));
+            }
+            while (offset<file.getLength()){
+                offset+=pieces.get(pieceIt).getLength();
+                list.add(pieces.get(pieceIt));
+                if (offset<=file.getLength())
+                   pieceIt++;
+            }
+            file.setPieces(list);
+            offset-=file.getLength();
+        }
     }
 }

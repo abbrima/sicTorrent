@@ -1,5 +1,41 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
+  <component name="MavenProjectsManager">
+    <option name="originalFiles">
+      <list>
+        <option value="C:/UCE-master/uce/pom.xml" />
+      </list>
+    </option>
+    <option name="ignoredFiles">
+      <set>
+        <option value="C:/UCE-master/All-In-One-Mediator/pom.xml" />
+        <option value="C:/UCE-master/connectivitymanager.demo.complete/pom.xml" />
+        <option value="C:/UCE-master/connectivitymanager.demo/pom.xml" />
+        <option value="C:/UCE-master/connectivitymanager/pom.xml" />
+        <option value="C:/UCE-master/core/pom.xml" />
+        <option value="C:/UCE-master/directconnection.mediator/pom.xml" />
+        <option value="C:/UCE-master/directconnection.message/pom.xml" />
+        <option value="C:/UCE-master/directconnection/pom.xml" />
+        <option value="C:/UCE-master/holepunching.mediator/pom.xml" />
+        <option value="C:/UCE-master/holepunching.message/pom.xml" />
+        <option value="C:/UCE-master/holepunching/pom.xml" />
+        <option value="C:/UCE-master/master.server/pom.xml" />
+        <option value="C:/UCE-master/mediator/pom.xml" />
+        <option value="C:/UCE-master/parent/pom.xml" />
+        <option value="C:/UCE-master/plugininterface/pom.xml" />
+        <option value="C:/UCE-master/relaying.mediator/pom.xml" />
+        <option value="C:/UCE-master/relaying.message/pom.xml" />
+        <option value="C:/UCE-master/relaying.server/pom.xml" />
+        <option value="C:/UCE-master/relaying/pom.xml" />
+        <option value="C:/UCE-master/reversal.mediator/pom.xml" />
+        <option value="C:/UCE-master/reversal.message/pom.xml" />
+        <option value="C:/UCE-master/reversal/pom.xml" />
+        <option value="C:/UCE-master/stun.server/pom.xml" />
+        <option value="C:/UCE-master/stun/pom.xml" />
+        <option value="C:/UCE-master/uce/pom.xml" />
+      </set>
+    </option>
+  </component>
   <component name="ProjectRootManager" version="2" languageLevel="JDK_11" default="false" project-jdk-name="12" project-jdk-type="JavaSDK">
     <output url="file://$PROJECT_DIR$/out" />
   </component>

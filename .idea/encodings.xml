@@ -1,4 +1,30 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
-  <component name="Encoding" addBOMForNewFiles="with NO BOM" />
+  <component name="Encoding">
+    <file url="file://C:/UCE-master/All-In-One-Mediator" charset="UTF-8" />
+    <file url="file://C:/UCE-master/connectivitymanager" charset="UTF-8" />
+    <file url="file://C:/UCE-master/connectivitymanager.demo" charset="UTF-8" />
+    <file url="file://C:/UCE-master/connectivitymanager.demo.complete" charset="UTF-8" />
+    <file url="file://C:/UCE-master/core" charset="UTF-8" />
+    <file url="file://C:/UCE-master/directconnection" charset="UTF-8" />
+    <file url="file://C:/UCE-master/directconnection.mediator" charset="UTF-8" />
+    <file url="file://C:/UCE-master/directconnection.message" charset="UTF-8" />
+    <file url="file://C:/UCE-master/holepunching" charset="UTF-8" />
+    <file url="file://C:/UCE-master/holepunching.mediator" charset="UTF-8" />
+    <file url="file://C:/UCE-master/holepunching.message" charset="UTF-8" />
+    <file url="file://C:/UCE-master/master.server" charset="UTF-8" />
+    <file url="file://C:/UCE-master/mediator" charset="UTF-8" />
+    <file url="file://C:/UCE-master/parent" charset="UTF-8" />
+    <file url="file://C:/UCE-master/plugininterface" charset="UTF-8" />
+    <file url="file://C:/UCE-master/relaying" charset="UTF-8" />
+    <file url="file://C:/UCE-master/relaying.mediator" charset="UTF-8" />
+    <file url="file://C:/UCE-master/relaying.message" charset="UTF-8" />
+    <file url="file://C:/UCE-master/relaying.server" charset="UTF-8" />
+    <file url="file://C:/UCE-master/reversal" charset="UTF-8" />
+    <file url="file://C:/UCE-master/reversal.mediator" charset="UTF-8" />
+    <file url="file://C:/UCE-master/reversal.message" charset="UTF-8" />
+    <file url="file://C:/UCE-master/stun" charset="UTF-8" />
+    <file url="file://C:/UCE-master/stun.server" charset="UTF-8" />
+    <file url="file://C:/UCE-master/uce" charset="UTF-8" />
+  </component>
 </project>
