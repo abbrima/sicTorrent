@@ -155,4 +155,25 @@ public class Torrent implements Serializable {
             offset-=file.getLength();
         }
     }
+    public void doNotDownload(DownloadFile fl){
+        int index=files.indexOf(fl);
+        int start,end;
+        start=index-1; //-1 for first file
+        if (index==files.size()-1)
+            end=-1;
+        else
+            end=index+1;
+        if (start==-1)
+            start=0;
+        else
+            start=files.get(index-1).getPieces().get(files.get(index-1).getPieces().size()-1).getIndex();
+        if (end==-1)
+            end=files.get(index).getPieces().get(files.get(index).getPieces().size()-1).getIndex();
+        else
+            end=files.get(index).getPieces().get(0).getIndex();
+        files.get(index).doNotDownload();
+        for (int i=start;i<=end;i++){
+            pieces.get(i).doNotDownload();
+        }
+    }
 }
