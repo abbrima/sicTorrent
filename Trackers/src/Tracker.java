@@ -8,7 +8,7 @@ import java.util.concurrent.TimeoutException;
 
 import static java.lang.Math.pow;
 
-public abstract class Tracker implements Serializable {
+public abstract class Tracker {
     public Tracker() {
         status=TrackerStatus.NONE;
         seeds = 0;
@@ -16,7 +16,7 @@ public abstract class Tracker implements Serializable {
         interval = -1;
     }
     public void disable(){status=TrackerStatus.DISABLED;}
-    public static Tracker createTracker(String s) throws InvalidTrackerException {
+    public static Tracker createTracker(String s) throws InvalidTrackerException,UnknownHostException {
         URL url;
         try {
             if (s.substring(0, 4).toUpperCase().equals("HTTP")) {
@@ -31,7 +31,7 @@ public abstract class Tracker implements Serializable {
                 try {
                     address = InetAddress.getByName(s.substring(6, s.lastIndexOf(':')));
                 } catch (UnknownHostException ex) {
-                    throw new InvalidTrackerException("Unknown Host " + s.substring(6, s.lastIndexOf(':')));
+                    throw ex;
                 }
                 int port;
                 try {

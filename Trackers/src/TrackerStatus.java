@@ -1,5 +1,5 @@
-import java.io.Serializable;
 
-public enum TrackerStatus implements Serializable {
+
+public enum TrackerStatus {
     WORKING,SCRAPING,SCRAPEOK,UPDATING,TIMEDOUT,NONE,DISABLED
 }
