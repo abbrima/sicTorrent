@@ -121,6 +121,9 @@ public class Piece implements Serializable {
                 status = PieceStatus.UNFINISHED;
                 torrent.addToDownloaded(-length);
                 downloaded = 0;
+                for (DataLocation loc:blockTable){
+                    loc.file.addToDownloaded(loc.length);
+                }
             }
         } catch (NoSuchAlgorithmException e) {
             e.printStackTrace();

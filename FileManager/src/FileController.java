@@ -14,6 +14,8 @@ public class FileController {
         RandomAccessFile raf = new RandomAccessFile(fl,"rw");
         raf.seek(offset);
         raf.write(arr);
+        file.addToDownloaded(arr.length);
+        file.validate();
     }
 
     public static byte[] readBytesFromFile(DownloadFile file, long offset, long length)
