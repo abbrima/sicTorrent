@@ -9,5 +9,6 @@
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="module" module-name="Bencoding" exported="" />
+    <orderEntry type="module" module-name="sicTorrent" exported="" />
   </component>
 </module>

@@ -24,7 +24,7 @@ public class Torrent implements Serializable {
     private transient TrackerManager trackermanager;
     private HashMap<String, Integer> peers;
     private TorrentStatus status;
-
+    private transient ArrayList<Connection> connections;
 
     class TrackerManager implements Runnable {
         private ArrayList<String> trackerStrings;
@@ -305,6 +305,7 @@ public class Torrent implements Serializable {
 
     public void invokeThreads() {
         trackermanager.start();
+        connections = new ArrayList<>();
     }
 }
 

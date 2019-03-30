@@ -6,12 +6,17 @@ import java.net.SocketAddress;
 import java.security.KeyPair;
 
 public class Connection {
-    private boolean am_choking=true; //client is choking the peer
+    private Socket socket;
+    private boolean am_choking=false; //client is choking the peer
     private boolean am_interested=false; //client is interested in peer
-    private boolean peer_choking=true;   //peer is chocking client
+    private boolean peer_choking=false;   //peer is chocking client
     private boolean peer_interested=false; // peer is interested
-  //  Torrent
-    public Connection(){
+    private Torrent torrent;
+    public Connection(Socket socket){
+        this.socket=socket;
+    }
+    public Connection(Torrent torrent){
+        this.torrent=torrent;
     }
     public void sendHandshake(String ip, int port, byte [] info_hash)throws IOException {
         try {

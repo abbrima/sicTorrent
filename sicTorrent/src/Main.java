@@ -16,7 +16,8 @@ public class Main {
         byte arr[] = TorrentFileReader.readFile("files/fb.torrent");
         init();
         Torrent torrent = new Torrent(bCoder.decode(arr, ParcelType.TORRENT));
-        torrent.invokeThreads();
+        NetworkController.addTorrent(torrent);
+        NetworkController.invokeTorrents();
           /*
         Connection handshake = new Connection();
 
