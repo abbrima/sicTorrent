@@ -4,6 +4,9 @@ import java.io.Serializable;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeoutException;
 
 public class Torrent implements Serializable {
@@ -25,25 +28,29 @@ public class Torrent implements Serializable {
     private HashMap<String, Integer> peers;
     private TorrentStatus status;
     private transient ArrayList<Connection> connections;
+    private Executor announceExecutor, scrapeExecutor;
 
     class TrackerManager implements Runnable {
         private ArrayList<String> trackerStrings;
         public boolean kill;
         private int interval;
+
         private Thread trackerThread;
 
         public void run() {
             for (String s : trackerStrings)
                 try {
-                    boolean exists=false;
-                    for (Tracker t:trackerlist)
+                    boolean exists = false;
+                    for (Tracker t : trackerlist)
                         if (t.getUri().toLowerCase().equals(s.toLowerCase()))
-                            exists=true;
-                        if (!exists)
-                    createTracker(s);
+                            exists = true;
+                    if (!exists)
+                        createTracker(s);
                 } catch (Exception e) {
                     return;
                 }
+            announceExecutor = Executors.newFixedThreadPool(trackerlist.size());
+            scrapeExecutor = Executors.newFixedThreadPool(trackerlist.size());
             for (Tracker tracker : trackerlist) {
                 scrape(tracker);
             }
@@ -52,24 +59,23 @@ public class Torrent implements Serializable {
             while (kill == false) {
                 interval = 100000;
                 for (int i = 0; i < trackerlist.size(); i++) {
-                    if (trackerlist.get(i).getInterval()>-1)
-                    interval = Math.min(interval, trackerlist.get(i).getInterval());
-                    System.out.println(i + ": " + trackerlist.get(i).getInterval());
+                    if (trackerlist.get(i).getInterval() > -1)
+                        interval = Math.min(interval, trackerlist.get(i).getInterval());
                 }
                 try {
                     Thread.sleep(interval * 1000);
                 } catch (InterruptedException ie) {
                     if (kill)
-                    for (Tracker tracker : trackerlist) {
-                        announce(tracker, AnnounceEvent.STOPPED);
-                    }
+                        for (Tracker tracker : trackerlist) {
+                            announce(tracker, AnnounceEvent.STOPPED);
+                        }
                     return;
                 }
                 for (Tracker tracker : trackerlist) {
-                    if (tracker.interval!=-1)
-                    tracker.interval -= interval;
-                    if (tracker.interval<=0 && tracker.status!=TrackerStatus.TIMEDOUT)
-                        announce(tracker,AnnounceEvent.NONE);
+                    if (tracker.interval != -1)
+                        tracker.interval -= interval;
+                    if (tracker.interval <= 0 && tracker.status != TrackerStatus.TIMEDOUT)
+                        announce(tracker, AnnounceEvent.NONE);
                 }
             }
         }
@@ -85,16 +91,16 @@ public class Torrent implements Serializable {
             }
         }
 
-        public void forceAnnounce(){
+        public void forceAnnounce() {
             trackerThread.interrupt();
-            trackerThread=new Thread(this);
+            trackerThread = new Thread(this);
             trackerThread.start();
         }
 
-        public void announceFinished(){
+        public void announceFinished() {
             kill();
-            for (Tracker tracker:trackerlist)
-                announce(tracker,AnnounceEvent.COMPLETED);
+            for (Tracker tracker : trackerlist)
+                announce(tracker, AnnounceEvent.COMPLETED);
         }
 
         public void kill() {
@@ -122,10 +128,10 @@ public class Torrent implements Serializable {
         }
 
         public void announce(Tracker tracker, AnnounceEvent event) {
-            Thread t = new Thread(new Runnable() {
+            announceExecutor.execute(new Runnable() {
                 public void run() {
                     try {
-                        if (tracker.isEnabled() && tracker.status!=TrackerStatus.TIMEDOUT) {
+                        if (tracker.isEnabled() && tracker.status != TrackerStatus.TIMEDOUT) {
                             for (Pair<String, Integer> pair : tracker.announce(infohash, uploaded, downloaded, length, event))
                                 peers.put(pair.getFirst(), pair.getSecond());
                         }
@@ -139,22 +145,20 @@ public class Torrent implements Serializable {
                     }
                 }
             });
-            t.setDaemon(true);
-            t.start();
-
         }
 
         public void scrape(Tracker tracker) {
-            Thread t = new Thread(new Runnable() {
+            scrapeExecutor.execute(new Runnable() {
                 public void run() {
                     ScrapeResult result;
-                    if (tracker.isEnabled()  && tracker.status!=TrackerStatus.TIMEDOUT)
+                    if (tracker.isEnabled() && tracker.status != TrackerStatus.TIMEDOUT)
                         try {
                             result = tracker.scrape(infohash);
                             tracker.seeds = result.getSeeders();
                             tracker.leeches = result.getLeechers();
                             tracker.downloaded = result.getDownloaded();
-                        } catch (TimeoutException toe) {tracker.status=TrackerStatus.TIMEDOUT;
+                        } catch (TimeoutException toe) {
+                            tracker.status = TrackerStatus.TIMEDOUT;
                         } catch (InterruptedException ie) {
                         } catch (IOException ioe) {
                             tracker.interval += 60;
@@ -163,8 +167,6 @@ public class Torrent implements Serializable {
                         }
                 }
             });
-            t.setDaemon(true);
-            t.start();
         }
 
     }
@@ -297,7 +299,9 @@ public class Torrent implements Serializable {
         }
     }
 
-    public ArrayList<DownloadFile> getFiles(){return this.files;}
+    public ArrayList<DownloadFile> getFiles() {
+        return this.files;
+    }
 
     public void killThreads() {
         trackermanager.kill();
