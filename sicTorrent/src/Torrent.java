@@ -1,8 +1,10 @@
 
+import java.io.IOException;
 import java.io.Serializable;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.concurrent.TimeoutException;
 
 public class Torrent implements Serializable {
     private byte infohash[];
@@ -26,22 +28,37 @@ public class Torrent implements Serializable {
 
     class TrackerManager implements Runnable {
         private ArrayList<String> trackerStrings;
+        public boolean kill;
+        private int interval;
         private Thread trackerThread;
-        public void run(){
 
-        }
-        private void createTracker(String s) throws UnknownHostException {
+        public void run() {
+            for (String s : trackerStrings)
                 try {
-                    if (!Tracker.checkIfExists(s, trackerlist))
-                        trackerlist.add(Tracker.createTracker(s));
-                } catch (InvalidTrackerException e) {
-                    e.printStackTrace();
-                } catch (UnknownHostException e) {
-
+                    createTracker(s);
+                } catch (Exception e) {
+                    return;
                 }
+            for (Tracker tracker:trackerlist)
+                scrape(tracker);
+            for (Tracker tracker:trackerlist)
+                announce(tracker,AnnounceEvent.STARTED);
+        }
+
+        private void createTracker(String s) throws UnknownHostException {
+            try {
+                if (!Tracker.checkIfExists(s, trackerlist))
+                    trackerlist.add(Tracker.createTracker(s));
+            } catch (InvalidTrackerException e) {
+                e.printStackTrace();
+            } catch (UnknownHostException e) {
+
+            }
         }
 
         public void kill() {
+            kill = true;
+            trackerThread.interrupt();
         }
 
         public void addToTrackerList(ArrayList<String> list) {
@@ -52,35 +69,51 @@ public class Torrent implements Serializable {
             trackerStrings.add(s);
         }
 
-        public void announceAll() {
-            for (Tracker tracker : trackerlist) {
-                if (tracker.isEnabled())
-                    try {
-
-                        for (Pair<String, Integer> pair : tracker.announce(infohash, uploaded, downloaded, length, AnnounceEvent.STARTED)) {
-                            peers.put(pair.getFirst(), pair.getSecond());
-
-                        }
-                        System.out.println(tracker.getUri() + " Succeeded!");
-
-                    } catch (Exception e) {
-                        System.out.println(tracker.getUri() + " Failed!");
-                    }
-            }
+        public TrackerManager() {
+            trackerStrings = new ArrayList<>();
+            kill = false;
         }
 
-        public void scrapeAll() {
-            for (Tracker tracker : trackerlist) {
+        public void start() {
+            interval = 0;
+            trackerThread = new Thread(this);
+            trackerThread.start();
+        }
+
+        public void announce(Tracker tracker, AnnounceEvent event) {
+            try {
                 if (tracker.isEnabled()) {
-                    try {
-                        tracker.scrape(infohash).print();
-                        System.out.println(tracker.getUri() + " Succeeded!");
-                    } catch (Exception e) {
-                        System.out.println(tracker.getUri() + " Failed!");
-                    }
+                    for (Pair<String, Integer> pair : tracker.announce(infohash, uploaded, downloaded, length, event))
+                        peers.put(pair.getFirst(), pair.getSecond());
                 }
+            } catch (TimeoutException toe) {
+                tracker.status = TrackerStatus.TIMEDOUT;
+            } catch (IOException ioe) {
+                tracker.interval += 60;
+            } catch (InterruptedException ie) {
+            } catch (InvalidReplyException ire) {
+                tracker.interval += 30;
             }
         }
+
+        public void scrape(Tracker tracker) {
+            ScrapeResult result;
+            if (tracker.isEnabled())
+                try {
+                    result = tracker.scrape(infohash);
+                    tracker.seeds=result.getSeeders();
+                    tracker.leeches=result.getLeechers();
+                    tracker.downloaded=result.getDownloaded();
+                } catch (TimeoutException toe) {
+                } catch (InterruptedException ie) {
+                } catch (IOException ioe) {
+                    tracker.interval += 60;
+                } catch (InvalidReplyException ire) {
+                    tracker.interval += 30;
+                }
+
+        }
+
     }
 
     public void test() {
@@ -90,11 +123,6 @@ public class Torrent implements Serializable {
         //System.out.println("\n\nSCRAPING: \n\n");
         //trackermanager.scrapeAll();
         System.out.println("\n\n#seeds: " + peers.size());
-
-        for (DownloadFile fl : files) {
-            ArrayList<Piece> list = fl.getPieces();
-            System.out.println(list.get(0).getIndex() + "   " + list.get(list.size() - 1).getIndex());
-        }
     }
 
     public long getLeft() {
@@ -223,6 +251,10 @@ public class Torrent implements Serializable {
 
     public void killThreads() {
         trackermanager.kill();
+    }
+
+    public void invokeThreads() {
+        trackermanager.start();
     }
 }
 

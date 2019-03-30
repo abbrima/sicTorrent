@@ -29,11 +29,7 @@ public class Server implements Runnable {
         while (true) {
             try {
                 Socket client = server.accept();
-                BufferedReader n = new BufferedReader(new InputStreamReader(client.getInputStream()));
-                String s = null;
-                while ((s = n.readLine()) != null) {
-                    System.out.println(s);
-                }
+                System.out.println("INCOMING");
 
             } catch (Exception e) {
             }

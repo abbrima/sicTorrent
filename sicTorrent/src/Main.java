@@ -35,7 +35,7 @@ public class Main {
         try {
             Server server = new Server();
             Thread t = new Thread(server);
-            t.setDaemon(true);
+            //t.setDaemon(true);
             t.start();
         } catch (Exception e) {
             System.out.println("ERROR CREATING SERVER");

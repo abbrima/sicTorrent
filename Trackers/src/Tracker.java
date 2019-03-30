@@ -13,7 +13,8 @@ public abstract class Tracker {
         status=TrackerStatus.NONE;
         seeds = 0;
         leeches = 0;
-        interval = -1;
+        downloaded=0;
+        interval = 0;
     }
     public void disable(){status=TrackerStatus.DISABLED;}
     public static Tracker createTracker(String s) throws InvalidTrackerException,UnknownHostException {
@@ -107,6 +108,7 @@ public abstract class Tracker {
     protected int interval;
     protected int seeds;
     protected int leeches;
+    protected int downloaded;
     protected String uri;
     protected TrackerStatus status;
 
@@ -136,6 +138,7 @@ class UDPTracker extends Tracker {
             socket = new DatagramSocket();
             socket.setSoTimeout(1500);
         }
+        interval=0;
         connect();
         status=TrackerStatus.UPDATING;
         int transactionID = rand.nextInt();
@@ -208,12 +211,13 @@ class UDPTracker extends Tracker {
         return list;
     }
 
-    public ScrapeResult scrape(byte infohash[]) throws
+    public synchronized ScrapeResult scrape(byte infohash[]) throws
             TimeoutException, IOException, InterruptedException, InvalidReplyException {
         if (socket == null) {
             socket = new DatagramSocket();
             socket.setSoTimeout(1500);
         }
+        interval=0;
         connect();
         status=TrackerStatus.SCRAPING;
         int transactionID = rand.nextInt();
@@ -307,14 +311,17 @@ class UDPTracker extends Tracker {
 
 class HTTPTracker extends Tracker {
 
+    private boolean scrapable;
+
     public HTTPTracker(String str) {
-        this.uri = str;
+        this.uri = str; scrapable=true;
     }
 
     public ArrayList<Pair<String, Integer>> announce(
             byte infohash[], long uploaded, long downloaded, long left,
             AnnounceEvent event) throws TimeoutException, InterruptedException, IOException, InvalidReplyException {
         Parcel parcel;
+        interval=0;
         String str = new String();
         str += uri;
         str += "?info_hash=" + URLByteEncoder.encode(infohash);
@@ -392,9 +399,12 @@ class HTTPTracker extends Tracker {
         return list;
     }
 
-    public ScrapeResult scrape(byte infohash[]) throws
+    public synchronized ScrapeResult scrape(byte infohash[]) throws
             TimeoutException, IOException, InterruptedException, InvalidReplyException {
+        if (scrapable==false)
+            throw new TimeoutException();
         String str = getScrapeUri();
+        interval=0;
         str += "?info_hash=" + URLByteEncoder.encode(infohash);
         status=TrackerStatus.SCRAPING;
         URL url;
@@ -411,6 +421,7 @@ class HTTPTracker extends Tracker {
 
             is.close();
         } catch (MalformedURLException e) {
+            scrapable=false;
             throw new TimeoutException();
         }
 
