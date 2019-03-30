@@ -81,9 +81,7 @@ public abstract class Tracker {
     public abstract ScrapeResult scrape(byte infohash[]) throws
             TimeoutException, IOException, InterruptedException, InvalidReplyException;
 
-    public synchronized int getInterval() {
-        return interval;
-    }
+    public abstract int getInterval();
 
     public int getSeeds() {
         return seeds;
@@ -116,6 +114,7 @@ public abstract class Tracker {
 }
 
 class UDPTracker extends Tracker {
+    public synchronized int getInterval(){return interval;}
     private InetAddress address;
     private int port;
     private long connectionID = 0;
@@ -138,7 +137,7 @@ class UDPTracker extends Tracker {
             socket = new DatagramSocket();
             socket.setSoTimeout(1500);
         }
-        interval=0;
+        interval=-1;
         connect();
         status=TrackerStatus.UPDATING;
         int transactionID = rand.nextInt();
@@ -217,7 +216,7 @@ class UDPTracker extends Tracker {
             socket = new DatagramSocket();
             socket.setSoTimeout(1500);
         }
-        interval=0;
+        interval=-1;
         connect();
         status=TrackerStatus.SCRAPING;
         int transactionID = rand.nextInt();
@@ -311,6 +310,7 @@ class UDPTracker extends Tracker {
 
 class HTTPTracker extends Tracker {
 
+    public synchronized int getInterval(){return interval;}
     private boolean scrapable;
 
     public HTTPTracker(String str) {
@@ -321,7 +321,7 @@ class HTTPTracker extends Tracker {
             byte infohash[], long uploaded, long downloaded, long left,
             AnnounceEvent event) throws TimeoutException, InterruptedException, IOException, InvalidReplyException {
         Parcel parcel;
-        interval=0;
+        interval=-1;
         String str = new String();
         str += uri;
         str += "?info_hash=" + URLByteEncoder.encode(infohash);
@@ -404,7 +404,7 @@ class HTTPTracker extends Tracker {
         if (scrapable==false)
             throw new TimeoutException();
         String str = getScrapeUri();
-        interval=0;
+        interval=-1;
         str += "?info_hash=" + URLByteEncoder.encode(infohash);
         status=TrackerStatus.SCRAPING;
         URL url;

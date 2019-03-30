@@ -35,6 +35,11 @@ public class Torrent implements Serializable {
         public void run() {
             for (String s : trackerStrings)
                 try {
+                    boolean exists=false;
+                    for (Tracker t:trackerlist)
+                        if (t.getUri().toLowerCase().equals(s.toLowerCase()))
+                            exists=true;
+                        if (!exists)
                     createTracker(s);
                 } catch (Exception e) {
                     return;
@@ -47,11 +52,11 @@ public class Torrent implements Serializable {
             while (kill == false) {
                 interval = 100000;
                 for (int i = 0; i < trackerlist.size(); i++) {
-                    if (trackerlist.get(i).interval>-1)
+                    if (trackerlist.get(i).getInterval()>-1)
                     interval = Math.min(interval, trackerlist.get(i).getInterval());
+                    System.out.println(i + ": " + trackerlist.get(i).getInterval());
                 }
                 try {
-                    System.out.println(peers.size() + " INTERVAL: " + interval);
                     Thread.sleep(interval * 1000);
                 } catch (InterruptedException ie) {
                     for (Tracker tracker : trackerlist) {
@@ -60,8 +65,9 @@ public class Torrent implements Serializable {
                     return;
                 }
                 for (Tracker tracker : trackerlist) {
+                    if (tracker.interval!=-1)
                     tracker.interval -= interval;
-                    if (tracker.interval==0)
+                    if (tracker.interval<=0 && tracker.status!=TrackerStatus.TIMEDOUT)
                         announce(tracker,AnnounceEvent.NONE);
                 }
             }
@@ -76,6 +82,12 @@ public class Torrent implements Serializable {
             } catch (UnknownHostException e) {
 
             }
+        }
+
+        public void forceAnnounce(){
+            trackerThread.interrupt();
+            trackerThread=new Thread(this);
+            trackerThread.start();
         }
 
         public void announceFinished(){
