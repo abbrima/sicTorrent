@@ -36,7 +36,7 @@ public class Connection implements Runnable {
     public Connection(Socket socket) throws IOException {
         this.socket = socket;
         ostream = new DataOutputStream(socket.getOutputStream());
-        istream = new DataInputStream(socket.getInputStream());
+        istream = new DataInputStream(new BufferedInputStream(socket.getInputStream()));
     }
 
     public Connection(Torrent torrent, String ip, int port) throws UnknownHostException {
@@ -54,20 +54,16 @@ public class Connection implements Runnable {
         }
     }
     public void receiveHandShake() throws IOException {
-        InputStream is = socket.getInputStream();
-       int length = is.read();
+        try{Thread.sleep(10000);}catch(Exception e){}
+       int length = istream.readByte();
        byte arr[] = new byte[length];
-       for (int i=0;i<length;i++)
-          arr[i]=(byte)is.read();
+       istream.read(arr);
        System.out.println(new String(arr, StandardCharsets.UTF_8));
        byte reserved[] = new byte[8];
-       for (int i=0;i<8;i++)
-           reserved[i]=(byte)is.read();
+       istream.read(reserved);
        byte infohash[] = new byte[20],peerID[] = new byte[20];
-       for (int i=0;i<20;i++)
-           infohash[i]=(byte)is.read();
-       for (int i=0;i<20;i++)
-           peerID[i]=(byte)is.read();
+       istream.read(infohash);
+       istream.read(peerID);
        if (Arrays.equals(infohash,torrent.getInfoHash()))
            System.out.println("HANDSHAKE SUCCESSFUL");
     }
