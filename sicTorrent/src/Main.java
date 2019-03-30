@@ -13,6 +13,9 @@ import java.util.*;
 
 public class Main {
     public static void main(String args[]) throws Exception {
+
+        NetworkController.startServer();
+
         byte arr[] = TorrentFileReader.readFile("files/fb.torrent");
         Torrent torrent = new Torrent(bCoder.decode(arr, ParcelType.TORRENT));
         NetworkController.addTorrent(torrent);
