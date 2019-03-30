@@ -2,12 +2,11 @@
 import java.io.IOException;
 import java.io.Serializable;
 import java.net.UnknownHostException;
+import java.security.Key;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeoutException;
+import java.util.Map;
+import java.util.concurrent.*;
 
 public class Torrent implements Serializable {
     private byte infohash[];
@@ -25,10 +24,11 @@ public class Torrent implements Serializable {
     private String name;
     private ArrayList<DownloadFile> files; //length path
     private transient TrackerManager trackermanager;
-    private HashMap<String, Integer> peers;
+    private ConcurrentHashMap<String, Integer> peers;
     private TorrentStatus status;
     private transient ArrayList<Connection> connections;
     private Executor announceExecutor, scrapeExecutor;
+    private transient PeerManager peermanager;
 
     class TrackerManager implements Runnable {
         private ArrayList<String> trackerStrings;
@@ -171,6 +171,54 @@ public class Torrent implements Serializable {
 
     }
 
+    class PeerManager implements Runnable {
+        private Thread peerThread;
+        private int connectionLimit;
+        private boolean kill;
+
+        public void run() {
+            while (peers.size() == 0)
+                Thread.yield();
+            while (true) {
+                if (peers.size() == 0) {
+                    trackermanager.forceAnnounce();
+                    while (peers.size()==0)
+                        Thread.yield();
+                }
+                Map<String,Integer> map = new ConcurrentHashMap<String,Integer>(peers);
+                map.forEach((ip, port) -> {
+                    try {
+                        if (connections.size()<connectionLimit)
+                        {Connection c = new Connection(Torrent.this, ip, port);
+                        connections.add(c);
+                        c.start();}
+                    } catch (Exception e) {
+                        System.out.println("CAN'T CONNECT");
+                        peers.remove(ip);
+                    }
+                });
+                for (int i=0;i<connections.size();i++)
+                    if (connections.get(i).dead())
+                        connections.remove(i);
+            }
+        }
+
+        public PeerManager(int limit) {
+            this.connectionLimit = limit;
+            kill = false;
+        }
+
+        public void start() {
+            peerThread = new Thread(this);
+            peerThread.start();
+        }
+
+        public void kill() {
+            kill = true;
+            peerThread.interrupt();
+        }
+    }
+
     public void test() {
 
     }
@@ -190,15 +238,23 @@ public class Torrent implements Serializable {
         return infohash;
     }
 
-    public HashMap<String, Integer> getPeers() {
+    public ConcurrentHashMap<String, Integer> getPeers() {
         return peers;
     }
 
+    public Torrent() {
+        peermanager = new PeerManager(10);
+        trackermanager = new TrackerManager();
+        connections = new ArrayList<>();
+    }
 
     public Torrent(Parcel parcel) {
         status = TorrentStatus.NEW;
+        connections = new ArrayList<>();
+
         trackerlist = new ArrayList<>();
         trackermanager = new TrackerManager();
+        peermanager = new PeerManager(10);
         infohash = parcel.getInfoHash();
         downloaded = 0;
         uploaded = 0;
@@ -232,7 +288,7 @@ public class Torrent implements Serializable {
                 files.add(new DownloadFile(parcel.getLength().get(i), new String(name + "/" + parcel.getPath().get(i))));
         }
 
-        peers = new HashMap<>();
+        peers = new ConcurrentHashMap<>();
         mapPiecesToFiles();
     }
 
@@ -309,7 +365,11 @@ public class Torrent implements Serializable {
 
     public void invokeThreads() {
         trackermanager.start();
-        connections = new ArrayList<>();
+        peermanager.start();
+    }
+
+    private void getPeersNow() {
+        trackermanager.forceAnnounce();
     }
 }
 
