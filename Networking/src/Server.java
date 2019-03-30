@@ -11,23 +11,39 @@ public class Server implements Runnable {
     int port;
     boolean port_works = false;
 
-    public Server() throws IOException{
+    public void kill() {
+        try {
+            server.close();
+        } catch (IOException ioe) {
+        }
+    }
+
+    public Server() throws IOException {
         int n = 0;
         this.port = 6881;
         while (n <= 8) {
             try {
                 server = new ServerSocket(port);
+                Info.setPort(port);
                 break;
             } catch (IOException e) {
                 n++;
             }
         }
-        if (n>8){
-            server = new ServerSocket(); port=server.getLocalPort();
+        if (n > 8) {
+            throw new IOException();
         }
-        Info.setPort(port);
     }
+
     public void run() {
-    return;
+        while (true) {
+            try {
+                Socket client = server.accept();
+                System.out.println("INCOMING");
+                NetworkController.getConnections().add(new Connection(client));
+            } catch (IOException ioe) {
+                return;
+            }
+        }
     }
 }

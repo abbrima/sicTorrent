@@ -14,7 +14,6 @@ import java.util.*;
 public class Main {
     public static void main(String args[]) throws Exception {
         byte arr[] = TorrentFileReader.readFile("files/fb.torrent");
-        init();
         Torrent torrent = new Torrent(bCoder.decode(arr, ParcelType.TORRENT));
         NetworkController.addTorrent(torrent);
         NetworkController.invokeTorrents();
@@ -30,17 +29,5 @@ public class Main {
 
     }
 
-    private static void init() {
-        Info.initPeerID();
-        try {
-            Server server = new Server();
-            Thread t = new Thread(server);
-            //t.setDaemon(true);
-            t.start();
-        } catch (Exception e) {
-            System.out.println("ERROR CREATING SERVER");
-        }
-
-    }
 }
 

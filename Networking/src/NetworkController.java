@@ -1,9 +1,27 @@
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 
 public class NetworkController {
     private static ArrayList<Torrent> torrents;
     private static ArrayList<Connection> connections;
+    private static Server server;
+    private static Thread serverThread;
+
+    public static ArrayList<Connection> getConnections(){return connections;}
+
+    public static void startServer() throws IOException {
+        server = new Server();
+        serverThread = new Thread(server);
+        serverThread.setDaemon(true);
+        serverThread.start();
+    }
+
+    public static void killServer(){
+
+        server.kill();
+
+    }
 
     public static void addTorrent(Torrent t){torrents.add(t);}
 
