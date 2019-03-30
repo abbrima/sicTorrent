@@ -59,6 +59,7 @@ public class Torrent implements Serializable {
                 try {
                     Thread.sleep(interval * 1000);
                 } catch (InterruptedException ie) {
+                    if (kill)
                     for (Tracker tracker : trackerlist) {
                         announce(tracker, AnnounceEvent.STOPPED);
                     }
@@ -295,6 +296,8 @@ public class Torrent implements Serializable {
             pieces.get(i).doNotDownload();
         }
     }
+
+    public ArrayList<DownloadFile> getFiles(){return this.files;}
 
     public void killThreads() {
         trackermanager.kill();
