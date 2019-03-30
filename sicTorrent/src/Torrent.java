@@ -39,10 +39,32 @@ public class Torrent implements Serializable {
                 } catch (Exception e) {
                     return;
                 }
-            for (Tracker tracker:trackerlist)
+            for (Tracker tracker : trackerlist) {
                 scrape(tracker);
-            for (Tracker tracker:trackerlist)
-                announce(tracker,AnnounceEvent.STARTED);
+            }
+            for (Tracker tracker : trackerlist)
+                announce(tracker, AnnounceEvent.STARTED);
+            while (kill == false) {
+                interval = 100000;
+                for (int i = 0; i < trackerlist.size(); i++) {
+                    if (trackerlist.get(i).interval>-1)
+                    interval = Math.min(interval, trackerlist.get(i).getInterval());
+                }
+                try {
+                    System.out.println(peers.size() + " INTERVAL: " + interval);
+                    Thread.sleep(interval * 1000);
+                } catch (InterruptedException ie) {
+                    for (Tracker tracker : trackerlist) {
+                        announce(tracker, AnnounceEvent.STOPPED);
+                    }
+                    return;
+                }
+                for (Tracker tracker : trackerlist) {
+                    tracker.interval -= interval;
+                    if (tracker.interval==0)
+                        announce(tracker,AnnounceEvent.NONE);
+                }
+            }
         }
 
         private void createTracker(String s) throws UnknownHostException {
@@ -54,6 +76,12 @@ public class Torrent implements Serializable {
             } catch (UnknownHostException e) {
 
             }
+        }
+
+        public void announceFinished(){
+            kill();
+            for (Tracker tracker:trackerlist)
+                announce(tracker,AnnounceEvent.COMPLETED);
         }
 
         public void kill() {
@@ -81,48 +109,55 @@ public class Torrent implements Serializable {
         }
 
         public void announce(Tracker tracker, AnnounceEvent event) {
-            try {
-                if (tracker.isEnabled()) {
-                    for (Pair<String, Integer> pair : tracker.announce(infohash, uploaded, downloaded, length, event))
-                        peers.put(pair.getFirst(), pair.getSecond());
+            Thread t = new Thread(new Runnable() {
+                public void run() {
+                    try {
+                        if (tracker.isEnabled() && tracker.status!=TrackerStatus.TIMEDOUT) {
+                            for (Pair<String, Integer> pair : tracker.announce(infohash, uploaded, downloaded, length, event))
+                                peers.put(pair.getFirst(), pair.getSecond());
+                        }
+                    } catch (TimeoutException toe) {
+                        tracker.status = TrackerStatus.TIMEDOUT;
+                    } catch (IOException ioe) {
+                        tracker.interval += 60;
+                    } catch (InterruptedException ie) {
+                    } catch (InvalidReplyException ire) {
+                        tracker.interval += 30;
+                    }
                 }
-            } catch (TimeoutException toe) {
-                tracker.status = TrackerStatus.TIMEDOUT;
-            } catch (IOException ioe) {
-                tracker.interval += 60;
-            } catch (InterruptedException ie) {
-            } catch (InvalidReplyException ire) {
-                tracker.interval += 30;
-            }
+            });
+            t.setDaemon(true);
+            t.start();
+
         }
 
         public void scrape(Tracker tracker) {
-            ScrapeResult result;
-            if (tracker.isEnabled())
-                try {
-                    result = tracker.scrape(infohash);
-                    tracker.seeds=result.getSeeders();
-                    tracker.leeches=result.getLeechers();
-                    tracker.downloaded=result.getDownloaded();
-                } catch (TimeoutException toe) {
-                } catch (InterruptedException ie) {
-                } catch (IOException ioe) {
-                    tracker.interval += 60;
-                } catch (InvalidReplyException ire) {
-                    tracker.interval += 30;
+            Thread t = new Thread(new Runnable() {
+                public void run() {
+                    ScrapeResult result;
+                    if (tracker.isEnabled()  && tracker.status!=TrackerStatus.TIMEDOUT)
+                        try {
+                            result = tracker.scrape(infohash);
+                            tracker.seeds = result.getSeeders();
+                            tracker.leeches = result.getLeechers();
+                            tracker.downloaded = result.getDownloaded();
+                        } catch (TimeoutException toe) {tracker.status=TrackerStatus.TIMEDOUT;
+                        } catch (InterruptedException ie) {
+                        } catch (IOException ioe) {
+                            tracker.interval += 60;
+                        } catch (InvalidReplyException ire) {
+                            tracker.interval += 30;
+                        }
                 }
-
+            });
+            t.setDaemon(true);
+            t.start();
         }
 
     }
 
     public void test() {
-        //trackerlist.get(2).disable();
-        //System.out.println("ANNOUNCING: \n\n");
-        //trackermanager.announceAll();
-        //System.out.println("\n\nSCRAPING: \n\n");
-        //trackermanager.scrapeAll();
-        System.out.println("\n\n#seeds: " + peers.size());
+
     }
 
     public long getLeft() {

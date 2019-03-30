@@ -3,6 +3,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.SocketException;
+import java.util.concurrent.TimeoutException;
 
 public class Server implements Runnable {
     ServerSocket server;
@@ -26,13 +28,6 @@ public class Server implements Runnable {
         Info.setPort(port);
     }
     public void run() {
-        while (true) {
-            try {
-                Socket client = server.accept();
-                System.out.println("INCOMING");
-
-            } catch (Exception e) {
-            }
-        }
+    return;
     }
 }

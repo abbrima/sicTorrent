@@ -14,7 +14,7 @@ public abstract class Tracker {
         seeds = 0;
         leeches = 0;
         downloaded=0;
-        interval = 0;
+        interval = -1;
     }
     public void disable(){status=TrackerStatus.DISABLED;}
     public static Tracker createTracker(String s) throws InvalidTrackerException,UnknownHostException {
@@ -81,7 +81,7 @@ public abstract class Tracker {
     public abstract ScrapeResult scrape(byte infohash[]) throws
             TimeoutException, IOException, InterruptedException, InvalidReplyException;
 
-    public int getInterval() {
+    public synchronized int getInterval() {
         return interval;
     }
 
@@ -130,7 +130,7 @@ class UDPTracker extends Tracker {
         this.uri = uri;
     }
 
-    public ArrayList<Pair<String, Integer>> announce(
+    public synchronized ArrayList<Pair<String, Integer>> announce(
             byte infohash[], long uploaded, long downloaded, long left,
             AnnounceEvent event) throws TimeoutException, InterruptedException, IOException, InvalidReplyException {
         ArrayList<Pair<String, Integer>> list = new ArrayList<>();
@@ -317,7 +317,7 @@ class HTTPTracker extends Tracker {
         this.uri = str; scrapable=true;
     }
 
-    public ArrayList<Pair<String, Integer>> announce(
+    public synchronized ArrayList<Pair<String, Integer>> announce(
             byte infohash[], long uploaded, long downloaded, long left,
             AnnounceEvent event) throws TimeoutException, InterruptedException, IOException, InvalidReplyException {
         Parcel parcel;
