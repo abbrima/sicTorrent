@@ -21,12 +21,10 @@ public class Controller implements Initializable {
     @Override
     public void initialize(URL location, ResourceBundle resources) {
 
-
     }
     public  void Run() throws Exception{
         System.out.println("Running");
         InetAddress address = InetAddress.getByName("192.168.77.242");
         Socket socket = new Socket(address,6881);
-
     }
 }
