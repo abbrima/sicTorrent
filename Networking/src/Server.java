@@ -39,7 +39,7 @@ public class Server implements Runnable {
         while (true) {
             try {
                 Socket client = server.accept();
-                System.out.println("INCOMING");
+                System.out.println(client.getInetAddress());
                 NetworkController.getConnections().add(new Connection(client));
             } catch (IOException ioe) {
                 return;

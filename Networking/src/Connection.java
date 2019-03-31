@@ -26,9 +26,10 @@ public class Connection implements Runnable {
             ostream = new DataOutputStream(socket.getOutputStream());
             istream = new DataInputStream(socket.getInputStream());
             sendHandshake(null);
-            try{receiveHandShake();}catch(IOException ioee){ioee.printStackTrace();}
+            //try{receiveHandShake();}catch(IOException ioee){kill=true; ioee.printStackTrace();}
         } catch (IOException ioe) {
             kill = true;
+            System.out.println("CONNECTION FAILED");
             return;
         }
     }
