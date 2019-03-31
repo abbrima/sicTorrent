@@ -67,6 +67,7 @@ public abstract class Tracker {
             throw new InvalidTrackerException("finally");
         }
     }
+    public String getStatusAsString(){return status.toString();}
     public static boolean checkIfExists(String uri,ArrayList<Tracker> trackers)
     {
         for (Tracker t:trackers)

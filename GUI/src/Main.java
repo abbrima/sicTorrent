@@ -13,9 +13,7 @@ public class Main extends Application {
     @Override
     public void start(Stage primaryStage) throws Exception{
         Parent root = FXMLLoader.load(getClass().getResource("scene.fxml"));
-        primaryStage.setTitle("HelloWorld");
-
-
+        primaryStage.setTitle("Hello World");
         primaryStage.setScene(new Scene(root, 1280, 720));
         primaryStage.show();
     }
@@ -23,12 +21,11 @@ public class Main extends Application {
 
     public static void main(String[] args) throws Exception {
         launch(args);
+        NetworkController.startServer();
 
+        byte arr[] = TorrentFileReader.readFile("files/fb.torrent");
+        Torrent torrent = new Torrent(bCoder.decode(arr, ParcelType.TORRENT));
+        NetworkController.addTorrent(torrent);
     }
 
-
-    public static void Run() throws Exception{
-        InetAddress address = InetAddress.getByName("192.168.77.242");
-        Socket socket = new Socket(address,6881);
-    }
 }
