@@ -13,18 +13,19 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
 import javafx.stage.Stage;
 
 
 public class Controller implements Initializable {
+    @FXML private TableView<Tracker> trackers;
+    @FXML private TableColumn<Tracker,String> trackersID;
+    @FXML private TableColumn<Tracker,String> trackersStatus;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
 
     }
-    public  void Run() throws Exception{
-        System.out.println("Running");
-        InetAddress address = InetAddress.getByName("192.168.77.242");
-        Socket socket = new Socket(address,6881);
-    }
+
 }
