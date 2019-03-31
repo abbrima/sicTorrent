@@ -10,5 +10,6 @@
     <orderEntry type="module" module-name="Bencoding" exported="" />
     <orderEntry type="module" module-name="Networking" exported="" />
     <orderEntry type="module" module-name="Utils" exported="" />
+    <orderEntry type="library" name="lib" level="project" />
   </component>
 </module>
