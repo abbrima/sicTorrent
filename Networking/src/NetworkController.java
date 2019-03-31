@@ -31,6 +31,8 @@ public class NetworkController {
         }
     }
 
+    public static ArrayList<Torrent> getTorrents(){return torrents;}
+
     public static boolean checkIfTorrentExists(byte arr[]) {
         for (Torrent t : torrents)
             if (Arrays.equals(t.getInfoHash(), arr))

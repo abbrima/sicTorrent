@@ -8,13 +8,9 @@ public class TorrentFileReader {
     public static byte[] readFile(String path) throws IOException
     {
         File fl = new File(path);
-        ArrayList<Byte> list = new ArrayList<>();
         byte arr[];
 
         arr = Files.readAllBytes(fl.toPath());
-
-        for (int i=0;i<list.size();i++)
-            arr[i]=list.get(i);
 
         return arr;
     }

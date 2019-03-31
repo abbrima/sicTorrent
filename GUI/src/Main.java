@@ -20,12 +20,16 @@ public class Main extends Application {
 
 
     public static void main(String[] args) throws Exception {
-        launch(args);
-        NetworkController.startServer();
 
         byte arr[] = TorrentFileReader.readFile("files/fb.torrent");
         Torrent torrent = new Torrent(bCoder.decode(arr, ParcelType.TORRENT));
         NetworkController.addTorrent(torrent);
+        NetworkController.invokeTorrents();
+        // NetworkController.startServer();
+        //try{Thread.sleep(10000);}catch(InterruptedException ie){}
+
+        launch(args);
+
     }
 
 }

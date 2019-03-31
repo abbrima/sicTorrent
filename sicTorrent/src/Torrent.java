@@ -34,7 +34,6 @@ public class Torrent implements Serializable {
         private ArrayList<String> trackerStrings;
         public boolean kill;
         private int interval;
-
         private Thread trackerThread;
 
         public void run() {
@@ -362,10 +361,12 @@ public class Torrent implements Serializable {
     public void killThreads() {
         trackermanager.kill();
     }
-
+public ArrayList<Tracker> getTrackers(){
+        return trackerlist;
+}
     public void invokeThreads() {
         trackermanager.start();
-        peermanager.start();
+        //peermanager.start();
     }
 
     private void getPeersNow() {
