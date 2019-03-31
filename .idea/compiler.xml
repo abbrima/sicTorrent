@@ -8,32 +8,6 @@
         <outputRelativeToContentRoot value="true" />
       </profile>
     </annotationProcessing>
-    <bytecodeTargetLevel target="11">
-      <module name="All-In-One-Mediator" target="1.6" />
-      <module name="connectivitymanager" target="1.6" />
-      <module name="connectivitymanager.demo" target="1.6" />
-      <module name="connectivitymanager.demo.complete" target="1.6" />
-      <module name="core" target="1.6" />
-      <module name="directconnection" target="1.6" />
-      <module name="directconnection.mediator" target="1.6" />
-      <module name="directconnection.message" target="1.6" />
-      <module name="holepunching" target="1.6" />
-      <module name="holepunching.mediator" target="1.6" />
-      <module name="holepunching.message" target="1.6" />
-      <module name="master.server" target="1.6" />
-      <module name="mediator" target="1.6" />
-      <module name="parent" target="1.6" />
-      <module name="plugininterface" target="1.6" />
-      <module name="relaying" target="1.6" />
-      <module name="relaying.mediator" target="1.6" />
-      <module name="relaying.message" target="1.6" />
-      <module name="relaying.server" target="1.6" />
-      <module name="reversal" target="1.6" />
-      <module name="reversal.mediator" target="1.6" />
-      <module name="reversal.message" target="1.6" />
-      <module name="stun" target="1.6" />
-      <module name="stun.server" target="1.6" />
-      <module name="uce" target="1.6" />
-    </bytecodeTargetLevel>
+    <bytecodeTargetLevel target="11" />
   </component>
 </project>
