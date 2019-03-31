@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.effect.*?>
+<?import javafx.scene.media.*?>
+<?import java.lang.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="800.0" prefWidth="1280.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Controller">
+    <children>
+        <MenuBar layoutY="1.0" prefHeight="32.0" prefWidth="1280.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="1.0">
+            <menus>
+                <Menu mnemonicParsing="false" text="File">
+                    <items>
+                        <MenuItem mnemonicParsing="false" text="Close" />
+                    </items>
+                </Menu>
+                <Menu mnemonicParsing="false" text="Edit">
+                    <items>
+                        <MenuItem mnemonicParsing="false" text="Delete" />
+                    </items>
+                </Menu>
+                <Menu mnemonicParsing="false" text="Help">
+                    <items>
+                        <MenuItem mnemonicParsing="false" text="About" />
+                    </items>
+                </Menu>
+            </menus>
+        </MenuBar>
+        <VBox layoutY="68.0" prefHeight="732.0" prefWidth="1280.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="68.0">
+            <children>
+                <ListView editable="true" prefHeight="320.0" prefWidth="1280.0" />
+                <TabPane prefHeight="413.0" prefWidth="1280.0" tabClosingPolicy="UNAVAILABLE">
+                    <tabs>
+                        <Tab text="Peers">
+                            <content>
+                                <TableView prefHeight="200.0" prefWidth="200.0">
+                                    <columns>
+                                        <TableColumn prefWidth="575.0" text="IP" />
+                                        <TableColumn prefWidth="693.0" text="Port" />
+                                    </columns>
+                                </TableView>
+                            </content>
+                        </Tab>
+                        <Tab text="Trackers">
+                            <content>
+                                <TableView prefHeight="200.0" prefWidth="200.0">
+                                    <columns>
+                                        <TableColumn prefWidth="480.0" text="ID" />
+                                        <TableColumn prefWidth="800.0" text="Status" />
+                                    </columns>
+                                </TableView>
+                            </content>
+                        </Tab>
+                        <Tab text="Pieces">
+                            <content>
+                                <TableView prefHeight="200.0" prefWidth="200.0">
+                                    <columns>
+                                        <TableColumn prefWidth="225.0" text="Size" />
+                                        <TableColumn minWidth="0.0" prefWidth="267.0" text="Downloaded" />
+                                        <TableColumn minWidth="0.0" prefWidth="300.0" text="Index" />
+                                        <TableColumn prefWidth="250.0" text="Status" />
+                                    </columns>
+                                </TableView>
+                            </content>
+                        </Tab>
+                        <Tab text="FIles">
+                            <content>
+                                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                                    <children>
+                                        <TableView layoutX="1.0" layoutY="4.0" prefHeight="367.0" prefWidth="626.0">
+                                            <columns>
+                                                <TableColumn prefWidth="75.0" text="Name" />
+                                                <TableColumn prefWidth="75.0" text="Size" />
+                                                <TableColumn prefWidth="75.0" text="Status" />
+                                            </columns>
+                                        </TableView>
+                                        <StackPane layoutX="631.0" layoutY="6.0" prefHeight="364.0" prefWidth="445.0">
+                                            <children>
+                                                <Button mnemonicParsing="false" onAction="#Run" text="Don't Download" />
+                                            </children>
+                                        </StackPane>
+                                    </children>
+                                </AnchorPane>
+                            </content>
+                        </Tab>
+                    </tabs>
+                </TabPane>
+            </children>
+        </VBox>
+        <Label fx:id="label" layoutX="2.0" layoutY="36.0" prefHeight="32.0" prefWidth="114.0" text="Torrents" />
+    </children>
+</AnchorPane>

@@ -4,7 +4,7 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/Bencoding/Bencoding.iml" filepath="$PROJECT_DIR$/Bencoding/Bencoding.iml" />
       <module fileurl="file://$PROJECT_DIR$/FileManager/FileManager.iml" filepath="$PROJECT_DIR$/FileManager/FileManager.iml" />
-      <module fileurl="file://$PROJECT_DIR$/../GUIforSic/GUIforSic.iml" filepath="$PROJECT_DIR$/../GUIforSic/GUIforSic.iml" />
+      <module fileurl="file://$PROJECT_DIR$/GUI/GUI.iml" filepath="$PROJECT_DIR$/GUI/GUI.iml" />
       <module fileurl="file://$PROJECT_DIR$/Networking/Networking.iml" filepath="$PROJECT_DIR$/Networking/Networking.iml" />
       <module fileurl="file://$PROJECT_DIR$/Trackers/Trackers.iml" filepath="$PROJECT_DIR$/Trackers/Trackers.iml" />
       <module fileurl="file://$PROJECT_DIR$/Utils/Utils.iml" filepath="$PROJECT_DIR$/Utils/Utils.iml" />
