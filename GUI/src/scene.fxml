@@ -41,7 +41,7 @@
         <VBox layoutY="68.0" prefHeight="732.0" prefWidth="1280.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="68.0">
             <children>
                 <ListView editable="true" prefHeight="320.0" prefWidth="1280.0" />
-                <TabPane prefHeight="413.0" prefWidth="1280.0" tabClosingPolicy="UNAVAILABLE">
+                <TabPane prefHeight="369.0" prefWidth="1280.0" tabClosingPolicy="UNAVAILABLE">
                     <tabs>
                         <Tab text="Peers">
                             <content>
@@ -55,7 +55,7 @@
                         </Tab>
                         <Tab text="Trackers">
                             <content>
-                                <TableView fx:id="trackers" prefHeight="200.0" prefWidth="200.0">
+                                <TableView fx:id="trackers" editable="true" prefHeight="200.0" prefWidth="200.0">
                                     <columns>
                                         <TableColumn fx:id="trackersID" prefWidth="480.0" text="ID" />
                                         <TableColumn fx:id="trackersStatus" prefWidth="800.0" text="Status" />
@@ -65,25 +65,25 @@
                         </Tab>
                         <Tab text="Pieces">
                             <content>
-                                <TableView prefHeight="200.0" prefWidth="200.0">
+                                <TableView fx:id="Pieces" prefHeight="200.0" prefWidth="200.0">
                                     <columns>
-                                        <TableColumn prefWidth="225.0" text="Size" />
-                                        <TableColumn minWidth="0.0" prefWidth="267.0" text="Downloaded" />
-                                        <TableColumn minWidth="0.0" prefWidth="300.0" text="Index" />
-                                        <TableColumn prefWidth="250.0" text="Status" />
+                                        <TableColumn fx:id="PieceSize" prefWidth="225.0" text="Size" />
+                                        <TableColumn fx:id="PieceDownloaded" minWidth="0.0" prefWidth="267.0" text="Downloaded" />
+                                        <TableColumn fx:id="PieceIndex" minWidth="0.0" prefWidth="300.0" text="Index" />
+                                        <TableColumn fx:id="PieceStatus" prefWidth="250.0" text="Status" />
                                     </columns>
                                 </TableView>
                             </content>
                         </Tab>
-                        <Tab text="FIles">
+                        <Tab text="Files">
                             <content>
                                 <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                                     <children>
-                                        <TableView layoutX="1.0" layoutY="4.0" prefHeight="367.0" prefWidth="626.0">
+                                        <TableView fx:id="Files" editable="true" layoutX="1.0" layoutY="4.0" prefHeight="367.0" prefWidth="626.0">
                                             <columns>
-                                                <TableColumn prefWidth="75.0" text="Name" />
-                                                <TableColumn prefWidth="75.0" text="Size" />
-                                                <TableColumn prefWidth="75.0" text="Status" />
+                                                <TableColumn fx:id="FileName" prefWidth="75.0" text="Name" />
+                                                <TableColumn fx:id="FileSize" prefWidth="75.0" text="Size" />
+                                                <TableColumn fx:id="FileStatus" prefWidth="75.0" text="Status" />
                                             </columns>
                                         </TableView>
                                         <StackPane layoutX="631.0" layoutY="6.0" prefHeight="364.0" prefWidth="445.0">
@@ -97,6 +97,7 @@
                         </Tab>
                     </tabs>
                 </TabPane>
+            <Button fx:id="Refresh" mnemonicParsing="false" onAction="#setRefresh" prefHeight="31.0" prefWidth="194.0" text="Refresh" />
             </children>
         </VBox>
         <Label fx:id="label" layoutX="2.0" layoutY="36.0" prefHeight="32.0" prefWidth="114.0" text="Torrents" />

@@ -363,7 +363,10 @@ public class Torrent implements Serializable {
     }
 public ArrayList<Tracker> getTrackers(){
         return trackerlist;
-}
+    }
+    public ArrayList<Piece> getPieces(){
+        return this.pieces;
+    }
     public void invokeThreads() {
         trackermanager.start();
         //peermanager.start();
