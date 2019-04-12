@@ -50,13 +50,6 @@ public class Connection {
             public synchronized void run() {
                 try {
                     sendHandshake(new byte [8]);
-                    while (true)
-                    {
-                        if(peerHas != null)
-                        {
-                            sendRequest();
-                        }
-                    }
                 } catch (Exception e) {
                     System.out.println("CONNECTION FAILED");
 
@@ -80,12 +73,6 @@ public class Connection {
                         if(!active)
                             receiveHandShake();
                         else {
-                            System.out.println("\n"+peerHas[1]+" "+peerHas[2]+"\n");
-                            if(peerHas != null)
-                        {
-                            System.out.println("\nSending request\n");
-                            sendRequest();
-                        }
                             System.out.println("Waiting for msg");
                             int prefix=istream.readInt();
                             System.out.print("\nprefix:"+prefix+"\n");
@@ -149,7 +136,7 @@ public class Connection {
                         failed = false;
                     } else if (!Arrays.equals(infohash, torrent.getInfoHash())) {
                         failed = true;
-                        active = false;
+                       // active = false;
                     }
                 } catch (Exception e) {
                 }

@@ -366,7 +366,7 @@ public class Torrent implements Serializable {
     public void killThreads() {
         trackermanager.kill();
     }
-public ArrayList<Tracker> getTrackers(){
+    public ArrayList<Tracker> getTrackers(){
         return trackerlist;
 }
     public void invokeThreads() {
