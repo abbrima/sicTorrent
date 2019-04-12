@@ -14,6 +14,9 @@ public class DownloadFile implements Serializable {
         this.pieces=pieces;
     }
     public ArrayList<Piece> getPieces(){return pieces;}
+    public FileStatus getStatus() {
+        return status;
+    }
     public void doNotDownload(){status=FileStatus.DONOTDOWNLOAD;}
     public void validate()
     {

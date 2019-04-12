@@ -27,8 +27,7 @@ public class Controller implements Initializable {
     @FXML private TableColumn<Tracker,String> trackersStatus;
 
     @Override
-    public void initialize(URL location, ResourceBundle resources)
-    {
+    public void initialize(URL location, ResourceBundle resources) {
         trackersID.setCellValueFactory(new PropertyValueFactory<Tracker, String>("uri"));
         trackersStatus.setCellValueFactory(new PropertyValueFactory<Tracker, String>("Status"));
        try{ trackers.setItems(getTrackers());}catch(IndexOutOfBoundsException ioobe){}
