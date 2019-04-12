@@ -8,7 +8,8 @@ import java.nio.file.Paths;
 
 public class FileController {
     public static void writeBytesToFile(byte[] arr, DownloadFile file, long offset)
-            throws FileNotFoundException, IOException {
+            throws FileNotFoundException, IOException
+    {
         File fl = new File(Parameters.downloadDir+file.getPath());
         if (!fl.exists()) throw new FileNotFoundException();
         RandomAccessFile raf = new RandomAccessFile(fl,"rw");
@@ -19,7 +20,8 @@ public class FileController {
     }
 
     public static byte[] readBytesFromFile(DownloadFile file, long offset, long length)
-            throws FileNotFoundException, IOException {
+            throws FileNotFoundException, IOException
+    {
         byte arr[]=new byte[(int)length]; File fl = new File(Parameters.downloadDir+file.getPath());
         if (!fl.exists()) throw new FileNotFoundException();
         RandomAccessFile raf = new RandomAccessFile(fl,"r");
@@ -28,7 +30,8 @@ public class FileController {
         return arr;
     }
 
-    public static void createFile(DownloadFile file) throws IOException,FileNotFoundException {
+    public static void createFile(DownloadFile file) throws IOException,FileNotFoundException
+    {
         Pair<String, String> pair = splitPath(file.getPath());
         Files.createDirectories(Paths.get(Parameters.downloadDir+pair.getFirst()));
         try{Files.createFile(Paths.get(Parameters.downloadDir+pair.getFirst()+pair.getSecond()));
@@ -37,7 +40,8 @@ public class FileController {
         }catch(FileAlreadyExistsException e){}
     }
 
-    private static Pair<String, String> splitPath(String path) {
+    private static Pair<String, String> splitPath(String path)
+    {
         String dir = new String(), file = new String();
         String arr[] = path.split("/");
         if (arr.length > 1)

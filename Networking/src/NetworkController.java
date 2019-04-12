@@ -10,14 +10,16 @@ public class NetworkController {
 
     public static ArrayList<Connection> getConnections(){return connections;}
 
-    public static void startServer() throws IOException {
+    public static void startServer() throws IOException
+    {
         server = new Server();
         serverThread = new Thread(server);
         serverThread.setDaemon(true);
         serverThread.start();
     }
 
-    public static void killServer(){
+    public static void killServer()
+    {
 
         server.kill();
 
@@ -25,7 +27,8 @@ public class NetworkController {
 
     public static void addTorrent(Torrent t){torrents.add(t);}
 
-    public static void invokeTorrents(){
+    public static void invokeTorrents()
+    {
         for (Torrent t:torrents){
             t.invokeThreads();
         }
@@ -33,7 +36,8 @@ public class NetworkController {
 
     public static ArrayList<Torrent> getTorrents(){return torrents;}
 
-    public static boolean checkIfTorrentExists(byte arr[]) {
+    public static boolean checkIfTorrentExists(byte arr[])
+    {
         for (Torrent t : torrents)
             if (Arrays.equals(t.getInfoHash(), arr))
                 return true;

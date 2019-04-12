@@ -14,21 +14,12 @@ import java.util.*;
 public class Main {
     public static void main(String args[]) throws Exception {
 
-        NetworkController.startServer();
 
+        NetworkController.startServer();
         byte arr[] = TorrentFileReader.readFile("files/fb.torrent");
         Torrent torrent = new Torrent(bCoder.decode(arr, ParcelType.TORRENT));
         NetworkController.addTorrent(torrent);
         NetworkController.invokeTorrents();
-          /*
-        Connection handshake = new Connection();
-
-        for (Map.Entry<String, Integer> entry : peersList.entrySet()) {
-            InetAddress n = InetAddress.getByName(entry.getKey());
-            System.out.println(entry.getKey() + "," + entry.getValue());
-            handshake.sendHandshake(entry.getKey(), entry.getValue(), torrent.getInfoHash());
-        }
-        */
 
     }
 

@@ -7,7 +7,8 @@ import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-public class Piece implements Serializable {
+public class Piece implements Serializable
+{
     private int index;
     private int length;
     private int downloaded;
@@ -39,7 +40,8 @@ public class Piece implements Serializable {
     public void dropRequest(){
         this.status=PieceStatus.UNFINISHED;
     }
-    public void print() {
+    public void print()
+    {
         for (DataLocation d : blockTable) {
             System.out.print("File: " + d.file.getPath() + " OffsetInFile: " + d.offsetInFile + " Length: " + d.length
                     + " OffsetInPiece: " + d.offsetInPiece);
@@ -48,7 +50,8 @@ public class Piece implements Serializable {
         System.out.println("\n-----------------\n");
     }
 
-    public Piece(int length, byte hash[], int index, Torrent torrent) {
+    public Piece(int length, byte hash[], int index, Torrent torrent)
+    {
         this.length = length;
         this.hash = hash;
         status = PieceStatus.UNFINISHED;
@@ -57,7 +60,8 @@ public class Piece implements Serializable {
         this.torrent = torrent;
     }
 
-    public byte[] getBlock(int offset, int size) throws FileNotFoundException, IOException {
+    public byte[] getBlock(int offset, int size) throws FileNotFoundException, IOException
+    {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         int readBytes = 0, fileOffset = 0;
         while (readBytes < size) {
@@ -82,7 +86,8 @@ public class Piece implements Serializable {
         return baos.toByteArray();
     }
 
-    public void applyBytes(byte[] bytes, int offset) throws FileNotFoundException,IOException {
+    public void applyBytes(byte[] bytes, int offset) throws FileNotFoundException,IOException
+    {
         int appliedBytes = 0, fileOffset = 0;
         while (appliedBytes < bytes.length) {
             for (int i = 0; i < blockTable.size(); i++) {
@@ -111,7 +116,8 @@ public class Piece implements Serializable {
             status=PieceStatus.UNFINISHED;
     }
 
-    private void validate() throws FileNotFoundException,IOException {
+    private void validate() throws FileNotFoundException,IOException
+    {
         try {
             MessageDigest hasher = MessageDigest.getInstance("SHA-1");
             byte arr[] = hasher.digest(readPiece());
@@ -130,7 +136,8 @@ public class Piece implements Serializable {
         }
     }
 
-    private byte[] readPiece() throws FileNotFoundException,IOException {
+    private byte[] readPiece() throws FileNotFoundException,IOException
+    {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         for (int i = 0; i < blockTable.size(); i++) {
             DataLocation loc = blockTable.get(i);
@@ -139,7 +146,8 @@ public class Piece implements Serializable {
         return baos.toByteArray();
     }
 
-    public synchronized BlockRequest requestBlock() {
+    public synchronized BlockRequest requestBlock()
+    {
         if (Thread.interrupted()){return null;}
         int left = length - downloaded;
         this.status = PieceStatus.GETTING;
@@ -149,18 +157,21 @@ public class Piece implements Serializable {
             return new BlockRequest(Info.MaxBlockSize, downloaded, index);
     }
 
-    public void addFileEntry(DownloadFile file, long offsetInFile, int length, int offsetInPiece) {
+    public void addFileEntry(DownloadFile file, long offsetInFile, int length, int offsetInPiece)
+    {
         blockTable.add(new DataLocation(file, offsetInFile, length, offsetInPiece));
     }
 }
 
-class DataLocation implements Serializable {
+class DataLocation implements Serializable
+{
     public DownloadFile file;
     public long offsetInFile;
     public int length;
     public int offsetInPiece;
 
-    public DataLocation(DownloadFile file, long offsetInFile, int length, int offsetInPiece) {
+    public DataLocation(DownloadFile file, long offsetInFile, int length, int offsetInPiece)
+    {
         this.file = file;
         this.offsetInFile = offsetInFile;
         this.offsetInPiece = offsetInPiece;
@@ -168,6 +179,7 @@ class DataLocation implements Serializable {
     }
 }
 
-enum PieceStatus implements Serializable {
+enum PieceStatus implements Serializable
+{
     HAVE, UNFINISHED, GETTING, DONOTDOWNLOAD
 }

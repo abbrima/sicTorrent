@@ -30,7 +30,8 @@ public class Torrent implements Serializable {
     private Executor announceExecutor, scrapeExecutor;
     private transient PeerManager peermanager;
 
-    class TrackerManager implements Runnable {
+    class TrackerManager implements Runnable
+    {
         private ArrayList<String> trackerStrings;
         public boolean kill;
         private int interval;
@@ -170,7 +171,8 @@ public class Torrent implements Serializable {
 
     }
 
-    class PeerManager implements Runnable {
+    class PeerManager implements Runnable
+    {
         private Thread peerThread;
         private int connectionLimit;
         private boolean kill;
@@ -185,25 +187,31 @@ public class Torrent implements Serializable {
                         Thread.yield();
                 }
                 Map<String,Integer> map = new ConcurrentHashMap<String,Integer>(peers);
+                ExecutorService t = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
                 map.forEach((ip, port) -> {
                     try {
-                        if (connections.size()<connectionLimit)
-                        {Connection c = new Connection(Torrent.this, ip, port);
-                        connections.add(c);
-                        c.start();}
+                        if (connections.size() < connectionLimit) {
+                            Connection c = new Connection(Torrent.this, ip, port);
+                            connections.add(c);
+                            t.execute(c.sending());
+                            if (c.hasFailed()){
+                                connections.remove(c);
+                                System.out.println("removed");
+                            }
+                        else if(!c.hasFailed()) {
+                                t.execute(c.receiving());
+                        }
+                    }
                     } catch (Exception e) {
                         System.out.println("CAN'T CONNECT");
                         peers.remove(ip);
                     }
                 });
-                for (int i=0;i<connections.size();i++)
-                    if (connections.get(i).dead())
-                        connections.remove(i);
             }
         }
 
         public PeerManager(int limit) {
-            this.connectionLimit = limit;
+            this.connectionLimit = limit; //remember to change
             kill = false;
         }
 
@@ -218,33 +226,30 @@ public class Torrent implements Serializable {
         }
     }
 
-    public void test() {
-
+    public Torrent()
+    {
+        peermanager = new PeerManager(10);
+        trackermanager = new TrackerManager();
+        connections = new ArrayList<>();
     }
-
-    public long getLeft() {
+    public long getLeft()
+    {
         return length - downloaded;
     }
 
-    public void addToDownloaded(int l) {
+    public void addToDownloaded(int l)
+    {
         downloaded += l;
         if (downloaded == length)
             status = TorrentStatus.FINISHED;
 
     }
-
     public byte[] getInfoHash() {
         return infohash;
     }
 
     public ConcurrentHashMap<String, Integer> getPeers() {
         return peers;
-    }
-
-    public Torrent() {
-        peermanager = new PeerManager(10);
-        trackermanager = new TrackerManager();
-        connections = new ArrayList<>();
     }
 
     public Torrent(Parcel parcel) {
@@ -361,19 +366,18 @@ public class Torrent implements Serializable {
     public void killThreads() {
         trackermanager.kill();
     }
-public ArrayList<Tracker> getTrackers(){
+
+    public ArrayList<Tracker> getTrackers(){
         return trackerlist;
 }
-    public void invokeThreads() {
-        trackermanager.start();
-        //peermanager.start();
-    }
 
+    public void invokeThreads()
+    {
+        trackermanager.start();
+        peermanager.start();
+    }
     private void getPeersNow() {
         trackermanager.forceAnnounce();
     }
 }
 
-enum TorrentStatus {
-    FINISHED, STARTED, NEW
-}
