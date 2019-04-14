@@ -1,10 +1,12 @@
 
 import javafx.collections.FXCollections;
+import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 
 import javafx.fxml.Initializable;
-
+import java.util.Timer;
+import java.util.TimerTask;
 
 import java.net.URL;
 import java.util.ResourceBundle;
@@ -13,6 +15,9 @@ import javafx.scene.control.Button;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
+
+import javax.print.attribute.SetOfIntegerSyntax;
+import javax.sound.midi.Track;
 
 
 public class Controller implements Initializable {
@@ -55,16 +60,9 @@ public class Controller implements Initializable {
         PieceStatus.setCellValueFactory(new PropertyValueFactory<Piece, String>("status"));
         PieceIndex.setCellValueFactory(new PropertyValueFactory<Piece, Integer>("index"));
         try{Pieces.setItems(getPieceInfo());}catch(IndexOutOfBoundsException ioobe){}
-        class MyClass implements Runnable {
-            public void run(){
-                while(true)
-                setRefresh();
-            }
-        }
 
-        Thread t1 = new Thread(new MyClass ());
-        t1.start();
-
+        RefreshTimer T= new RefreshTimer();
+        T.start();
 
     }
 
@@ -81,6 +79,7 @@ public class Controller implements Initializable {
         tracker = FXCollections.observableArrayList();
         tracker.addAll(NetworkController.getTorrents().get(0).getTrackers());
         return  tracker;
+
 
     }
 
@@ -99,4 +98,21 @@ public class Controller implements Initializable {
         return  PieceTable;
 
     }
+   public class RefreshTimer {
+        private Timer timer = new Timer();
+        TimerTask task = new TimerTask() {
+            @Override
+            public void run() {
+                setRefresh();
+
+            }
+        };
+
+
+        public void start() {
+            timer.scheduleAtFixedRate(task, 0, 2000);
+        }
+    }
+
+
 }
