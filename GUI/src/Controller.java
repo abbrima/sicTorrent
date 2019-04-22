@@ -183,6 +183,7 @@ public class Controller implements Initializable {
     public void HandleClose(MouseEvent mouseEvent) {
         if(mouseEvent.getSource()==btnclose){
             System.exit(0);
+            System.out.println("exit");
 
         }
     }
