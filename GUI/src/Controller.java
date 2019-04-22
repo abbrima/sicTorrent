@@ -1,7 +1,11 @@
 
+import animatefx.animation.Jello;
+import animatefx.animation.RollIn;
+import animatefx.animation.Tada;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 
 import javafx.fxml.Initializable;
@@ -11,10 +15,15 @@ import java.util.TimerTask;
 import java.net.URL;
 import java.util.ResourceBundle;
 
+import javafx.geometry.Insets;
 import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.*;
+import javafx.scene.paint.Color;
 
 import javax.print.attribute.SetOfIntegerSyntax;
 import javax.sound.midi.Track;
@@ -41,6 +50,36 @@ public class Controller implements Initializable {
     @FXML private TableColumn<Piece,Integer> PieceIndex;
     @FXML ObservableList<Piece> PieceTable;
 
+    @FXML
+    private Pane paneStatus;
+
+    @FXML
+    private Button btnTorrents;
+
+    @FXML
+    private Button btnSettings;
+
+    @FXML
+    private Button btnAddTorrnets;
+
+    @FXML
+    private Button btnTasks;
+
+    @FXML
+    private Label labelStatus;
+
+
+    @FXML
+    private Button btnclose;
+
+    @FXML
+    private GridPane settGrid;
+
+    @FXML
+    private GridPane torrnetGrid;
+
+    @FXML
+    private GridPane taskGrid;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -115,4 +154,36 @@ public class Controller implements Initializable {
     }
 
 
+    @FXML
+    private void Handleclicks(ActionEvent event){
+
+        if(event.getSource()==btnTorrents){
+            labelStatus.setText("Torrents");
+            paneStatus.setBackground(new Background(new BackgroundFill(Color.rgb(0, 80, 58), CornerRadii.EMPTY, Insets.EMPTY)));
+            new Tada(paneStatus).play();
+            torrnetGrid.toFront();
+        }
+
+        else if(event.getSource()==btnSettings){
+            labelStatus.setText("Settings");
+            paneStatus.setBackground(new Background(new BackgroundFill(Color.rgb(170, 0, 14), CornerRadii.EMPTY, Insets.EMPTY)));
+            new RollIn(paneStatus).play();
+            settGrid.toFront();
+        }
+        else if(event.getSource()==btnTasks){
+            labelStatus.setText("Monitor");
+            paneStatus.setBackground(new Background(new BackgroundFill(Color.rgb(17, 225, 111), CornerRadii.EMPTY, Insets.EMPTY)));
+            new Jello(paneStatus).play();
+            taskGrid.toFront();
+        }
+    }
+
+
+
+    public void HandleClose(MouseEvent mouseEvent) {
+        if(mouseEvent.getSource()==btnclose){
+            System.exit(0);
+
+        }
+    }
 }

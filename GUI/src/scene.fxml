@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.geometry.*?>
+<?import javafx.scene.effect.*?>
+<?import javafx.scene.text.*?>
 <?import java.lang.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
@@ -17,89 +20,203 @@
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 
-<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="800.0" prefWidth="1280.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Controller">
-    <children>
-        <MenuBar layoutY="1.0" prefHeight="32.0" prefWidth="1280.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="1.0">
-            <menus>
-                <Menu mnemonicParsing="false" text="File">
-                    <items>
-                        <MenuItem mnemonicParsing="false" text="Close" />
-                    </items>
-                </Menu>
-                <Menu mnemonicParsing="false" text="Edit">
-                    <items>
-                        <MenuItem mnemonicParsing="false" text="Delete" />
-                    </items>
-                </Menu>
-                <Menu mnemonicParsing="false" text="Help">
-                    <items>
-                        <MenuItem mnemonicParsing="false" text="About" />
-                    </items>
-                </Menu>
-            </menus>
-        </MenuBar>
-        <VBox layoutY="68.0" prefHeight="732.0" prefWidth="1280.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="68.0">
-            <children>
-                <ListView editable="true" prefHeight="320.0" prefWidth="1280.0" />
-                <TabPane prefHeight="369.0" prefWidth="1280.0" tabClosingPolicy="UNAVAILABLE">
-                    <tabs>
-                        <Tab text="Peers">
-                            <content>
-                                <TableView prefHeight="200.0" prefWidth="200.0">
-                                    <columns>
-                                        <TableColumn prefWidth="575.0" text="IP" />
-                                        <TableColumn prefWidth="693.0" text="Port" />
-                                    </columns>
-                                </TableView>
-                            </content>
-                        </Tab>
-                        <Tab text="Trackers">
-                            <content>
-                                <TableView fx:id="trackers" editable="true" prefHeight="200.0" prefWidth="200.0">
-                                    <columns>
-                                        <TableColumn fx:id="trackersID" prefWidth="480.0" text="ID" />
-                                        <TableColumn fx:id="trackersStatus" prefWidth="800.0" text="Status" />
-                                    </columns>
-                                </TableView>
-                            </content>
-                        </Tab>
-                        <Tab text="Pieces">
-                            <content>
-                                <TableView fx:id="Pieces" prefHeight="200.0" prefWidth="200.0">
-                                    <columns>
-                                        <TableColumn fx:id="PieceSize" prefWidth="225.0" text="Size" />
-                                        <TableColumn fx:id="PieceDownloaded" minWidth="0.0" prefWidth="267.0" text="Downloaded" />
-                                        <TableColumn fx:id="PieceIndex" minWidth="0.0" prefWidth="300.0" text="Index" />
-                                        <TableColumn fx:id="PieceStatus" prefWidth="250.0" text="Status" />
-                                    </columns>
-                                </TableView>
-                            </content>
-                        </Tab>
-                        <Tab text="Files">
-                            <content>
-                                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
-                                    <children>
-                                        <TableView fx:id="Files" editable="true" layoutX="1.0" layoutY="4.0" prefHeight="367.0" prefWidth="626.0">
-                                            <columns>
-                                                <TableColumn fx:id="FileName" prefWidth="75.0" text="Name" />
-                                                <TableColumn fx:id="FileSize" prefWidth="75.0" text="Size" />
-                                                <TableColumn fx:id="FileStatus" prefWidth="75.0" text="Status" />
-                                            </columns>
-                                        </TableView>
-                                        <StackPane layoutX="631.0" layoutY="6.0" prefHeight="364.0" prefWidth="445.0">
-                                            <children>
-                                                <Button mnemonicParsing="false" text="Don't Download" />
-                                            </children>
-                                        </StackPane>
-                                    </children>
-                                </AnchorPane>
-                            </content>
-                        </Tab>
-                    </tabs>
-                </TabPane>
-            <Button fx:id="Refresh" mnemonicParsing="false" onAction="#setRefresh" prefHeight="31.0" prefWidth="194.0" text="Refresh" />
-            </children>
-        </VBox>
-        <Label fx:id="label" layoutX="2.0" layoutY="36.0" prefHeight="32.0" prefWidth="114.0" text="Torrents" />
-    </children>
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="800.0" prefWidth="1280.0" style="-fx-background-color: #FFFFFF;" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Controller">
+   <children>
+      <VBox prefHeight="800.0" prefWidth="345.0" style="-fx-background-color: #333645;" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="0.0">
+         <children>
+            <Pane prefHeight="155.0" prefWidth="342.0" style="-fx-background-color: #333645;">
+               <children>
+                  <Label alignment="CENTER" layoutX="80.0" layoutY="57.0" text="SicTorrent" textFill="#f8f8f8">
+                     <font>
+                        <Font name="Ebrima" size="36.0" />
+                     </font>
+                  </Label>
+               </children>
+            </Pane>
+            <Button fx:id="btnTorrents" alignment="BASELINE_LEFT" graphicTextGap="15.0" mnemonicParsing="false" onAction="#Handleclicks" prefHeight="55.0" prefWidth="342.0" style="-fx-background-color: #333645;" text="Torrents" textFill="#f8f8f8">
+               <font>
+                  <Font size="18.0" />
+               </font>
+               <padding>
+                  <Insets left="50.0" />
+               </padding>
+            </Button>
+            <Button fx:id="btnTasks" alignment="BASELINE_LEFT" graphicTextGap="15.0" layoutX="10.0" layoutY="375.0" mnemonicParsing="false" onAction="#Handleclicks" prefHeight="55.0" prefWidth="342.0" style="-fx-background-color: #333645;" text="Monitor" textFill="#f8f8f8">
+               <font>
+                  <Font size="18.0" />
+               </font>
+               <padding>
+                  <Insets left="50.0" />
+               </padding>
+            </Button>
+            <Button fx:id="btnSettings" alignment="BASELINE_LEFT" graphicTextGap="15.0" layoutX="10.0" layoutY="320.0" mnemonicParsing="false" onAction="#Handleclicks" prefHeight="50.0" prefWidth="342.0" style="-fx-background-color: #333645;" text="Settings" textFill="#f8f8f8">
+               <font>
+                  <Font size="18.0" />
+               </font>
+               <padding>
+                  <Insets left="50.0" />
+               </padding>
+            </Button>
+         </children>
+      </VBox>
+      <GridPane layoutX="345.0" layoutY="141.0" prefHeight="659.0" prefWidth="935.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="345.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="141.0">
+         <children>
+            <StackPane prefHeight="150.0" prefWidth="200.0" GridPane.hgrow="ALWAYS" GridPane.vgrow="ALWAYS">
+               <children>
+                  <GridPane fx:id="taskGrid" prefHeight="218.0" prefWidth="1055.0" style="-fx-background-color: #fff;">
+                     <children>
+                        <TabPane prefHeight="369.0" prefWidth="1280.0" tabClosingPolicy="UNAVAILABLE" GridPane.hgrow="ALWAYS" GridPane.vgrow="ALWAYS">
+                           <tabs>
+                              <Tab text="Peers">
+                                 <content>
+                                    <TableView prefHeight="200.0" prefWidth="200.0">
+                                       <columns>
+                                          <TableColumn prefWidth="400.0" text="IP" />
+                                          <TableColumn prefWidth="514.0" text="Port" />
+                                       </columns>
+                                    </TableView>
+                                 </content>
+                              </Tab>
+                              <Tab text="Trackers">
+                                 <content>
+                                    <TableView fx:id="trackers" editable="true" prefHeight="200.0" prefWidth="200.0">
+                                       <columns>
+                                          <TableColumn fx:id="trackersID" prefWidth="452.0" text="ID" />
+                                          <TableColumn fx:id="trackersStatus" prefWidth="492.0" text="Status" />
+                                       </columns>
+                                    </TableView>
+                                 </content>
+                              </Tab>
+                              <Tab text="Pieces">
+                                 <content>
+                                    <TableView fx:id="Pieces" prefHeight="200.0" prefWidth="200.0">
+                                       <columns>
+                                          <TableColumn fx:id="PieceSize" prefWidth="200.0" text="Size" />
+                                          <TableColumn fx:id="PieceDownloaded" minWidth="0.0" prefWidth="238.0" text="Downloaded" />
+                                          <TableColumn fx:id="PieceIndex" minWidth="0.0" prefWidth="241.0" text="Index" />
+                                          <TableColumn fx:id="PieceStatus" prefWidth="250.0" text="Status" />
+                                       </columns>
+                                    </TableView>
+                                 </content>
+                              </Tab>
+                              <Tab text="Files">
+                                 <content>
+                                    <TableView fx:id="Files" editable="true" prefHeight="367.0" prefWidth="626.0">
+                                       <columns>
+                                          <TableColumn fx:id="FileName" prefWidth="240.0" text="Name" />
+                                          <TableColumn fx:id="FileSize" prefWidth="347.0" text="Size" />
+                                          <TableColumn fx:id="FileStatus" prefWidth="330.0" text="Status" />
+                                       </columns>
+                                    </TableView>
+                                 </content>
+                              </Tab>
+                           </tabs>
+                        </TabPane>
+                     </children>
+                     <columnConstraints>
+                        <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                     </columnConstraints>
+                     <rowConstraints>
+                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                     </rowConstraints>
+                  </GridPane>
+                  <GridPane fx:id="settGrid" style="-fx-background-color: #fff;">
+                     <children>
+                        <Label fx:id="labelStatus1" alignment="CENTER" prefHeight="86.0" prefWidth="309.0" text="Settings" textFill="#1b1919">
+                           <font>
+                              <Font size="36.0" />
+                           </font>
+                        </Label>
+                     </children>
+                     <columnConstraints>
+                        <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                     </columnConstraints>
+                     <rowConstraints>
+                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                     </rowConstraints>
+                  </GridPane>
+                  <GridPane fx:id="torrnetGrid" prefHeight="700.0" prefWidth="935.0" style="-fx-background-color: #fff;">
+                     <children>
+                        <HBox prefHeight="68.0" prefWidth="935.0">
+                           <children>
+                              <Button fx:id="btnAddTorrnets" alignment="CENTER" graphicTextGap="15.0" mnemonicParsing="false" prefHeight="45.0" prefWidth="67.0" style="-fx-background-color: #00543D;" text="Add " textAlignment="CENTER" textFill="WHITE" wrapText="true">
+                                 <effect>
+                                    <Blend mode="LIGHTEN" />
+                                 </effect>
+                                 <font>
+                                    <Font size="18.0" />
+                                 </font>
+                                 <opaqueInsets>
+                                    <Insets />
+                                 </opaqueInsets>
+                                 <HBox.margin>
+                                    <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                                 </HBox.margin>
+                              </Button>
+                              <Button fx:id="btnAddTorrnets1" alignment="CENTER" graphicTextGap="15.0" layoutX="20.0" layoutY="20.0" mnemonicParsing="false" prefHeight="45.0" prefWidth="90.0" style="-fx-background-color: #00543D;" text="Delete" textAlignment="CENTER" textFill="WHITE" wrapText="true">
+                                 <effect>
+                                    <Blend mode="LIGHTEN" />
+                                 </effect>
+                                 <font>
+                                    <Font size="18.0" />
+                                 </font>
+                                 <opaqueInsets>
+                                    <Insets />
+                                 </opaqueInsets>
+                                 <HBox.margin>
+                                    <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                                 </HBox.margin>
+                              </Button>
+                              <Button fx:id="btnAddTorrnets11" alignment="CENTER" graphicTextGap="15.0" layoutX="107.0" layoutY="20.0" mnemonicParsing="false" prefHeight="45.0" prefWidth="90.0" style="-fx-background-color: #00543D;" text="Stop" textAlignment="CENTER" textFill="WHITE" wrapText="true">
+                                 <effect>
+                                    <Blend mode="LIGHTEN" />
+                                 </effect>
+                                 <font>
+                                    <Font size="18.0" />
+                                 </font>
+                                 <opaqueInsets>
+                                    <Insets />
+                                 </opaqueInsets>
+                                 <HBox.margin>
+                                    <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                                 </HBox.margin>
+                              </Button>
+                           </children>
+                           <padding>
+                              <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                           </padding>
+                           <GridPane.margin>
+                              <Insets />
+                           </GridPane.margin>
+                        </HBox>
+                        <ListView prefHeight="608.0" prefWidth="935.0" GridPane.rowIndex="1" />
+                     </children>
+                     <columnConstraints>
+                        <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                     </columnConstraints>
+                     <rowConstraints>
+                        <RowConstraints maxHeight="276.0" minHeight="10.0" prefHeight="70.0" vgrow="SOMETIMES" />
+                        <RowConstraints maxHeight="497.0" minHeight="10.0" prefHeight="492.0" vgrow="SOMETIMES" />
+                     </rowConstraints>
+                  </GridPane>
+               </children>
+            </StackPane>
+         </children>
+         <columnConstraints>
+            <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+         </columnConstraints>
+         <rowConstraints>
+            <RowConstraints maxHeight="592.0" minHeight="10.0" prefHeight="469.0" valignment="CENTER" vgrow="ALWAYS" />
+         </rowConstraints>
+      </GridPane>
+      <Pane fx:id="paneStatus" layoutX="345.0" layoutY="14.0" prefHeight="138.0" prefWidth="935.0" style="-fx-background-color: #00543D;" AnchorPane.leftAnchor="345.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+         <children>
+            <Label fx:id="labelStatus" layoutX="28.0" layoutY="29.0" prefHeight="86.0" prefWidth="309.0" text="Torrents" textFill="WHITE">
+               <font>
+                  <Font size="36.0" />
+               </font>
+            </Label>
+         </children>
+      </Pane>
+   </children>
 </AnchorPane>
