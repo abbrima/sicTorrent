@@ -18,7 +18,8 @@ public class DownloadFile implements Serializable {
         return status;
     }
     public void doNotDownload(){status=FileStatus.DONOTDOWNLOAD;}
-    public void validate(){
+    public void validate()
+    {
         boolean b=true;
         for (Piece p:pieces){
             if (p.getStatus()!=PieceStatus.HAVE)
@@ -27,11 +28,10 @@ public class DownloadFile implements Serializable {
         if (b)
             status=FileStatus.DOWNLOADED;
     }
-
     public long getLength(){return length;}
     public String getPath(){return path;}
-
-    public DownloadFile(long length,String path){
+    public DownloadFile(long length,String path)
+    {
         status=FileStatus.UNFINISHED;
         downloaded=0;
         this.length=length;

@@ -7,7 +7,8 @@ public class BlockRequest {
     public int getOffset(){return offset;}
     public int getIndex(){return index;}
 
-    public BlockRequest(int length,int offset,int index){
+    public BlockRequest(int length,int offset,int index)
+    {
         this.length=length; this.offset=offset; this.index=index;
     }
 }

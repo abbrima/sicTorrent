@@ -209,7 +209,6 @@ public abstract class Parcel {
     public void setPrivate(int s) {
     }
 
-
     public void setName(String s) {
     }
 

@@ -11,7 +11,8 @@ import java.net.Socket;
 public class Main extends Application {
 
     @Override
-    public void start(Stage primaryStage) throws Exception{
+    public void start(Stage primaryStage) throws Exception
+    {
         Parent root = FXMLLoader.load(getClass().getResource("scene.fxml"));
         primaryStage.setTitle("SicTorrent");
         primaryStage.setScene(new Scene(root, 1280, 720));
@@ -19,7 +20,8 @@ public class Main extends Application {
     }
 
 
-    public static void main(String[] args) throws Exception {
+    public static void main(String[] args) throws Exception
+    {
 
         byte arr[] = TorrentFileReader.readFile("files/fb.torrent");
         Torrent torrent = new Torrent(bCoder.decode(arr, ParcelType.TORRENT));

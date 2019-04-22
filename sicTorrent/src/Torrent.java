@@ -184,13 +184,18 @@ public class Torrent implements Serializable {
                     while (peers.size()==0)
                         Thread.yield();
                 }
+                ExecutorService ex = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
                 Map<String,Integer> map = new ConcurrentHashMap<String,Integer>(peers);
                 map.forEach((ip, port) -> {
                     try {
                         if (connections.size()<connectionLimit)
                         {Connection c = new Connection(Torrent.this, ip, port);
                         connections.add(c);
-                        c.start();}
+                        ex.execute(c.sending());
+                        if(!c.hasFailed()){
+                            ex.execute(c.receiving());
+                        }
+                       }
                     } catch (Exception e) {
                         System.out.println("CAN'T CONNECT");
                         peers.remove(ip);
@@ -361,22 +366,18 @@ public class Torrent implements Serializable {
     public void killThreads() {
         trackermanager.kill();
     }
-public ArrayList<Tracker> getTrackers(){
+    public ArrayList<Tracker> getTrackers(){
         return trackerlist;
-    }
-    public ArrayList<Piece> getPieces(){
-        return this.pieces;
-    }
+}
     public void invokeThreads() {
         trackermanager.start();
-        //peermanager.start();
+        peermanager.start();
     }
 
     private void getPeersNow() {
         trackermanager.forceAnnounce();
     }
-}
-
-enum TorrentStatus {
-    FINISHED, STARTED, NEW
+    enum TorrentStatus {
+        FINISHED, STARTED, NEW
+    }
 }

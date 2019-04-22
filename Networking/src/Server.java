@@ -11,14 +11,16 @@ public class Server implements Runnable {
     int port;
     boolean port_works = false;
 
-    public void kill() {
+    public void kill()
+    {
         try {
             server.close();
         } catch (IOException ioe) {
         }
     }
 
-    public Server() throws IOException {
+    public Server() throws IOException
+    {
         int n = 0;
         this.port = 6881;
         while (n <= 8) {
@@ -35,7 +37,8 @@ public class Server implements Runnable {
         }
     }
 
-    public void run() {
+    public void run()
+    {
         while (true) {
             try {
                 Socket client = server.accept();

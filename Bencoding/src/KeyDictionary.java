@@ -39,7 +39,8 @@ public class KeyDictionary {
         keys.put("downloaded", ValueType.INTEGER);
     }
 
-    public static void applyString(Parcel parcel, Stack<String> keystack, String value) throws InvalidBencodeException {
+    public static void applyString(Parcel parcel, Stack<String> keystack, String value) throws InvalidBencodeException
+    {
         if (!keys.containsKey(keystack.peek())) {
             System.out.println("WARNING Unknown key: " + keystack.peek());
             return;
@@ -155,7 +156,8 @@ public class KeyDictionary {
         }
     }
 
-    public static void applyInteger(Parcel parcel, Stack<String> keystack, long value) throws InvalidBencodeException {
+    public static void applyInteger(Parcel parcel, Stack<String> keystack, long value) throws InvalidBencodeException
+    {
         if (!keys.containsKey(keystack.peek())) {
             System.out.println("WARNING Unknown key: " + keystack.peek());
             return;
@@ -245,7 +247,8 @@ public class KeyDictionary {
         }
     }
 
-    public static void applyBytes(Parcel parcel, Stack<String> keystack, byte value[]) throws InvalidBencodeException {
+    public static void applyBytes(Parcel parcel, Stack<String> keystack, byte value[]) throws InvalidBencodeException
+    {
         if (!keys.containsKey(keystack.peek())) {
             System.out.println("WARNING Unknown key: " + keystack.peek());
             return;
