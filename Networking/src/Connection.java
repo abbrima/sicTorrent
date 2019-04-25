@@ -22,7 +22,7 @@ public class Connection {
     private InetAddress address;
     private int port;
     public boolean dead(){return kill;}
-
+    private int bitfield=286;
 
 
     public Connection(Socket socket) throws IOException
@@ -68,81 +68,89 @@ public class Connection {
                     if(hasFailed()){
                         return;
                     }
-                    while (true)
-                    {
-                        if(!active)
-                            receiveHandShake();
-                        else {
-                            System.out.println("Waiting for msg");
-                            int prefix=istream.readInt();
-                            System.out.print("\nprefix:"+prefix+"\n");
-                            if (prefix <= 1)
-                                receiveMessage(prefix);
-                            if (prefix == 5)
-                                receiveHave();
-                            if (prefix == 13)
-                                receiveRequest();
-                            else if(prefix==287)
-                                receiveBitfield();
+                    if(!hasFailed()) {
+                        while (true)
+                        {
+                            if(!active)
+                                receiveHandShake();
+                            if(peerHas != null && !made)
+                                sendRequest();
+                            else {
+                                System.out.println("Waiting for msg from  "+address.getHostAddress());
+                                int prefix=istream.readInt();
+                                System.out.print("\nprefix:"+prefix+"\n");
+                                if (prefix <= 1)
+                                    receiveMessage(prefix);
+                                else if (prefix == 5)
+                                    receiveHave();
+                                else if (prefix == 13)
+                                    receiveRequest();
+                                else if (prefix==1+bitfield)
+                                    receiveBitfield();
+                                else if (prefix <= 9+16384)
+                                    receivepiece();
+                            }
                         }
                     }
+
+
                 } catch (Exception e) {
                     //  System.out.println("CONNECTION FAILED");
                     // e.printStackTrace();
                 }
             }
 
-       }             Thread th = new Thread(new t());
+        }             Thread th = new Thread(new t());
         return th;
     }
     public void sendHandshake(byte reserved[]) throws IOException
     {
-                try {
-                    socket = new Socket(address, port);
-                    ostream = new DataOutputStream(socket.getOutputStream());
-                    istream = new DataInputStream(socket.getInputStream());
-                    ostream.write(ConnectionMessages.makeHandshake(torrent.getInfoHash(), reserved));
-                    System.out.println("connection has been made");
-                    am_interested=true;
-                    failed = false;
-                } catch (Exception e) {
-                    failed = true;
-                    System.out.println("CONNECTION FAILED");
-                    // e.printStackTrace();
-                }
+        try {
+            socket = new Socket(address, port);
+            ostream = new DataOutputStream(socket.getOutputStream());
+            istream = new DataInputStream(socket.getInputStream());
+            ostream.write(ConnectionMessages.makeHandshake(torrent.getInfoHash(), reserved));
+            System.out.println("connection has been made");
+            am_interested=true;
+            active = false;
+            failed = false;
+            made= false;
+        } catch (Exception e) {
+            failed = true;
+            System.out.println("CONNECTION FAILED");
+            // e.printStackTrace();
+        }
 
     }
 
     public void receiveHandShake() throws IOException
     {
-        if(hasFailed()){
+
+        if(hasFailed())
             return;
-        }
-        else {
-                try {
-                    Thread.sleep(10000);
-                    int length = istream.readByte();
-                    byte arr[] = new byte[length];
-                    istream.read(arr);
-                    byte reserved[] = new byte[8];
-                    istream.read(reserved);
-                    byte infohash[] = new byte[20], peerID[] = new byte[20];
-                    istream.read(infohash);
-                    istream.read(peerID);
-                    if (Arrays.equals(infohash, torrent.getInfoHash())) {
-                        System.out.println("HANDSHAKE SUCCESSFUL");
-                        peer_interested = true;
-                        active = true;
-                        failed = false;
-                    } else if (!Arrays.equals(infohash, torrent.getInfoHash())) {
-                        failed = true;
-                       // active = false;
-                    }
-                } catch (Exception e) {
+
+            try {
+                Thread.sleep(10000);
+                int length = istream.readByte();
+                byte arr[] = new byte[length];
+                istream.read(arr);
+                byte reserved[] = new byte[8];
+                istream.read(reserved);
+                byte infohash[] = new byte[20], peerID[] = new byte[20];
+                istream.read(infohash);
+                istream.read(peerID);
+                if (Arrays.equals(infohash, torrent.getInfoHash())) {
+                    System.out.println("HANDSHAKE SUCCESSFUL");
+                    peer_interested = true;
+                    active = true;
+                    failed = false;
+                } else if (!Arrays.equals(infohash, torrent.getInfoHash())) {
+                    failed = true;
+                    // active = false;
                 }
+            } catch (Exception e) {
+            }
 
-
-        }
     }
     public void sendMessage(MessageType type){
         try{
@@ -154,54 +162,59 @@ public class Connection {
     }
     public void receiveMessage(int prefix){
 
-                    try {
-                        Thread.sleep(10000);
-                        byte readID ;
-                        int ID;
-                        if (prefix==0000) {
-                            //keep alive
-                        }
-                        else if (prefix ==0001) {
-                            readID = istream.readByte();
-                            ID = readID;
-                            if(ID == 0)
-                                peer_choking = true;
-                            if( ID == 1)
-                                peer_choking = false;
-                            if( ID == 2)
-                                peer_interested = true;
-                            if( ID == 3)
-                                peer_interested = false;
+        try {
+            Thread.sleep(10000);
+            byte readID ;
+            int ID;
+            if (prefix==0000) {
+                //keep alive
+            }
+            else if (prefix ==0001) {
+                readID = istream.readByte();
+                ID = readID;
+                if(ID == 0)
+                    peer_choking = true;
+                if( ID == 1)
+                    peer_choking = false;
+                if( ID == 2)
+                    peer_interested = true;
+                if( ID == 3)
+                    peer_interested = false;
 
-                            System.out.println("\nMessage Received"+ID+"\n");
-                        }
-                       else{
-                            System.out.println("UNSUCCESSFUL");
-                        }
-                    } catch (Exception e) {
-                }
+                System.out.println("\nMessage Received"+ID+"\n");
+            }
+            else{
+                System.out.println("UNSUCCESSFUL");
+            }
+        } catch (Exception e) {
+        }
 
     }
     public void sendHave(){}
     public void receiveHave(){
 
-            try {
-                Thread.sleep(10000);
-                System.out.println("Succuessful have");
-                byte  readID = istream.readByte();
-                int index = istream.readInt();
-                System.out.println(index);
-                peerHas[index]=1;
+        try {
+            Thread.sleep(10000);
+            System.out.println("Succuessful have");
+            byte  readID = istream.readByte();
+            int index = istream.readInt();
+            System.out.println(index);
+            peerHas[index]=1;
 
-            } catch (Exception e) {
-            }
+        } catch (Exception e) {
+        }
 
 
     }
+    boolean made = false;
     public void sendRequest() throws IOException {
 
-        boolean made = false;
+
         int i=0;
+        if(peerHas == null)
+        {
+            return;
+        }
         while (!made)
         {
             if (peerHas[i] == 1)
@@ -221,8 +234,8 @@ public class Connection {
                 byte  readID = istream.readByte();
                 int index = istream.readInt();
                 int offset = istream.readInt();
-               int length = istream.readInt();
-               //change
+                int length = istream.readInt();
+                //change
                 peerWants[index]=1;
 
             } catch (Exception e) {
@@ -259,6 +272,7 @@ public class Connection {
             istream.read(bitfield);
             String a = toBinaryString(bitfield);
             System.out.println("\nbitfield size is :"+a.length()+"\n");
+            peerHas = new byte[a.length()];
             for (int i=0; i<a.length(); i++) {
                 peerHas[i]= a.charAt(i)=='1' ? (byte)1 : (byte)0;
             }
@@ -277,7 +291,8 @@ public class Connection {
                 int offset = istream.readInt();
                 int length = istream.readInt();
                 byte [] block = new byte [length];
-                 istream.read(block,0,length);
+                istream.read(block,0,length);
+                System.out.println("\nPiece received\n");
                 //change
                 //save block
 

@@ -160,7 +160,7 @@ public class Controller implements Initializable {
         if(event.getSource()==btnTorrents){
             labelStatus.setText("Torrents");
             paneStatus.setBackground(new Background(new BackgroundFill(Color.rgb(0, 80, 58), CornerRadii.EMPTY, Insets.EMPTY)));
-            new Tada(paneStatus).play();
+           new Tada(paneStatus).play();
             torrnetGrid.toFront();
         }
 

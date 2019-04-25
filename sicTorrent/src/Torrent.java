@@ -190,19 +190,19 @@ public class Torrent implements Serializable {
                     try {
                         if (connections.size()<connectionLimit)
                         {Connection c = new Connection(Torrent.this, ip, port);
-                        connections.add(c);
-                        ex.execute(c.sending());
-                        if(!c.hasFailed()){
-                            ex.execute(c.receiving());
+                            connections.add(c);
+                            ex.execute(c.sending());
+                            if(!c.hasFailed()){
+                                ex.execute(c.receiving());
+                            }
                         }
-                       }
                     } catch (Exception e) {
                         System.out.println("CAN'T CONNECT");
                         peers.remove(ip);
                     }
                 });
                 for (int i=0;i<connections.size();i++)
-                    if (connections.get(i).dead())
+                    if (connections.get(i).hasFailed())
                         connections.remove(i);
             }
         }
@@ -247,7 +247,7 @@ public class Torrent implements Serializable {
     }
 
     public Torrent() {
-        peermanager = new PeerManager(10);
+        peermanager = new PeerManager(400);
         trackermanager = new TrackerManager();
         connections = new ArrayList<>();
     }
