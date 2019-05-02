@@ -253,6 +253,7 @@ public class Torrent implements Serializable {
     }
 
     public Torrent(Parcel parcel) {
+
         status = TorrentStatus.NEW;
         connections = new ArrayList<>();
 

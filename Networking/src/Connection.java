@@ -3,6 +3,7 @@ import java.net.*;
 import java.nio.charset.StandardCharsets;
 import java.security.KeyPair;
 import java.util.Arrays;
+import java.util.stream.Stream;
 
 public class Connection {
     boolean failed;
@@ -73,8 +74,6 @@ public class Connection {
                         {
                             if(!active)
                                 receiveHandShake();
-                            if(peerHas != null && !made)
-                                sendRequest();
                             else {
                                 System.out.println("Waiting for msg from  "+address.getHostAddress());
                                 int prefix=istream.readInt();
@@ -87,8 +86,11 @@ public class Connection {
                                     receiveRequest();
                                 else if (prefix==1+bitfield)
                                     receiveBitfield();
-                                else if (prefix <= 9+16384)
+                                else
                                     receivepiece();
+
+                                if(peerHas != null)
+                                    sendRequest();
                             }
                         }
                     }
@@ -295,6 +297,7 @@ public class Connection {
                 System.out.println("\nPiece received\n");
                 //change
                 //save block
+                torrent.getPieces().get(index).applyBytes(block,offset);
 
             } catch (Exception e) {
             }
