@@ -5,310 +5,359 @@ import java.security.KeyPair;
 import java.util.Arrays;
 import java.util.stream.Stream;
 
-public class Connection {
-    boolean failed;
+
+public class Connection implements Runnable {
     private Socket socket;
     private boolean am_choking = false; //client is choking the peer
     private boolean am_interested = false; //client is interested in peer
     private boolean peer_choking = false;   //peer is chocking client
     private boolean peer_interested = false; // peer is interested
-    private boolean active;
-    private byte [] peerHas;
-    private byte [] peerWants;
+
+
+    private ConnectionState state;
+
+    private boolean peerHas[];
+
+    private String debug = "D";
+    private String ID;
+    private String IP;
+
+    private byte reserved[];
+
     private Torrent torrent;
+    private Thread thread;
+
     private DataOutputStream ostream;
     private DataInputStream istream;
-    private Thread connectionThread;
-    private boolean kill;
+
     private InetAddress address;
     private int port;
-    public boolean dead(){return kill;}
-    private int bitfield=286;
 
 
-    public Connection(Socket socket) throws IOException
-    {
-        this.socket = socket;
-        ostream = new DataOutputStream(socket.getOutputStream());
-        istream = new DataInputStream(new BufferedInputStream(socket.getInputStream()));
+    public Connection() {
+        state = ConnectionState.INIT;
+        ID = "ID";
     }
 
-    public Connection(Torrent torrent, String ip, int port) throws UnknownHostException
-    {
-        address = InetAddress.getByName(ip);
-        this.port=port;
-        this.torrent = torrent;
-        am_interested = true;
-        peer_choking =true;
-    }
-    public boolean hasFailed()
-    {
-        return failed;
-    }
-    public Thread sending()
-    {
-        class t implements Runnable{
-            public synchronized void run() {
-                try {
-                    sendHandshake(new byte [8]);
-                } catch (Exception e) {
-                    System.out.println("CONNECTION FAILED");
+    public Connection(Socket socket) {
+        this();
 
-                    // e.printStackTrace();
-                }
-            }
-
-        }             Thread th = new Thread(new t());
-        return th;
-    }
-    public Thread receiving()
-    {
-        class t implements Runnable{
-            public synchronized void run() {
-                try {
-                    if(hasFailed()){
-                        return;
-                    }
-                    if(!hasFailed()) {
-                        while (true)
-                        {
-                            if(!active)
-                                receiveHandShake();
-                            else {
-                                System.out.println("Waiting for msg from  "+address.getHostAddress());
-                                int prefix=istream.readInt();
-                                System.out.print("\nprefix:"+prefix+"\n");
-                                if (prefix <= 1)
-                                    receiveMessage(prefix);
-                                else if (prefix == 5)
-                                    receiveHave();
-                                else if (prefix == 13)
-                                    receiveRequest();
-                                else if (prefix==1+bitfield)
-                                    receiveBitfield();
-                                else
-                                    receivepiece();
-
-                                if(peerHas != null)
-                                    sendRequest();
-                            }
-                        }
-                    }
-
-
-                } catch (Exception e) {
-                    //  System.out.println("CONNECTION FAILED");
-                    // e.printStackTrace();
-                }
-            }
-
-        }             Thread th = new Thread(new t());
-        return th;
-    }
-    public void sendHandshake(byte reserved[]) throws IOException
-    {
+        IP = socket.getInetAddress().getHostAddress();
+        port = socket.getPort();
         try {
+            istream = new DataInputStream(socket.getInputStream());
+            receiveHandshake();
+            if (socket.isClosed())
+                return;
+            if (torrent == null)
+                return;
+            torrent.getConnections().add(this);
+            ostream = new DataOutputStream(socket.getOutputStream());
+            sendHandshake(new byte[8]);
+            state = ConnectionState.HANDSSHOOK;
+            if (torrent.getStatus() == Torrent.TorrentStatus.FINISHED)
+                sendMessage(MessageType.NOTINTERESTED);
+            else
+                sendMessage(MessageType.INTERESTED);
+
+            peerHas = new boolean[torrent.getPieces().size()];
+            thread = new Thread(this);
+            thread.setDaemon(true);
+            thread.start();
+        } catch (IOException ioe) {
+            closeSocket();
+        }
+    }
+
+    public Connection(Torrent torrent, String ip, int port) {
+        this();
+        IP = ip;
+        this.torrent = torrent;
+        peerHas = new boolean[torrent.getPieces().size()];
+        this.port = port;
+        try {
+            address = InetAddress.getByName(ip);
             socket = new Socket(address, port);
             ostream = new DataOutputStream(socket.getOutputStream());
             istream = new DataInputStream(socket.getInputStream());
-            ostream.write(ConnectionMessages.makeHandshake(torrent.getInfoHash(), reserved));
-            System.out.println("connection has been made");
-            am_interested=true;
-            active = false;
-            failed = false;
-            made= false;
-        } catch (Exception e) {
-            failed = true;
-            System.out.println("CONNECTION FAILED");
-            // e.printStackTrace();
-        }
 
-    }
+            am_interested = true;
+            am_choking = false;
 
-    public void receiveHandShake() throws IOException
-    {
+            sendHandshake(new byte[8]);
 
-        if(hasFailed())
-            return;
+            thread = new Thread(this);
+            thread.setDaemon(true);
+            thread.start();
 
-            try {
-                Thread.sleep(10000);
-                int length = istream.readByte();
-                byte arr[] = new byte[length];
-                istream.read(arr);
-                byte reserved[] = new byte[8];
-                istream.read(reserved);
-                byte infohash[] = new byte[20], peerID[] = new byte[20];
-                istream.read(infohash);
-                istream.read(peerID);
-                if (Arrays.equals(infohash, torrent.getInfoHash())) {
-                    System.out.println("HANDSHAKE SUCCESSFUL");
-                    peer_interested = true;
-                    active = true;
-                    failed = false;
-                } else if (!Arrays.equals(infohash, torrent.getInfoHash())) {
-                    failed = true;
-                    // active = false;
-                }
-            } catch (Exception e) {
-            }
-
-    }
-    public void sendMessage(MessageType type){
-        try{
-            ostream.write(ConnectionMessages.MakeMessage(MessageType.INTERESTED));
-        }
-        catch (Exception e) {
-            // e.printStackTrace();
+        } catch (UnknownHostException uhe) {
+            socket = null;
+        } catch (IOException ioe) {
+            socket = null;
         }
     }
-    public void receiveMessage(int prefix){
 
+    public void run() {
         try {
-            Thread.sleep(10000);
-            byte readID ;
-            int ID;
-            if (prefix==0000) {
-                //keep alive
-            }
-            else if (prefix ==0001) {
-                readID = istream.readByte();
-                ID = readID;
-                if(ID == 0)
-                    peer_choking = true;
-                if( ID == 1)
-                    peer_choking = false;
-                if( ID == 2)
-                    peer_interested = true;
-                if( ID == 3)
-                    peer_interested = false;
-
-                System.out.println("\nMessage Received"+ID+"\n");
-            }
-            else{
-                System.out.println("UNSUCCESSFUL");
-            }
-        } catch (Exception e) {
-        }
-
-    }
-    public void sendHave(){}
-    public void receiveHave(){
-
-        try {
-            Thread.sleep(10000);
-            System.out.println("Succuessful have");
-            byte  readID = istream.readByte();
-            int index = istream.readInt();
-            System.out.println(index);
-            peerHas[index]=1;
-
-        } catch (Exception e) {
-        }
-
-
-    }
-    boolean made = false;
-    public void sendRequest() throws IOException {
-
-
-        int i=0;
-        if(peerHas == null)
-        {
-            return;
-        }
-        while (!made)
-        {
-            if (peerHas[i] == 1)
-            {
-                ostream.write(ConnectionMessages.MakeRequest(i,0,16384));
-                System.out.println("\nRequest Has been sent\n");
-                made = true;
-            }
-            i++;
-        }
-    }
-    public void receiveRequest(){
-        while (true) {
-            try {
-                Thread.sleep(10000);
-                //read
-                byte  readID = istream.readByte();
-                int index = istream.readInt();
-                int offset = istream.readInt();
-                int length = istream.readInt();
-                //change
-                peerWants[index]=1;
-
-            } catch (Exception e) {
-            }
-
-        }
-    }
-    public static String toBinaryString(byte b []) {
-
-        char[] bits = new char[8 * b.length];
-        for(int i = 0; i < b.length; i++) {
-
-            final byte byteval = b[i];
-            int bytei = i << 3;
-            int mask = 0x1;
-            for(int j = 7; j >= 0; j--) {
-                final int bitval = byteval & mask;
-                if(bitval == 0) {
-                    bits[bytei + j] = '0';
+            while (!Thread.interrupted()) {
+                if (state == ConnectionState.INIT) {
+                    receiveHandshake();
+                    if (socket != null && !socket.isClosed()) {
+                        state = ConnectionState.HANDSSHOOK;
+                        sendBitfield();
+                        setInterested(true);
+                        setChoke(true);
+                    }
                 } else {
-                    bits[bytei + j] = '1';
+                    int prefix = istream.readInt();
+                    if (prefix == 0) {
+                        //keep alive
+                    } else {
+                        byte id = istream.readByte();
+                        switch (id) {
+                            case 0: //choke
+                                peer_choking = true;
+                                break;
+                            case 1: //unchoke
+                                peer_choking = false;
+                                break;
+                            case 2: //interested
+                                peer_interested = true;
+                                break;
+                            case 3: //not interested
+                                peer_interested = false;
+                                break;
+                            case 4: //have
+                                peerHas[istream.readInt()] = true;
+                                break;
+                            case 5: //bitfield
+                                receiveBitfield(prefix);
+                                break;
+                            case 6: //request
+                                receiveRequest();
+                                break;
+                            case 7: //piece
+                                receivePiece(prefix);
+                                break;
+                            default:
+                                closeSocket();
+                                return;
+                        }
+                    }
                 }
-                mask <<= 1;
+                if (peer_choking == false && am_interested == true && getPiecesFromPeer() > 0) {
+                    state = ConnectionState.REQUEST;
+                    Block request = torrent.createRequest(peerHas, this);
+
+                    if (request != null)
+                    {
+                        synchronized (ostream) {
+                            ostream.write(ConnectionMessages.genRequest(request.getIndex(), request.getOffset(), request.getLength()));
+
+                        }
+                    }
+                }
             }
+        } catch (IOException ioe) {
+            closeSocket();
         }
-        return String.valueOf(bits);
     }
-    public void sendBitfield(){}
-    public void receiveBitfield(){
+
+    public void closeSocket() {
         try {
-            //read
-            byte readID = istream.readByte();
-            byte [] bitfield = new byte [286];
-            istream.read(bitfield);
-            String a = toBinaryString(bitfield);
-            System.out.println("\nbitfield size is :"+a.length()+"\n");
-            peerHas = new byte[a.length()];
-            for (int i=0; i<a.length(); i++) {
-                peerHas[i]= a.charAt(i)=='1' ? (byte)1 : (byte)0;
-            }
+            if (socket != null)
+                socket.close();
+        } catch (IOException se) {
+            System.out.println("FAILED TO CLOSE SOCKET");
+        }
 
-        } catch (Exception e) {
+    }
+
+
+    public void sendHandshake(byte[] reserved) throws IOException {
+        ostream.write(ConnectionMessages.genHandshake(torrent.getInfoHash(), new byte[8]));
+        debug = "Handshake Sent";
+    }
+
+    private void sendBitfield() throws IOException {
+        if (torrent.getAvailiblePieces() > 0) {
+            synchronized (ostream) {
+                ostream.write(ConnectionMessages.genBitfield(torrent));
+            }
         }
     }
-    public void sendPiece(){}
-    public void receivepiece() {
-        while (true) {
+
+    public void receiveHandshake() throws IOException {
+        Thread t = new Thread(() -> {
             try {
-                Thread.sleep(10000);
-                //read//9+block.length
-                byte  ID = istream.readByte();
-                int index = istream.readInt();
-                int offset = istream.readInt();
-                int length = istream.readInt();
-                byte [] block = new byte [length];
-                istream.read(block,0,length);
-                System.out.println("\nPiece received\n");
-                //change
-                //save block
-                torrent.getPieces().get(index).applyBytes(block,offset);
-
-            } catch (Exception e) {
+                Thread.sleep(3000);
+                closeSocket();
+            } catch (InterruptedException ie) {
             }
-
+        });
+        t.setDaemon(true);
+        t.start();
+        try {
+            byte pstrlen = istream.readByte();
+            String pstrn = new String(istream.readNBytes(pstrlen));
+            if (!pstrn.equals(ConnectionMessages.protocolString))
+                closeSocket();
+            reserved = new byte[8];
+            istream.read(reserved);
+            byte[] hash = new byte[20];
+            istream.read(hash);
+            if (torrent == null) {
+                torrent = NetworkController.checkIfTorrentExists(hash);
+                if (torrent == null)
+                    if (socket != null)
+                        closeSocket();
+            } else {
+                if (!Arrays.equals(hash, torrent.getInfoHash()))
+                    closeSocket();
+            }
+            byte[] peerID = new byte[20];
+            istream.read(peerID);
+            ID = new String(peerID);
+            debug = "handshake Received";
+            t.interrupt();
+        } catch (IllegalArgumentException iae) {
+            throw new IOException();
         }
     }
-    public void kill()
-    {
-        kill = true;
-        try{socket.close();}catch(Exception e){}
-        connectionThread.interrupt();
+
+    private void receiveBitfield(int prefix) throws IOException {
+        byte bitfield[] = new byte[prefix - 1];
+        istream.readNBytes(bitfield, 0, prefix - 1);
+        String bin = Funcs.toBitString(bitfield);
+        for (int i = torrent.getPieces().size(); i < (prefix - 1) * 8; i++) {
+            if (bin.charAt(i) != '0')
+                closeSocket();
+        }
+        state = ConnectionState.BITFIELD;
+        debug = bin;
+        char carr[] = bin.toCharArray();
+        for (int i = 0; i < torrent.getPieces().size(); i++)
+            if (carr[i] == '1')
+                peerHas[i] = true;
+            else if (carr[i] == '0')
+                peerHas[i] = false;
+            else
+                System.exit(-1);
     }
 
+    private void receiveRequest() throws IOException {
+        int index = istream.readInt();
+        int offset = istream.readInt();
+        int length = istream.readInt();
+        if (index < 0 || index > torrent.getPieces().size())
+            closeSocket();
+        if (offset + length > torrent.getPieces().get(index).getLength() || offset + length < 0)
+            closeSocket();
+        if (!am_choking) {
+            Piece p = torrent.getPieces().get(index);
+            if (p.getStatus() != PieceStatus.HAVE)
+                closeSocket();
+            else {
+                state = ConnectionState.SENDINGBLOCK;
+                synchronized (ostream) {
+                    try {
+                        ostream.write(ConnectionMessages.genBlock(index, offset, p.getBlock(offset, index)));
+                    } catch (FileNotFoundException fnfe) {
+                        //handle file not found (STUPID USER)
+                    }
+                }
+            }
+        }
+    }
+
+    private void receivePiece(int prefix) throws IOException {
+        int index = istream.readInt();
+        int offset = istream.readInt();
+        if (index < 0 || index > torrent.getPieces().size())
+            closeSocket();
+        Piece p = torrent.getPieces().get(index);
+        if (prefix - 9 < 0)
+            closeSocket();
+        byte arr[] = new byte[prefix - 9];
+        istream.readNBytes(arr, 0, prefix - 9);
+        if (offset + arr.length < 0 || offset + arr.length > p.getLength())
+            closeSocket();
+        try {
+            p.applyBytes(arr, offset, this);
+        } catch (FileNotFoundException fnfe) {
+            //handle (stupid user)
+        }
+    }
+
+    public void cancelRequest(Block req) {
+        try {
+            synchronized (ostream) {
+                ostream.write(ConnectionMessages.genCancel(req));
+            }
+        } catch (IOException ioe) {
+        }
+
+    }
+
+    public boolean failed() {
+        return socket == null || socket.isClosed();
+    }
+
+    public String getID() {
+        return ID;
+    }
+
+    public ConnectionState getState() {
+        return state;
+    }
+
+    public String getDebug() {
+        return debug;
+    }
+
+    public String getIP() {
+        return IP;
+    }
+
+    private void sendMessage(MessageType type) throws IOException {
+        byte arr[] = ConnectionMessages.genMessage(type);
+        synchronized (ostream) {
+            ostream.write(arr);
+        }
+    }
+
+    public void setChoke(boolean b) {
+        am_choking = b;
+        try {
+            if (b) {
+                sendMessage(MessageType.CHOKE);
+            } else {
+                sendMessage(MessageType.UNCHOKE);
+            }
+        } catch (IOException ioe) {
+            closeSocket();
+        }
+    }
+
+    public void setInterested(boolean b) {
+        am_interested = b;
+        try {
+            if (b) {
+                sendMessage(MessageType.INTERESTED);
+            } else {
+                sendMessage(MessageType.NOTINTERESTED);
+            }
+        } catch (IOException ioe) {
+            closeSocket();
+        }
+    }
+
+    private int getPiecesFromPeer() {
+        int n = 0;
+        for (int i = 0; i < peerHas.length; i++) {
+            if (peerHas[i] == true)
+                n++;
+        }
+        return n;
+    }
 }

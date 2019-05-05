@@ -5,8 +5,12 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.ObjectInputStream;
 import java.net.InetAddress;
 import java.net.Socket;
+import java.util.ArrayList;
 
 public class Main extends Application {
 
@@ -14,24 +18,29 @@ public class Main extends Application {
     public void start(Stage primaryStage) throws Exception
     {
         Parent root = FXMLLoader.load(getClass().getResource("scene.fxml"));
+        Controller.primaryStage=primaryStage;
         primaryStage.setTitle("SicTorrent");
         primaryStage.setScene(new Scene(root, 1280, 720));
+        primaryStage.setOnCloseRequest(event->{
+              NetworkController.killServer();
+              NetworkController.killTorrents();
+              //save torrent objects
+        });
         primaryStage.show();
     }
 
 
     public static void main(String[] args) throws Exception
     {
+        NetworkController.startServer();
 
-        byte arr[] = TorrentFileReader.readFile("files/fb.torrent");
-        Torrent torrent = new Torrent(bCoder.decode(arr, ParcelType.TORRENT));
-        NetworkController.addTorrent(torrent);
-        NetworkController.invokeTorrents();
-        // NetworkController.startServer();
-        //try{Thread.sleep(10000);}catch(InterruptedException ie){}
-
+        File fl = new File("torrents.list");
+        if (fl.exists()) {
+            ObjectInputStream ois = new ObjectInputStream(new FileInputStream(fl));
+            ArrayList<Torrent> torrents = (ArrayList<Torrent>)ois.readObject();
+            NetworkController.addTorrents(torrents);
+            NetworkController.invokeTorrents();
+        }
         launch(args);
-
     }
-
 }

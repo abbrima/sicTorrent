@@ -1,95 +1,99 @@
-import java.io.*;
-import java.net.*;
-import java.lang.*;
-import java.nio.charset.StandardCharsets;
+import java.io.ByteArrayOutputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
 
-enum MessageType
-{
-    CHOKE, UNCHOKE, INTERESTED, UNINTERESTED, KEEP_ALIVE
+enum MessageType{
+    CHOKE,KEEPALIVE,UNCHOKE,INTERESTED,NOTINTERESTED,
 }
-public class ConnectionMessages {
 
-    public static byte[] makeHandshake(byte [] info_Hash, byte [] reserved )
-    {
-        byte pstrlen=19;
-        String pstr=new String("BitTorrent protocol");
-        reserved = new byte[8];
-        String r = reserved.toString();
+class ConnectionMessages{
+    static String protocolString = "BitTorrent protocol";
+    public static byte[] genHandshake(byte[] infoHash,byte[] reserved) throws IOException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        DataOutputStream ostream = new DataOutputStream(baos);
-        try
-        {
-            ostream.writeByte(pstrlen);
-            ostream.write(pstr.getBytes(StandardCharsets.UTF_8));
-            ostream.write(reserved);
-            ostream.write(info_Hash);
-            ostream.write(Info.getPeerID().getBytes(StandardCharsets.UTF_8));
-        }catch (IOException e){}
+        DataOutputStream os = new DataOutputStream(baos);
+        os.writeByte(19);
+        os.writeBytes(protocolString);
+        os.write(reserved);
+        os.write(infoHash);
+        os.writeBytes(Info.getPeerID());
         return baos.toByteArray();
     }
-    public static byte [] MakeMessage(MessageType type) throws IOException
-    {
+    public static byte[] genMessage(MessageType type) throws IOException{
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        DataOutputStream ostream = new DataOutputStream(baos);
-        switch(type) {
-            case KEEP_ALIVE:
-                ostream.writeInt(0);
+        DataOutputStream os = new DataOutputStream(baos);
+        switch(type){
             case CHOKE:
-                ostream.writeInt(0);
-                ostream.writeByte(1);
+                os.writeInt(1);
+                os.writeByte(0);
+                break;
             case UNCHOKE:
-                ostream.writeInt(1);
-                ostream.writeByte(1);
+                os.writeInt(1);
+                os.writeByte(1);
+                break;
             case INTERESTED:
-                ostream.writeInt(1);
-                ostream.writeByte(2);
-            case UNINTERESTED:
-                ostream.writeInt(1);
-                ostream.writeByte(3);
+                os.writeInt(1);
+                os.writeByte(2);
+                break;
+            case NOTINTERESTED:
+                os.writeInt(1);
+                os.writeByte(3);
+            case KEEPALIVE:
+                os.writeInt(0);
         }
         return baos.toByteArray();
     }
-    public static byte [] MakeHave(int index) throws IOException
-    {
+    public static byte[] genBitfield(Torrent torrent)throws IOException{
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        DataOutputStream ostream = new DataOutputStream(baos);
-        ostream.writeInt(5);
-        ostream.writeByte(4);
-        ostream.writeInt(index);
+        DataOutputStream os = new DataOutputStream(baos);
+
+        int payload = torrent.getPieces().size();
+        payload = payload%8==0?payload/8:(payload/8)+1;
+
+        os.writeInt(payload+1);
+        os.writeByte(5);
+
+        String binaryString = new String();
+        for (Piece p:torrent.getPieces()){
+            if (p.getStatus()==PieceStatus.HAVE)
+                binaryString+="1";
+            else
+                binaryString+="0";
+        }
+        while(binaryString.length()%8!=0)
+            binaryString+="0";
+        os.write(Funcs.getByteByString(binaryString));
         return baos.toByteArray();
     }
-    public static byte [] MakeRequest(int index, int begin, int length) throws IOException
-    {
+    public static byte[] genBlock(int index,int offset,byte[] data) throws IOException{
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        DataOutputStream ostream = new DataOutputStream(baos);
-        ostream.writeInt(13);
-        ostream.writeByte(6);
-        ostream.writeInt(index);
-        ostream.writeInt(begin);
-        ostream.writeInt(length);
+        DataOutputStream os = new DataOutputStream(baos);
+        os.writeInt(9+data.length);
+        os.writeByte(7);
+        os.writeInt(index);
+        os.writeInt(offset);
+        os.write(data);
         return baos.toByteArray();
     }
-    public static byte [] MakePiece(int index, int begin , byte [] block ) throws IOException
-    {
+    public static byte[] genRequest(int index,int offset,int length) throws IOException{
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        DataOutputStream ostream = new DataOutputStream(baos);
-        ostream.writeInt(9+block.length);
-        ostream.writeByte(6);
-        ostream.writeInt(index);
-        ostream.writeInt(begin);
-        ostream.write(block);
+        DataOutputStream os = new DataOutputStream(baos);
+        os.writeInt(13);
+        os.writeByte(6);
+        os.writeInt(index);
+        os.writeInt(offset);
+        os.writeInt(length);
         return baos.toByteArray();
     }
-    public static byte [] MakeCancel(int index, int begin, int length) throws IOException
-    {
+    public static byte[] genCancel(Block req)throws IOException{
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        DataOutputStream ostream = new DataOutputStream(baos);
-        ostream.writeInt(13);
-        ostream.writeByte(8);
-        ostream.writeInt(index);
-        ostream.writeInt(begin);
-        ostream.writeInt(length);
+        DataOutputStream os = new DataOutputStream(baos);
+
+        os.writeInt(13);
+        os.writeByte(8);
+        os.writeInt(req.getIndex());
+        os.writeInt(req.getOffset());
+        os.writeInt(req.getLength());
+
         return baos.toByteArray();
     }
-    //private byte [] MakeBitfield()
 }

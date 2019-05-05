@@ -6,19 +6,27 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
-public class Piece implements Serializable
-{
+public class Piece implements Serializable {
     private int index;
     private int length;
     private int downloaded;
     private byte hash[];
+
     private PieceStatus status;
     private Torrent torrent;
 
 
-    public int getIndex(){return index;}
-    public void doNotDownload(){this.status=PieceStatus.DONOTDOWNLOAD;}
+    public int getIndex() {
+        return index;
+    }
+
+    public void doNotDownload() {
+        this.status = PieceStatus.DONOTDOWNLOAD;
+    }
+
     public PieceStatus getStatus() {
         return status;
     }
@@ -37,21 +45,7 @@ public class Piece implements Serializable
         this.length = s;
     }
 
-    public void dropRequest(){
-        this.status=PieceStatus.UNFINISHED;
-    }
-    public void print()
-    {
-        for (DataLocation d : blockTable) {
-            System.out.print("File: " + d.file.getPath() + " OffsetInFile: " + d.offsetInFile + " Length: " + d.length
-                    + " OffsetInPiece: " + d.offsetInPiece);
-            System.out.println("");
-        }
-        System.out.println("\n-----------------\n");
-    }
-
-    public Piece(int length, byte hash[], int index, Torrent torrent)
-    {
+    public Piece(int length, byte hash[], int index, Torrent torrent) {
         this.length = length;
         this.hash = hash;
         status = PieceStatus.UNFINISHED;
@@ -60,8 +54,8 @@ public class Piece implements Serializable
         this.torrent = torrent;
     }
 
-    public byte[] getBlock(int offset, int size) throws FileNotFoundException, IOException
-    {
+
+    public byte[] getBlock(int offset, int size) throws FileNotFoundException, IOException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         int readBytes = 0, fileOffset = 0;
         while (readBytes < size) {
@@ -70,15 +64,15 @@ public class Piece implements Serializable
                 DataLocation loc = blockTable.get(i);
                 fileOffset = (offset - loc.offsetInPiece) + readBytes;
                 if (i == blockTable.size() - 1) {
-                    FileController.readBytesFromFile(loc.file,loc.offsetInFile+fileOffset,size-readBytes);
-                    readBytes=size;
+                    FileController.readBytesFromFile(loc.file, loc.offsetInFile + fileOffset, size - readBytes);
+                    readBytes = size;
                 } else {
                     if (offset >= blockTable.get(i + 1).offsetInPiece)
                         continue;
                     else {
                         int readable = Math.min(blockTable.get(i + 1).offsetInPiece - offset - readBytes, size - readBytes);
                         baos.writeBytes(FileController.readBytesFromFile(loc.file, loc.offsetInFile + fileOffset, readable));
-                        readBytes+=readable;
+                        readBytes += readable;
                     }
                 }
             }
@@ -86,8 +80,7 @@ public class Piece implements Serializable
         return baos.toByteArray();
     }
 
-    public void applyBytes(byte[] bytes, int offset) throws FileNotFoundException,IOException
-    {
+    public synchronized void applyBytes(byte[] bytes, int offset, Connection c) throws FileNotFoundException, IOException {
         int appliedBytes = 0, fileOffset = 0;
         while (appliedBytes < bytes.length) {
             for (int i = 0; i < blockTable.size(); i++) {
@@ -113,11 +106,10 @@ public class Piece implements Serializable
         if (downloaded == length)
             this.validate();
         else
-            status=PieceStatus.UNFINISHED;
+            status = PieceStatus.UNFINISHED;
     }
 
-    private void validate() throws FileNotFoundException,IOException
-    {
+    private void validate() throws FileNotFoundException, IOException {
         try {
             MessageDigest hasher = MessageDigest.getInstance("SHA-1");
             byte arr[] = hasher.digest(readPiece());
@@ -127,8 +119,8 @@ public class Piece implements Serializable
                 status = PieceStatus.UNFINISHED;
                 torrent.addToDownloaded(-length);
                 downloaded = 0;
-                for (DataLocation loc:blockTable){
-                    loc.file.addToDownloaded(loc.length);
+                for (DataLocation loc : blockTable) {
+                    loc.file.addToDownloaded(-loc.length);
                 }
             }
         } catch (NoSuchAlgorithmException e) {
@@ -136,8 +128,7 @@ public class Piece implements Serializable
         }
     }
 
-    private byte[] readPiece() throws FileNotFoundException,IOException
-    {
+    private byte[] readPiece() throws FileNotFoundException, IOException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         for (int i = 0; i < blockTable.size(); i++) {
             DataLocation loc = blockTable.get(i);
@@ -146,32 +137,33 @@ public class Piece implements Serializable
         return baos.toByteArray();
     }
 
-    public synchronized BlockRequest requestBlock()
-    {
-        if (Thread.interrupted()){return null;}
-        int left = length - downloaded;
-        this.status = PieceStatus.GETTING;
-        if (left < Info.MaxBlockSize) {
-            return new BlockRequest(left, downloaded, index);
-        } else
-            return new BlockRequest(Info.MaxBlockSize, downloaded, index);
+    public synchronized Block requestBlock(Connection c) {
+       if (Thread.interrupted())
+           return null;
+       status=PieceStatus.GETTING;
+       int rem = length-downloaded;
+       if (rem>Info.MaxBlockSize)
+           rem=Info.MaxBlockSize;
+       return new Block(index,rem,downloaded);
     }
 
-    public void addFileEntry(DownloadFile file, long offsetInFile, int length, int offsetInPiece)
-    {
+    public synchronized void cancelGet() {
+         if (status==PieceStatus.GETTING)
+             status=PieceStatus.UNFINISHED;
+    }
+
+    public void addFileEntry(DownloadFile file, long offsetInFile, int length, int offsetInPiece) {
         blockTable.add(new DataLocation(file, offsetInFile, length, offsetInPiece));
     }
 }
 
-class DataLocation implements Serializable
-{
+class DataLocation implements Serializable {
     public DownloadFile file;
     public long offsetInFile;
     public int length;
     public int offsetInPiece;
 
-    public DataLocation(DownloadFile file, long offsetInFile, int length, int offsetInPiece)
-    {
+    public DataLocation(DownloadFile file, long offsetInFile, int length, int offsetInPiece) {
         this.file = file;
         this.offsetInFile = offsetInFile;
         this.offsetInPiece = offsetInPiece;
@@ -179,7 +171,6 @@ class DataLocation implements Serializable
     }
 }
 
-enum PieceStatus implements Serializable
-{
-    HAVE, UNFINISHED, GETTING, DONOTDOWNLOAD
+enum PieceStatus implements Serializable {
+    HAVE, UNFINISHED, REQUESTED, DONOTDOWNLOAD,GETTING
 }

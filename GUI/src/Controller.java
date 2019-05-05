@@ -9,6 +9,9 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 
 import javafx.fxml.Initializable;
+
+import java.io.File;
+import java.util.ArrayList;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -24,43 +27,52 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
+import javafx.stage.FileChooser;
+import javafx.stage.Stage;
 
 import javax.print.attribute.SetOfIntegerSyntax;
 import javax.sound.midi.Track;
 
 
 public class Controller implements Initializable {
+
+    public static Stage primaryStage;
     @FXML private TableView<Tracker> trackers;
     @FXML private TableColumn<Tracker,String> trackersID;
     @FXML private TableColumn<Tracker,String> trackersStatus;
     @FXML private Button Refresh;
-    @FXML ObservableList<Tracker> tracker;
+
 
 
     @FXML private TableView<DownloadFile> Files;
     @FXML private TableColumn<DownloadFile,String> FileName;
     @FXML private TableColumn<DownloadFile,Long> FileSize;
+    @FXML private TableColumn<DownloadFile,Long> FileDownloaded;
     @FXML private TableColumn<DownloadFile,String> FileStatus;
-    @FXML ObservableList<DownloadFile> FileTable;
 
     @FXML private TableView<Piece> Pieces;
     @FXML private TableColumn<Piece, Integer> PieceDownloaded;
     @FXML private TableColumn<Piece,Integer> PieceSize;
     @FXML private TableColumn<Piece,String> PieceStatus;
     @FXML private TableColumn<Piece,Integer> PieceIndex;
-    @FXML ObservableList<Piece> PieceTable;
+
+    @FXML private TableView<Connection> peers;
+    @FXML private TableColumn<Connection,String> PeerID;
+    @FXML private TableColumn<Connection,String> PeerStatus;
+    @FXML private TableColumn<Connection,String> PeerDebug;
 
     @FXML
     private Pane paneStatus;
 
     @FXML
     private Button btnTorrents;
+    @FXML private Button addTorrentBtn;
 
     @FXML
     private Button btnSettings;
 
     @FXML
-    private Button btnAddTorrnets;
+    private Button btnAddTorrent;
 
     @FXML
     private Button btnTasks;
@@ -83,62 +95,50 @@ public class Controller implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-
         trackersID.setCellValueFactory(new PropertyValueFactory<Tracker, String>("uri"));
         trackersStatus.setCellValueFactory(new PropertyValueFactory<Tracker, String>("Status"));
-       try{ trackers.setItems(getTrackers());}catch(IndexOutOfBoundsException ioobe){}
+       try{ trackers.getItems().addAll(NetworkController.getTorrents().get(0).getTrackers());}catch(Exception ioobe){}
 
+        PeerID.setCellValueFactory(new PropertyValueFactory<Connection,String>("ID"));
+        PeerStatus.setCellValueFactory(new PropertyValueFactory<Connection,String>("state"));
+        PeerDebug.setCellValueFactory(new PropertyValueFactory<Connection,String>("debug"));
+        try{ peers.getItems().addAll(NetworkController.getTorrents().get(0).getConnections());}catch(Exception e){}
 
         FileName.setCellValueFactory(new PropertyValueFactory<DownloadFile, String>("path"));
         FileSize.setCellValueFactory(new PropertyValueFactory<DownloadFile, Long>("length"));
         FileStatus.setCellValueFactory(new PropertyValueFactory<DownloadFile, String>("status"));
-        try{Files.setItems(getFileInfo());}catch(IndexOutOfBoundsException ioobe){}
+        FileDownloaded.setCellValueFactory(new PropertyValueFactory<DownloadFile,Long>("downloaded"));
+        try{Files.getItems().addAll(NetworkController.getTorrents().get(0).getFiles());}catch(Exception ioobe){}
 
         PieceDownloaded.setCellValueFactory(new PropertyValueFactory<Piece,Integer>("downloaded"));
         PieceSize.setCellValueFactory(new PropertyValueFactory<Piece, Integer>("length"));
         PieceStatus.setCellValueFactory(new PropertyValueFactory<Piece, String>("status"));
         PieceIndex.setCellValueFactory(new PropertyValueFactory<Piece, Integer>("index"));
-        try{Pieces.setItems(getPieceInfo());}catch(IndexOutOfBoundsException ioobe){}
+        try{Pieces.getItems().addAll(NetworkController.getTorrents().get(0).getPieces());}catch(Exception ioobe){}
 
         RefreshTimer T= new RefreshTimer();
         T.start();
-
     }
 
     public void setRefresh() {
+        try{
+            trackers.getItems().clear();
+            trackers.getItems().addAll(NetworkController.getTorrents().get(0).getTrackers());
 
-            trackers.refresh();
-            Pieces.refresh();;
-            Files.refresh();
+            Pieces.getItems().clear();
+            Pieces.getItems().addAll(NetworkController.getTorrents().get(0).getPieces());
 
+            Files.getItems().clear();
+            Files.getItems().addAll(NetworkController.getTorrents().get(0).getFiles());
+
+            peers.getItems().clear();
+            peers.getItems().addAll(NetworkController.getTorrents().get(0).getConnections());
+            }catch(Exception ioobe){}
     }
 
-    public ObservableList<Tracker>  getTrackers() throws IndexOutOfBoundsException
-    {
-        tracker = FXCollections.observableArrayList();
-        tracker.addAll(NetworkController.getTorrents().get(0).getTrackers());
-        return  tracker;
 
-
-    }
-
-
-    public ObservableList<DownloadFile>  getFileInfo() throws IndexOutOfBoundsException
-    {
-        FileTable = FXCollections.observableArrayList();
-        FileTable.addAll(NetworkController.getTorrents().get(0).getFiles());
-        return  FileTable;
-
-    }
-    public ObservableList<Piece>  getPieceInfo() throws IndexOutOfBoundsException
-    {
-        PieceTable = FXCollections.observableArrayList();
-        PieceTable.addAll(NetworkController.getTorrents().get(0).getPieces());
-        return  PieceTable;
-
-    }
    public class RefreshTimer {
-        private Timer timer = new Timer();
+        private Timer timer = new Timer(true);
         TimerTask task = new TimerTask() {
             @Override
             public void run() {
@@ -147,9 +147,8 @@ public class Controller implements Initializable {
             }
         };
 
-
         public void start() {
-            timer.scheduleAtFixedRate(task, 0, 2000);
+            timer.scheduleAtFixedRate(task, 0, 500);
         }
     }
 
@@ -178,12 +177,22 @@ public class Controller implements Initializable {
         }
     }
 
-
+    public void addTorrentBtnPress(ActionEvent e){
+        FileChooser chooser = new FileChooser();
+        File dir = new File("files/");
+        chooser.setInitialDirectory(dir);
+        File fl = chooser.showOpenDialog(primaryStage);
+        try {
+            byte arr[] = TorrentFileReader.readFile(fl.getAbsolutePath());
+            Torrent torrent = new Torrent(bCoder.decode(arr, ParcelType.TORRENT));
+            NetworkController.addTorrent(torrent);
+            torrent.invokeThreads();
+        }catch(Exception ex){ex.printStackTrace();}
+    }
 
     public void HandleClose(MouseEvent mouseEvent) {
         if(mouseEvent.getSource()==btnclose){
             System.exit(0);
-
         }
     }
 }

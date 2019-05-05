@@ -198,7 +198,7 @@ public class bCoder {
                        case KEY:
                            String temp = new String();
                            temp = readStr(arr);
-                           if (!(parcel instanceof ScrapeParcel) && temp.compareTo(tempKey)<0)
+                           if (!(parcel instanceof ScrapeParcel) && !(parcel instanceof ResponseParcel) && temp.compareTo(tempKey)<0)
                                throw new InvalidBencodeException("Incorrect Lexicographical Order" + temp + "  " + tempKey);
                            KeyStack.push(temp);
                            kvmode= toggle(kvmode);

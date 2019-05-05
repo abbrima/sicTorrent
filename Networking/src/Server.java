@@ -9,7 +9,6 @@ import java.util.concurrent.TimeoutException;
 public class Server implements Runnable {
     ServerSocket server;
     int port;
-    boolean port_works = false;
 
     public void kill()
     {
@@ -25,7 +24,7 @@ public class Server implements Runnable {
         this.port = 6881;
         while (n <= 8) {
             try {
-                server = new ServerSocket(port);
+                server = new ServerSocket(port+n);
                 Info.setPort(port);
                 break;
             } catch (IOException e) {
@@ -42,8 +41,11 @@ public class Server implements Runnable {
         while (true) {
             try {
                 Socket client = server.accept();
-                System.out.println(client.getInetAddress());
-                NetworkController.getConnections().add(new Connection(client));
+                System.out.println(client.getInetAddress().getHostAddress());
+                if (!NetworkController.ipExists(client.getInetAddress().getHostAddress()))
+                    NetworkController.getConnections().add(new Connection(client));
+                else
+                    client.close();
             } catch (IOException ioe) {
                 return;
             }

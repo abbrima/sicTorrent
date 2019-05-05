@@ -1,0 +1,3 @@
+public enum ConnectionState{
+    INIT,HANDSSHOOK,BITFIELD,SENDINGBLOCK,REQUEST
+}

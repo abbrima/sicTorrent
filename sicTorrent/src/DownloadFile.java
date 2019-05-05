@@ -8,39 +8,69 @@ public class DownloadFile implements Serializable {
     private long downloaded;
 
     private ArrayList<Piece> pieces;
-    public long getDownloaded(){return downloaded;}
-    public void addToDownloaded(int num){downloaded+=num;}
-    public void setPieces(ArrayList<Piece> pieces){
-        this.pieces=pieces;
+
+    public long getDownloaded() {
+        return downloaded;
     }
-    public ArrayList<Piece> getPieces(){return pieces;}
+
+    public synchronized void addToDownloaded(int num) {
+        downloaded += num;
+        if (length==downloaded)
+            status = FileStatus.DOWNLOADED;
+            //validate();
+    }
+
+    public void setPieces(ArrayList<Piece> pieces) {
+        this.pieces = pieces;
+    }
+
+    public ArrayList<Piece> getPieces() {
+        return pieces;
+    }
+
     public FileStatus getStatus() {
         return status;
     }
-    public void doNotDownload(){status=FileStatus.DONOTDOWNLOAD;}
-    public void validate()
-    {
-        boolean b=true;
-        for (Piece p:pieces){
-            if (p.getStatus()!=PieceStatus.HAVE)
-                b=false;
+
+    public void doNotDownload() {
+        status = FileStatus.DONOTDOWNLOAD;
+    }
+
+    public synchronized void validate() {
+        boolean b = true;
+        for (Piece p : pieces) {
+            if (p.getStatus() != PieceStatus.HAVE) {
+                b = false;
+                break;
+            }
         }
         if (b)
-            status=FileStatus.DOWNLOADED;
+            status = FileStatus.DOWNLOADED;
     }
-    public long getLength(){return length;}
-    public String getPath(){return path;}
-    public DownloadFile(long length,String path)
-    {
-        status=FileStatus.UNFINISHED;
-        downloaded=0;
-        this.length=length;
-        this.path=path;
-        try{FileController.createFile(this);} catch(Exception e){e.printStackTrace();}
-        pieces=new ArrayList<>();
+
+    public long getLength() {
+        return length;
+    }
+
+    public String getPath() {
+        return path;
+    }
+
+    public DownloadFile(long length, String path) {
+        status = FileStatus.UNFINISHED;
+        downloaded = 0;
+        this.length = length;
+        this.path = path;
+        try {
+            FileController.createFile(this);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        pieces = new ArrayList<>();
     }
 
 }
-enum FileStatus{
-    DOWNLOADED,UNFINISHED,DONOTDOWNLOAD
+
+enum FileStatus {
+    DOWNLOADED, UNFINISHED, DONOTDOWNLOAD
 }
