@@ -15,6 +15,8 @@ public class Piece implements Serializable {
     private int downloaded;
     private byte hash[];
 
+    private ArrayList<Block> blocks;
+
     private PieceStatus status;
     private Torrent torrent;
 
@@ -54,33 +56,116 @@ public class Piece implements Serializable {
         this.torrent = torrent;
     }
 
+    public void initBlocks() {
+        blocks = new ArrayList<>();
+        int off = 0;
+        while (off + Info.MaxBlockSize < length) {
+            blocks.add(new Block(Info.MaxBlockSize, off));
+            off += Info.MaxBlockSize;
+        }
+        int rem = length - off;
+        if (rem > 0)
+            blocks.add(new Block(rem, off));
+    }
 
-    public byte[] getBlock(int offset, int size) throws FileNotFoundException, IOException {
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        int readBytes = 0, fileOffset = 0;
-        while (readBytes < size) {
-            for (int i = 0; i < blockTable.size(); i++) {
-                if (readBytes == size) break;
-                DataLocation loc = blockTable.get(i);
-                fileOffset = (offset - loc.offsetInPiece) + readBytes;
-                if (i == blockTable.size() - 1) {
-                    FileController.readBytesFromFile(loc.file, loc.offsetInFile + fileOffset, size - readBytes);
-                    readBytes = size;
-                } else {
-                    if (offset >= blockTable.get(i + 1).offsetInPiece)
-                        continue;
-                    else {
-                        int readable = Math.min(blockTable.get(i + 1).offsetInPiece - offset - readBytes, size - readBytes);
-                        baos.writeBytes(FileController.readBytesFromFile(loc.file, loc.offsetInFile + fileOffset, readable));
-                        readBytes += readable;
+    class Block implements Serializable {
+        private int blength;
+        private int boffset;
+        private transient Thread t;
+        private BlockStatus status;
+        private transient ArrayList<Connection> connections;
+
+        public Block(int length, int offset) {
+            blength = length;
+            boffset = offset;
+            status = BlockStatus.READY;
+        }
+
+        public int getOffset() {
+            return boffset;
+        }
+
+        public synchronized void setDownloaded(Connection c) {
+            t.interrupt();
+            connections.remove(c);
+            for (Connection con : connections)
+                con.cancelRequest(new Triplet<>(index, boffset, blength));
+            status = BlockStatus.DOWNLOADED;
+        }
+
+        public BlockStatus getStatus() {
+            return status;
+        }
+
+        public synchronized Triplet<Integer, Integer, Integer> get(Connection c, boolean endgame) {
+            if (connections == null)
+                connections = new ArrayList<>();
+            if (status == BlockStatus.READY && !endgame) {
+                t = new Thread(() -> {
+                    try {
+                        Thread.sleep(10000);
+                        cancelRequest();
+                    } catch (InterruptedException e) {
                     }
+                });
+                t.setDaemon(true);
+                t.start();
+                status = BlockStatus.REQUESTED;
+                connections.add(c);
+                return new Triplet<>(index, boffset, blength);
+            } else if (endgame && (status == BlockStatus.READY || status == BlockStatus.REQUESTED)) {
+                status = BlockStatus.REQUESTED;
+                connections.add(c);
+                return new Triplet<>(index, boffset, blength);
+            } else
+                return null;
+        }
+
+        public void reset() {
+            status = BlockStatus.READY;
+        }
+
+        public synchronized void cancelRequest() {
+            if (connections != null)
+                for (Connection c : connections)
+                    c.cancelRequest(new Triplet<>(index, boffset, blength));
+            if (status == BlockStatus.REQUESTED)
+                status = BlockStatus.READY;
+        }
+    }
+
+    enum BlockStatus {
+        DOWNLOADED, READY, REQUESTED
+    }
+
+
+    public synchronized Triplet<Integer, Integer, Integer> requestBlock(Connection c, boolean endgame) {
+        if (!endgame) {
+            for (Block b : blocks) {
+                if (b.getStatus() == BlockStatus.READY) {
+                    Triplet<Integer, Integer, Integer> blk = b.get(c, endgame);
+                    if (blk != null) return blk;
+                }
+            }
+        } else {
+            for (Block b : blocks) {
+                if (b.getStatus() == BlockStatus.READY || b.getStatus() == BlockStatus.REQUESTED) {
+                    Triplet<Integer, Integer, Integer> blk = b.get(c, endgame);
+                    if (blk != null) return blk;
                 }
             }
         }
-        return baos.toByteArray();
+        return null;
     }
 
     public synchronized void applyBytes(byte[] bytes, int offset, Connection c) throws FileNotFoundException, IOException {
+        for (Block b : blocks)
+            if (b.getOffset() == offset) {
+                if (b.getStatus()==BlockStatus.DOWNLOADED)
+                    return;
+                b.setDownloaded(c);
+                break;
+            }
         int appliedBytes = 0, fileOffset = 0;
         while (appliedBytes < bytes.length) {
             for (int i = 0; i < blockTable.size(); i++) {
@@ -109,12 +194,13 @@ public class Piece implements Serializable {
             status = PieceStatus.UNFINISHED;
     }
 
+    ///reset blocks here
     private void validate() throws FileNotFoundException, IOException {
         try {
             MessageDigest hasher = MessageDigest.getInstance("SHA-1");
             byte arr[] = hasher.digest(readPiece());
             if (Arrays.equals(arr, hash))
-                status = PieceStatus.HAVE;
+            {status = PieceStatus.HAVE; torrent.broadcastHave(this);}
             else {
                 status = PieceStatus.UNFINISHED;
                 torrent.addToDownloaded(-length);
@@ -122,10 +208,22 @@ public class Piece implements Serializable {
                 for (DataLocation loc : blockTable) {
                     loc.file.addToDownloaded(-loc.length);
                 }
+                for (Block b : blocks)
+                    b.reset();
             }
         } catch (NoSuchAlgorithmException e) {
             e.printStackTrace();
         }
+    }
+
+
+    public synchronized void cancelGet() {
+        for (Block b : blocks)
+            b.cancelRequest();
+    }
+
+    public void addFileEntry(DownloadFile file, long offsetInFile, int length, int offsetInPiece) {
+        blockTable.add(new DataLocation(file, offsetInFile, length, offsetInPiece));
     }
 
     private byte[] readPiece() throws FileNotFoundException, IOException {
@@ -137,23 +235,30 @@ public class Piece implements Serializable {
         return baos.toByteArray();
     }
 
-    public synchronized Block requestBlock(Connection c) {
-       if (Thread.interrupted())
-           return null;
-       status=PieceStatus.GETTING;
-       int rem = length-downloaded;
-       if (rem>Info.MaxBlockSize)
-           rem=Info.MaxBlockSize;
-       return new Block(index,rem,downloaded);
-    }
-
-    public synchronized void cancelGet() {
-         if (status==PieceStatus.GETTING)
-             status=PieceStatus.UNFINISHED;
-    }
-
-    public void addFileEntry(DownloadFile file, long offsetInFile, int length, int offsetInPiece) {
-        blockTable.add(new DataLocation(file, offsetInFile, length, offsetInPiece));
+    public byte[] getBlock(int offset, int size) throws FileNotFoundException, IOException {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        int readBytes = 0, fileOffset = 0;
+        while (readBytes < size) {
+            for (int i = 0; i < blockTable.size(); i++) {
+                if (readBytes == size) break;
+                DataLocation loc = blockTable.get(i);
+                fileOffset = (offset - loc.offsetInPiece) + readBytes;
+                if (i == blockTable.size() - 1) {
+                    FileController.readBytesFromFile(loc.file, loc.offsetInFile + fileOffset, size - readBytes);
+                    readBytes = size;
+                } else {
+                    if (offset >= blockTable.get(i + 1).offsetInPiece)
+                        continue;
+                    else {
+                        int readable = Math.min(blockTable.get(i + 1).offsetInPiece - offset - readBytes, size - readBytes);
+                        baos.writeBytes(FileController.readBytesFromFile(loc.file, loc.offsetInFile + fileOffset, readable));
+                        readBytes += readable;
+                    }
+                }
+            }
+        }
+        torrent.addToUploaded(baos.toByteArray().length);
+        return baos.toByteArray();
     }
 }
 
@@ -172,5 +277,5 @@ class DataLocation implements Serializable {
 }
 
 enum PieceStatus implements Serializable {
-    HAVE, UNFINISHED, REQUESTED, DONOTDOWNLOAD,GETTING
+    HAVE, UNFINISHED, REQUESTED, DONOTDOWNLOAD, GETTING
 }

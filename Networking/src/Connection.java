@@ -40,37 +40,52 @@ public class Connection implements Runnable {
     }
 
     public Connection(Socket socket) {
-        this();
+       this();
+       this.socket=socket;
+       debug = "incoming";
+       state = ConnectionState.INCOMING;
+       IP = socket.getInetAddress().getHostAddress();
+       try{
+           istream = new DataInputStream(socket.getInputStream());
+           ostream = new DataOutputStream(socket.getOutputStream());
 
-        IP = socket.getInetAddress().getHostAddress();
-        port = socket.getPort();
-        try {
-            istream = new DataInputStream(socket.getInputStream());
-            receiveHandshake();
-            if (socket.isClosed())
-                return;
-            if (torrent == null)
-                return;
-            torrent.getConnections().add(this);
-            ostream = new DataOutputStream(socket.getOutputStream());
-            sendHandshake(new byte[8]);
-            state = ConnectionState.HANDSSHOOK;
-            if (torrent.getStatus() == Torrent.TorrentStatus.FINISHED)
-                sendMessage(MessageType.NOTINTERESTED);
-            else
-                sendMessage(MessageType.INTERESTED);
+           receiveHandshake();
 
-            peerHas = new boolean[torrent.getPieces().size()];
-            thread = new Thread(this);
-            thread.setDaemon(true);
-            thread.start();
-        } catch (IOException ioe) {
-            closeSocket();
-        }
+           if (torrent==null)
+           {
+               closeSocket(); return;
+           }
+
+           sendHandshake(new byte[8]);
+
+           state = ConnectionState.HANDSSHOOK;
+
+           torrent.getConnections().add(this);
+
+           if (torrent.getStatus()!= Torrent.TorrentStatus.FINISHED)
+               setInterested(false);
+           setChoke(false);
+
+           peerHas = new boolean[torrent.getPieces().size()];
+
+           synchronized(ostream){
+               ostream.write(ConnectionMessages.genBitfield(torrent));
+           }
+
+           thread = new Thread(this);
+           thread.setDaemon(true);
+           thread.start();
+
+       }catch(Exception e){
+           e.printStackTrace();
+           closeSocket();
+       }
     }
 
     public Connection(Torrent torrent, String ip, int port) {
         this();
+        peer_interested=true;
+        debug = "outgoing";
         IP = ip;
         this.torrent = torrent;
         peerHas = new boolean[torrent.getPieces().size()];
@@ -85,6 +100,9 @@ public class Connection implements Runnable {
             am_choking = false;
 
             sendHandshake(new byte[8]);
+
+
+
 
             thread = new Thread(this);
             thread.setDaemon(true);
@@ -147,12 +165,12 @@ public class Connection implements Runnable {
                 }
                 if (peer_choking == false && am_interested == true && getPiecesFromPeer() > 0) {
                     state = ConnectionState.REQUEST;
-                    Block request = torrent.createRequest(peerHas, this);
+                    Triplet<Integer, Integer, Integer> request = torrent.createRequest(peerHas, this);
 
-                    if (request != null)
-                    {
+                    if (request != null) {
                         synchronized (ostream) {
-                            ostream.write(ConnectionMessages.genRequest(request.getIndex(), request.getOffset(), request.getLength()));
+                            ostream.write(ConnectionMessages.genRequest(request.getFirst(),
+                                    request.getSecond(), request.getThird()));
 
                         }
                     }
@@ -167,8 +185,7 @@ public class Connection implements Runnable {
         try {
             if (socket != null)
                 socket.close();
-        } catch (IOException se) {
-            System.out.println("FAILED TO CLOSE SOCKET");
+        } catch (Exception se) {
         }
 
     }
@@ -176,7 +193,6 @@ public class Connection implements Runnable {
 
     public void sendHandshake(byte[] reserved) throws IOException {
         ostream.write(ConnectionMessages.genHandshake(torrent.getInfoHash(), new byte[8]));
-        debug = "Handshake Sent";
     }
 
     private void sendBitfield() throws IOException {
@@ -218,10 +234,12 @@ public class Connection implements Runnable {
             byte[] peerID = new byte[20];
             istream.read(peerID);
             ID = new String(peerID);
-            debug = "handshake Received";
             t.interrupt();
         } catch (IllegalArgumentException iae) {
             throw new IOException();
+        }
+        catch(IOException ioe){
+            throw ioe;
         }
     }
 
@@ -246,6 +264,7 @@ public class Connection implements Runnable {
     }
 
     private void receiveRequest() throws IOException {
+        state = ConnectionState.SENDINGBLOCK;
         int index = istream.readInt();
         int offset = istream.readInt();
         int length = istream.readInt();
@@ -289,7 +308,7 @@ public class Connection implements Runnable {
         }
     }
 
-    public void cancelRequest(Block req) {
+    public void cancelRequest(Triplet<Integer, Integer, Integer> req) {
         try {
             synchronized (ostream) {
                 ostream.write(ConnectionMessages.genCancel(req));
@@ -297,6 +316,16 @@ public class Connection implements Runnable {
         } catch (IOException ioe) {
         }
 
+    }
+
+    public void sendHave(int index) {
+        try {
+            synchronized (ostream) {
+                ostream.write(ConnectionMessages.genHave(index));
+            }
+        } catch (Exception e) {
+            closeSocket();
+        }
     }
 
     public boolean failed() {
@@ -320,9 +349,8 @@ public class Connection implements Runnable {
     }
 
     private void sendMessage(MessageType type) throws IOException {
-        byte arr[] = ConnectionMessages.genMessage(type);
         synchronized (ostream) {
-            ostream.write(arr);
+            ostream.write(ConnectionMessages.genMessage(type));
         }
     }
 

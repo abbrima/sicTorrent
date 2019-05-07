@@ -37,8 +37,10 @@ class ConnectionMessages{
             case NOTINTERESTED:
                 os.writeInt(1);
                 os.writeByte(3);
+                break;
             case KEEPALIVE:
                 os.writeInt(0);
+                break;
         }
         return baos.toByteArray();
     }
@@ -84,15 +86,23 @@ class ConnectionMessages{
         os.writeInt(length);
         return baos.toByteArray();
     }
-    public static byte[] genCancel(Block req)throws IOException{
+    public static byte[] genCancel(Triplet<Integer,Integer,Integer> req)throws IOException{
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         DataOutputStream os = new DataOutputStream(baos);
 
         os.writeInt(13);
         os.writeByte(8);
-        os.writeInt(req.getIndex());
-        os.writeInt(req.getOffset());
-        os.writeInt(req.getLength());
+        os.writeInt(req.getFirst());
+        os.writeInt(req.getSecond());
+        os.writeInt(req.getThird());
+
+        return baos.toByteArray();
+    }
+    public static byte[] genHave(int index) throws IOException{
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        DataOutputStream os = new DataOutputStream(baos);
+
+        os.writeInt(5);os.writeByte(4);os.writeInt(index);
 
         return baos.toByteArray();
     }
