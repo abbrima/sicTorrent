@@ -77,7 +77,6 @@ public class Connection implements Runnable {
            thread.start();
 
        }catch(Exception e){
-           e.printStackTrace();
            closeSocket();
        }
     }
