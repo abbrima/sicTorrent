@@ -74,8 +74,6 @@ public class Controller implements Initializable {
     @FXML
     private Button btnAddTorrent;
 
-    @FXML
-    private Button btnTasks;
 
     @FXML
     private Label labelStatus;
@@ -90,8 +88,7 @@ public class Controller implements Initializable {
     @FXML
     private GridPane torrnetGrid;
 
-    @FXML
-    private GridPane taskGrid;
+
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -168,12 +165,6 @@ public class Controller implements Initializable {
             paneStatus.setBackground(new Background(new BackgroundFill(Color.rgb(170, 0, 14), CornerRadii.EMPTY, Insets.EMPTY)));
             new RollIn(paneStatus).play();
             settGrid.toFront();
-        }
-        else if(event.getSource()==btnTasks){
-            labelStatus.setText("Monitor");
-            paneStatus.setBackground(new Background(new BackgroundFill(Color.rgb(17, 225, 111), CornerRadii.EMPTY, Insets.EMPTY)));
-            new Jello(paneStatus).play();
-            taskGrid.toFront();
         }
     }
 
