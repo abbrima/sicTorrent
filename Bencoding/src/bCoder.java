@@ -38,7 +38,7 @@ public class bCoder {
                if ((char)arr[i]==':')
                {i++; break;}
                else
-               {System.out.println(i);throw new InvalidBencodeException("Error reading length of string");}
+               {System.out.println(arr[i]);throw new InvalidBencodeException("Error reading length of string " + i + "\n" + new String(arr));}
            }
            i++;
        }
@@ -63,7 +63,7 @@ public class bCoder {
                if ((char)arr[i]==':')
                {i++; break;}
                else
-                   throw new InvalidBencodeException("Error reading length of string");
+                   throw new InvalidBencodeException("Error reading length of string:\n"+ i + new String(arr));
            }
            i++;
        }

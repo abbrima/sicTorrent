@@ -9,7 +9,10 @@ import java.util.concurrent.*;
 public class Torrent implements Serializable {
     private byte infohash[];
     private long downloaded, uploaded;
-    private long length;
+    private long length; public long getLength(){return length;} public double getProgress(){return progress;}
+    private double progress;
+    public String getName(){return name;}
+    public long getDownloaded(){return downloaded;}
     private int piecelength;
     private ArrayList<String> urllist;
     private ArrayList<String> trackerURLS;
@@ -320,6 +323,7 @@ public class Torrent implements Serializable {
 
     public void addToDownloaded(int l) {
         downloaded += l;
+        progress=(double)downloaded/length;
         if (downloaded == length) {
             status = TorrentStatus.FINISHED;
             trackermanager.announceFinished();
@@ -350,6 +354,7 @@ public class Torrent implements Serializable {
     }
     public Torrent(Parcel parcel) {
         this();
+        progress=0;
         status = TorrentStatus.NEW;
         connections = new ArrayList<>();
 

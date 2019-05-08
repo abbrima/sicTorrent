@@ -19,11 +19,10 @@ import java.net.URL;
 import java.util.ResourceBundle;
 
 import javafx.geometry.Insets;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
+import javafx.scene.control.*;
+import javafx.scene.control.cell.ProgressBarTableCell;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
@@ -50,6 +49,12 @@ public class Controller implements Initializable {
     @FXML private TableColumn<DownloadFile,Long> FileDownloaded;
     @FXML private TableColumn<DownloadFile,String> FileStatus;
 
+    @FXML private TableView<Torrent> Torrents;
+    @FXML private TableColumn<Torrent,String> TorrentName;
+    @FXML private TableColumn<Torrent,Long> TorrentSize;
+    @FXML private TableColumn<Torrent,ProgressBar> TorrentStatus;
+    @FXML private TableColumn<Torrent,Long> TorrentDownloaded;
+
     @FXML private TableView<Piece> Pieces;
     @FXML private TableColumn<Piece, Integer> PieceDownloaded;
     @FXML private TableColumn<Piece,Integer> PieceSize;
@@ -71,6 +76,8 @@ public class Controller implements Initializable {
     @FXML
     private Button btnSettings;
 
+    @FXML private Button btnDelete;
+
     @FXML
     private Button btnAddTorrent;
 
@@ -88,48 +95,86 @@ public class Controller implements Initializable {
     @FXML
     private GridPane torrnetGrid;
 
-
+    private static Torrent currentTorrent;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        trackersID.setCellValueFactory(new PropertyValueFactory<Tracker, String>("uri"));
-        trackersStatus.setCellValueFactory(new PropertyValueFactory<Tracker, String>("Status"));
-       try{ trackers.getItems().addAll(NetworkController.getTorrents().get(0).getTrackers());}catch(Exception ioobe){}
+        if (NetworkController.getTorrents().size()>0)
+            currentTorrent=NetworkController.getTorrents().get(0);
 
-        PeerID.setCellValueFactory(new PropertyValueFactory<Connection,String>("ID"));
-        PeerStatus.setCellValueFactory(new PropertyValueFactory<Connection,String>("state"));
-        PeerDebug.setCellValueFactory(new PropertyValueFactory<Connection,String>("debug"));
-        try{ peers.getItems().addAll(NetworkController.getTorrents().get(0).getConnections());}catch(Exception e){}
 
-        FileName.setCellValueFactory(new PropertyValueFactory<DownloadFile, String>("path"));
-        FileSize.setCellValueFactory(new PropertyValueFactory<DownloadFile, Long>("length"));
-        FileStatus.setCellValueFactory(new PropertyValueFactory<DownloadFile, String>("status"));
-        FileDownloaded.setCellValueFactory(new PropertyValueFactory<DownloadFile,Long>("downloaded"));
-        try{Files.getItems().addAll(NetworkController.getTorrents().get(0).getFiles());}catch(Exception ioobe){}
+        if (currentTorrent!=null) {
+            TorrentName.setCellValueFactory(new PropertyValueFactory<>("name"));
+            TorrentDownloaded.setCellValueFactory(new PropertyValueFactory<>("downloaded"));
+            TorrentSize.setCellValueFactory(new PropertyValueFactory<>("length"));
+            TorrentStatus.setCellValueFactory(new PropertyValueFactory<>("progress"));
+            Torrents.setRowFactory(e-> {
+                TableRow<Torrent> row = new TableRow<>();
+                row.setOnMouseClicked(event->{
+                    if (event.getClickCount()==1 && event.getButton().equals(MouseButton.PRIMARY))
+                        currentTorrent = row.getItem();
+                });
+                return row;
+            });
+            //TorrentStatus.setCellFactory(ProgressBarTableCell.<Torrent> forTableColumn());
+            try {
+                Torrents.getItems().addAll(NetworkController.getTorrents());
+            } catch (Exception ioobe) {
+            }
 
-        PieceDownloaded.setCellValueFactory(new PropertyValueFactory<Piece,Integer>("downloaded"));
-        PieceSize.setCellValueFactory(new PropertyValueFactory<Piece, Integer>("length"));
-        PieceStatus.setCellValueFactory(new PropertyValueFactory<Piece, String>("status"));
-        PieceIndex.setCellValueFactory(new PropertyValueFactory<Piece, Integer>("index"));
-        try{Pieces.getItems().addAll(NetworkController.getTorrents().get(0).getPieces());}catch(Exception ioobe){}
+            trackersID.setCellValueFactory(new PropertyValueFactory<Tracker, String>("uri"));
+            trackersStatus.setCellValueFactory(new PropertyValueFactory<Tracker, String>("Status"));
+            try {
+                trackers.getItems().addAll(currentTorrent.getTrackers());
+            } catch (Exception ioobe) {
+            }
 
+            PeerID.setCellValueFactory(new PropertyValueFactory<Connection, String>("ID"));
+            PeerStatus.setCellValueFactory(new PropertyValueFactory<Connection, String>("state"));
+            PeerDebug.setCellValueFactory(new PropertyValueFactory<Connection, String>("debug"));
+            try {
+                peers.getItems().addAll(currentTorrent.getConnections());
+            } catch (Exception e) {
+            }
+
+            FileName.setCellValueFactory(new PropertyValueFactory<DownloadFile, String>("path"));
+            FileSize.setCellValueFactory(new PropertyValueFactory<DownloadFile, Long>("length"));
+            FileStatus.setCellValueFactory(new PropertyValueFactory<DownloadFile, String>("status"));
+            FileDownloaded.setCellValueFactory(new PropertyValueFactory<DownloadFile, Long>("downloaded"));
+            try {
+                Files.getItems().addAll(currentTorrent.getFiles());
+            } catch (Exception ioobe) {
+            }
+
+            PieceDownloaded.setCellValueFactory(new PropertyValueFactory<Piece, Integer>("downloaded"));
+            PieceSize.setCellValueFactory(new PropertyValueFactory<Piece, Integer>("length"));
+            PieceStatus.setCellValueFactory(new PropertyValueFactory<Piece, String>("status"));
+            PieceIndex.setCellValueFactory(new PropertyValueFactory<Piece, Integer>("index"));
+            try {
+                Pieces.getItems().addAll(currentTorrent.getPieces());
+            } catch (Exception ioobe) {
+            }
+        }
         RefreshTimer T= new RefreshTimer();
         T.start();
     }
 
     public void setRefresh() {
         try{
+            Torrents.getItems().clear();
+            Torrents.getItems().addAll(NetworkController.getTorrents());
+
             trackers.getItems().clear();
-            trackers.getItems().addAll(NetworkController.getTorrents().get(0).getTrackers());
+            trackers.getItems().addAll(currentTorrent.getTrackers());
 
             Pieces.getItems().clear();
-            Pieces.getItems().addAll(NetworkController.getTorrents().get(0).getPieces());
+            Pieces.getItems().addAll(currentTorrent.getPieces());
 
             Files.getItems().clear();
-            Files.getItems().addAll(NetworkController.getTorrents().get(0).getFiles());
+            Files.getItems().addAll(currentTorrent.getFiles());
 
             peers.getItems().clear();
-            peers.getItems().addAll(NetworkController.getTorrents().get(0).getConnections());
+            peers.getItems().addAll(currentTorrent.getConnections());
             }catch(Exception ioobe){}
     }
 
@@ -145,7 +190,7 @@ public class Controller implements Initializable {
         };
 
         public void start() {
-            timer.scheduleAtFixedRate(task, 0, 500);
+            timer.scheduleAtFixedRate(task, 0, 1000);
         }
     }
 
@@ -167,7 +212,14 @@ public class Controller implements Initializable {
             settGrid.toFront();
         }
     }
-
+    public void deleteTorrentBtnPress(ActionEvent e){
+        if (currentTorrent!=null){
+            currentTorrent.killThreads();
+            NetworkController.getTorrents().remove(currentTorrent);
+            if (NetworkController.getTorrents().size()>0)
+                currentTorrent = NetworkController.getTorrents().get(0);
+        }
+    }
     public void addTorrentBtnPress(ActionEvent e){
         FileChooser chooser = new FileChooser();
         File dir = new File("files/");
@@ -178,6 +230,7 @@ public class Controller implements Initializable {
             Torrent torrent = new Torrent(bCoder.decode(arr, ParcelType.TORRENT));
             NetworkController.addTorrent(torrent);
             torrent.invokeThreads();
+            currentTorrent = torrent;
         }catch(Exception ex){ex.printStackTrace();}
     }
 
