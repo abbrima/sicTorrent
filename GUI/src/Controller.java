@@ -2,6 +2,7 @@
 import animatefx.animation.Jello;
 import animatefx.animation.RollIn;
 import animatefx.animation.Tada;
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
@@ -11,12 +12,9 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.util.*;
 
 import java.net.URL;
-import java.util.ResourceBundle;
 
 import javafx.geometry.Insets;
 import javafx.scene.control.*;
@@ -40,7 +38,7 @@ public class Controller implements Initializable {
     @FXML private TableColumn<Tracker,String> trackersID;
     @FXML private TableColumn<Tracker,String> trackersStatus;
     @FXML private Button Refresh;
-
+    private static ArrayList<Long> downloadeds = new ArrayList<>();
 
 
     @FXML private TableView<DownloadFile> Files;
@@ -77,6 +75,8 @@ public class Controller implements Initializable {
     private Button btnSettings;
 
     @FXML private Button btnDelete;
+
+    @FXML private Label speedlbl;
 
     @FXML
     private Button btnAddTorrent;
@@ -161,6 +161,19 @@ public class Controller implements Initializable {
 
     public void setRefresh() {
         try{
+            if (downloadeds.size()==NetworkController.getTorrents().size())
+            {
+                long data=0;
+                for (int i=0;i<downloadeds.size();i++){
+                    data+=NetworkController.getTorrents().get(i).getDownloaded()-downloadeds.get(i);
+                }
+                double speed = (double)data/1024.0;
+                Platform.runLater(()->speedlbl.setText(String.format("%.2f KB/s",speed)));
+            }
+            downloadeds.clear();
+            for (Torrent t:NetworkController.getTorrents())
+                downloadeds.add(t.getDownloaded());
+
             Torrents.getItems().clear();
             Torrents.getItems().addAll(NetworkController.getTorrents());
 

@@ -86,7 +86,7 @@ public class Piece implements Serializable {
         }
 
         public synchronized void setDownloaded(Connection c) {
-            t.interrupt();
+            if (t!=null) t.interrupt();
             connections.remove(c);
             for (Connection con : connections)
                 con.cancelRequest(new Triplet<>(index, boffset, blength));

@@ -63,7 +63,7 @@ public class Connection implements Runnable {
            torrent.getConnections().add(this);
 
            if (torrent.getStatus()!= Torrent.TorrentStatus.FINISHED)
-               setInterested(false);
+               setInterested(true);
            setChoke(false);
 
            peerHas = new boolean[torrent.getPieces().size()];

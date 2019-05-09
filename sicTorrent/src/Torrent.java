@@ -248,7 +248,13 @@ public class Torrent implements Serializable {
                                     t.setDaemon(true);
                                     t.start();
                                     //create connection
-                                } else
+                                } else if (connections.size() >= connectionLimit && downloaded < length){
+                                    int closed = 0,i=0;
+                                   while(closed < 0 && i<connectionLimit )
+                                        if (connections.get(i).getState()!=ConnectionState.REQUEST)
+                                        {connections.get(i++).closeSocket(); closed++;}
+                                }
+                                else
                                     break;
                             }
                         }
@@ -429,7 +435,7 @@ public class Torrent implements Serializable {
             if (offset > 0) {
                 list.add(pieces.get(pieceIt++));
             }
-            while (offset < file.getLength()) {
+            while (offset <= file.getLength()) {
                 offset += pieces.get(pieceIt).getLength();
                 list.add(pieces.get(pieceIt));
                 if (offset <= file.getLength())
