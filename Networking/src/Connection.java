@@ -175,7 +175,9 @@ public class Connection implements Runnable {
                     }
                 }
             }
+            closeSocket();
         } catch (IOException ioe) {
+
             closeSocket();
         }
     }
@@ -197,7 +199,13 @@ public class Connection implements Runnable {
     private void sendBitfield() throws IOException {
         if (torrent.getAvailiblePieces() > 0) {
             synchronized (ostream) {
-                ostream.write(ConnectionMessages.genBitfield(torrent));
+                byte arr[] = ConnectionMessages.genBitfield(torrent);
+                DataInputStream dis = new DataInputStream(new ByteArrayInputStream(arr));
+                int len = dis.readInt()-1;
+                byte id = dis.readByte();
+                String str = new String(dis.readNBytes(len));
+                System.out.println(len + " " + id + " " + dis.available() + " " + str);
+                ostream.write(arr);
             }
         }
     }
@@ -248,18 +256,15 @@ public class Connection implements Runnable {
         String bin = Funcs.toBitString(bitfield);
         for (int i = torrent.getPieces().size(); i < (prefix - 1) * 8; i++) {
             if (bin.charAt(i) != '0')
-                closeSocket();
+            { closeSocket();}
         }
         state = ConnectionState.BITFIELD;
-        debug = bin;
         char carr[] = bin.toCharArray();
         for (int i = 0; i < torrent.getPieces().size(); i++)
             if (carr[i] == '1')
                 peerHas[i] = true;
-            else if (carr[i] == '0')
-                peerHas[i] = false;
             else
-                System.exit(-1);
+                peerHas[i] = false;
     }
 
     private void receiveRequest() throws IOException {
@@ -378,6 +383,8 @@ public class Connection implements Runnable {
             closeSocket();
         }
     }
+
+    public Thread getThread(){return thread;}
 
     private int getPiecesFromPeer() {
         int n = 0;

@@ -1,8 +1,8 @@
 
+
 import java.io.IOException;
 import java.io.Serializable;
 import java.net.UnknownHostException;
-import java.security.Key;
 import java.util.*;
 import java.util.concurrent.*;
 
@@ -478,13 +478,17 @@ public class Torrent implements Serializable {
         synchronized (peers) {
             peers.notify();
         }
-        for (Piece p : pieces)
-            p.cancelGet();
+
         for (Connection c : connections) {
             synchronized (c) {
-                c.closeSocket();
+                if (c.getThread().getState()==Thread.State.BLOCKED)
+                     try{c.closeSocket();}catch(Exception e){}
+                else
+                    c.getThread().interrupt();
             }
         }
+        for (Piece p : pieces)
+            p.cancelGet();
     }
 
     public ArrayList<Tracker> getTrackers() {

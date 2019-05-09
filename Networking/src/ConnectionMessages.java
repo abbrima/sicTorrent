@@ -48,12 +48,6 @@ class ConnectionMessages{
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         DataOutputStream os = new DataOutputStream(baos);
 
-        int payload = torrent.getPieces().size();
-        payload = payload%8==0?payload/8:(payload/8)+1;
-
-        os.writeInt(payload+1);
-        os.writeByte(5);
-
         String binaryString = new String();
         for (Piece p:torrent.getPieces()){
             if (p.getStatus()==PieceStatus.HAVE)
@@ -63,7 +57,12 @@ class ConnectionMessages{
         }
         while(binaryString.length()%8!=0)
             binaryString+="0";
-        os.write(Funcs.getByteByString(binaryString));
+        byte arr[] = Funcs.getByteByString(binaryString);
+
+        os.writeInt(1+arr.length);
+        os.writeByte(5);
+        os.write(arr);
+
         return baos.toByteArray();
     }
     public static byte[] genBlock(int index,int offset,byte[] data) throws IOException{

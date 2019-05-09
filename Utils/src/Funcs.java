@@ -12,18 +12,8 @@ public class Funcs {
         byte arr[] = new byte[binaryString.length() / 8];
         for (int i = 0; i < binaryString.length(); i += 8) {
             String s = binaryString.substring(i, i + 8);
-            byte b = 0;
-            for (int j = 7; j > 0; j--) {
-                char c = s.charAt(j);
-                try {
-                    b += Integer.valueOf(""+c) * Math.pow(2,Math.abs(7-j));
-                } catch (Exception e) {
-                    System.exit(-1);
-                }
-            }
-            if (s.charAt(0)=='1')
-                b*=-1;
-            arr[i / 8] = b;
+            Integer byt = Integer.parseInt(s,2);
+            arr[i / 8] = byt.byteValue();
         }
         return arr;
     }
