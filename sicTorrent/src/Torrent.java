@@ -9,7 +9,8 @@ import java.util.concurrent.*;
 public class Torrent implements Serializable {
     private byte infohash[];
     private long downloaded, uploaded;
-    private long length; public long getLength(){return length;} public double getProgress(){return progress;}
+    private long length; public long getLength(){return length;}
+    public double getProgress(){return progress;} public long getUploaded(){return uploaded;}
     private double progress;
     public String getName(){return name;}
     public long getDownloaded(){return downloaded;}
@@ -309,7 +310,7 @@ public class Torrent implements Serializable {
         //random
         synchronized(pieces) {
             ArrayList<Piece> pcs = (ArrayList<Piece>) pieces.clone();
-            Collections.shuffle(pcs);
+            //Collections.shuffle(pcs);
             //linear
             for (Piece p : pcs) {
                 if (p.getStatus() == PieceStatus.UNFINISHED && have[p.getIndex()]) {
@@ -407,7 +408,7 @@ public class Torrent implements Serializable {
 
     private void mapPiecesToFiles() {
         int fileIt = 0;
-        DownloadFile currentFile = files.get(0);
+        DownloadFile currentFile;
         long offset = 0;
         for (int i = 0; i < pieces.size(); i++) {
             Piece p = pieces.get(i);
@@ -429,20 +430,21 @@ public class Torrent implements Serializable {
         }
         offset = 0;
         int pieceIt = 0;
-        for (fileIt = 0; fileIt < files.size(); fileIt++) {
-            DownloadFile file = files.get(fileIt);
-            ArrayList<Piece> list = new ArrayList<>();
-            if (offset > 0) {
-                list.add(pieces.get(pieceIt++));
+        for (int i=0;i<files.size();i++)
+        {
+            DownloadFile file = files.get(i);
+            ArrayList<Piece> pcs = new ArrayList<>();
+            if (offset>0){
+                pcs.add(pieces.get(pieceIt));
             }
-            while (offset <= file.getLength()) {
-                offset += pieces.get(pieceIt).getLength();
-                list.add(pieces.get(pieceIt));
-                if (offset <= file.getLength())
+            while (offset <file.getLength()){
+                pcs.add(pieces.get(pieceIt));
+                offset+=pieces.get(pieceIt).getLength();
+                if (offset<file.getLength())
                     pieceIt++;
             }
-            file.setPieces(list);
-            offset -= file.getLength();
+            file.setPieces(pcs);
+            offset-=file.getLength();
         }
     }
 
@@ -480,11 +482,12 @@ public class Torrent implements Serializable {
         }
 
         for (Connection c : connections) {
-            synchronized (c) {
+            synchronized (c) {try{
                 if (c.getThread().getState()==Thread.State.BLOCKED)
-                     try{c.closeSocket();}catch(Exception e){}
+                     c.closeSocket();
                 else
                     c.getThread().interrupt();
+            }catch(Exception e){c.closeSocket();}
             }
         }
         for (Piece p : pieces)

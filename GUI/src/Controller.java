@@ -52,6 +52,7 @@ public class Controller implements Initializable {
     @FXML private TableColumn<Torrent,Long> TorrentSize;
     @FXML private TableColumn<Torrent,ProgressBar> TorrentStatus;
     @FXML private TableColumn<Torrent,Long> TorrentDownloaded;
+    @FXML private TableColumn<Torrent,Long> TorrentUploaded;
 
     @FXML private TableView<Piece> Pieces;
     @FXML private TableColumn<Piece, Integer> PieceDownloaded;
@@ -106,12 +107,13 @@ public class Controller implements Initializable {
         if (currentTorrent!=null) {
             TorrentName.setCellValueFactory(new PropertyValueFactory<>("name"));
             TorrentDownloaded.setCellValueFactory(new PropertyValueFactory<>("downloaded"));
+            TorrentUploaded.setCellValueFactory(new PropertyValueFactory<>("uploaded"));
             TorrentSize.setCellValueFactory(new PropertyValueFactory<>("length"));
             TorrentStatus.setCellValueFactory(new PropertyValueFactory<>("progress"));
             Torrents.setRowFactory(e-> {
                 TableRow<Torrent> row = new TableRow<>();
                 row.setOnMouseClicked(event->{
-                    if (event.getClickCount()==1 && event.getButton().equals(MouseButton.PRIMARY))
+                    if (event.getClickCount()==1 && event.getButton().equals(MouseButton.PRIMARY) && row.getItem()!=null)
                         currentTorrent = row.getItem();
                 });
                 return row;
@@ -119,7 +121,7 @@ public class Controller implements Initializable {
             //TorrentStatus.setCellFactory(ProgressBarTableCell.<Torrent> forTableColumn());
             try {
                 Torrents.getItems().addAll(NetworkController.getTorrents());
-            } catch (Exception ioobe) {
+            } catch (Exception ioobe) {Torrents.getItems().clear();
             }
 
             trackersID.setCellValueFactory(new PropertyValueFactory<Tracker, String>("uri"));
@@ -175,19 +177,16 @@ public class Controller implements Initializable {
                 downloadeds.add(t.getDownloaded());
 
             Torrents.getItems().clear();
-            Torrents.getItems().addAll(NetworkController.getTorrents());
-
             trackers.getItems().clear();
-            trackers.getItems().addAll(currentTorrent.getTrackers());
-
             Pieces.getItems().clear();
-            Pieces.getItems().addAll(currentTorrent.getPieces());
-
             Files.getItems().clear();
-            Files.getItems().addAll(currentTorrent.getFiles());
-
             peers.getItems().clear();
+
+            trackers.getItems().addAll(currentTorrent.getTrackers());
+            Pieces.getItems().addAll(currentTorrent.getPieces());
+            Files.getItems().addAll(currentTorrent.getFiles());
             peers.getItems().addAll(currentTorrent.getConnections());
+            Torrents.getItems().addAll(NetworkController.getTorrents());
             }catch(Exception ioobe){}
     }
 
@@ -231,6 +230,8 @@ public class Controller implements Initializable {
             NetworkController.getTorrents().remove(currentTorrent);
             if (NetworkController.getTorrents().size()>0)
                 currentTorrent = NetworkController.getTorrents().get(0);
+            else
+                currentTorrent=null;
         }
     }
     public void addTorrentBtnPress(ActionEvent e){
@@ -241,6 +242,8 @@ public class Controller implements Initializable {
         try {
             byte arr[] = TorrentFileReader.readFile(fl.getAbsolutePath());
             Torrent torrent = new Torrent(bCoder.decode(arr, ParcelType.TORRENT));
+            if (NetworkController.checkIfTorrentExists(torrent.getInfoHash())!=null)
+                return;
             NetworkController.addTorrent(torrent);
             torrent.invokeThreads();
             currentTorrent = torrent;

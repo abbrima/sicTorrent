@@ -63,6 +63,7 @@ class ConnectionMessages{
         os.writeByte(5);
         os.write(arr);
 
+
         return baos.toByteArray();
     }
     public static byte[] genBlock(int index,int offset,byte[] data) throws IOException{

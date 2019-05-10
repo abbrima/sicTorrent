@@ -40,50 +40,50 @@ public class Connection implements Runnable {
     }
 
     public Connection(Socket socket) {
-       this();
-       this.socket=socket;
-       debug = "incoming";
-       state = ConnectionState.INCOMING;
-       IP = socket.getInetAddress().getHostAddress();
-       try{
-           istream = new DataInputStream(socket.getInputStream());
-           ostream = new DataOutputStream(socket.getOutputStream());
+        this();
+        this.socket = socket;
+        debug = "incoming";
+        state = ConnectionState.INCOMING;
+        IP = socket.getInetAddress().getHostAddress();
+        try {
+            istream = new DataInputStream(socket.getInputStream());
+            ostream = new DataOutputStream(socket.getOutputStream());
 
-           receiveHandshake();
+            receiveHandshake();
 
-           if (torrent==null)
-           {
-               closeSocket(); return;
-           }
+            if (torrent == null) {
+                closeSocket();
+                return;
+            }
 
-           sendHandshake(new byte[8]);
+            sendHandshake(new byte[8]);
 
-           state = ConnectionState.HANDSSHOOK;
+            state = ConnectionState.HANDSSHOOK;
 
-           torrent.getConnections().add(this);
+            torrent.getConnections().add(this);
 
-           if (torrent.getStatus()!= Torrent.TorrentStatus.FINISHED)
-               setInterested(true);
-           setChoke(false);
+            setInterested(true);
+            setChoke(false);
 
-           peerHas = new boolean[torrent.getPieces().size()];
+            peerHas = new boolean[torrent.getPieces().size()];
 
-           synchronized(ostream){
-               ostream.write(ConnectionMessages.genBitfield(torrent));
-           }
+            if (torrent.getAvailiblePieces() > 0)
+                synchronized (ostream) {
+                    ostream.write(ConnectionMessages.genBitfield(torrent));
+                }
 
-           thread = new Thread(this);
-           thread.setDaemon(true);
-           thread.start();
+            thread = new Thread(this);
+            thread.setDaemon(true);
+            thread.start();
 
-       }catch(Exception e){
-           closeSocket();
-       }
+        } catch (Exception e) {
+            closeSocket();
+        }
     }
 
     public Connection(Torrent torrent, String ip, int port) {
         this();
-        peer_interested=true;
+        peer_interested = true;
         debug = "outgoing";
         IP = ip;
         this.torrent = torrent;
@@ -99,8 +99,6 @@ public class Connection implements Runnable {
             am_choking = false;
 
             sendHandshake(new byte[8]);
-
-
 
 
             thread = new Thread(this);
@@ -123,9 +121,10 @@ public class Connection implements Runnable {
                         state = ConnectionState.HANDSSHOOK;
                         sendBitfield();
                         setInterested(true);
-                        setChoke(true);
+                        setChoke(false);
                     }
                 } else {
+
                     int prefix = istream.readInt();
                     if (prefix == 0) {
                         //keep alive
@@ -162,7 +161,9 @@ public class Connection implements Runnable {
                         }
                     }
                 }
-                if (peer_choking == false && am_interested == true && getPiecesFromPeer() > 0) {
+                if (peer_choking == false && torrent.getStatus()!= Torrent.TorrentStatus.FINISHED &&
+                        am_interested == true && getPiecesFromPeer() > 0) {
+                    if (state!=ConnectionState.SENDINGBLOCK)
                     state = ConnectionState.REQUEST;
                     Triplet<Integer, Integer, Integer> request = torrent.createRequest(peerHas, this);
 
@@ -201,10 +202,9 @@ public class Connection implements Runnable {
             synchronized (ostream) {
                 byte arr[] = ConnectionMessages.genBitfield(torrent);
                 DataInputStream dis = new DataInputStream(new ByteArrayInputStream(arr));
-                int len = dis.readInt()-1;
+                int len = dis.readInt() - 1;
                 byte id = dis.readByte();
                 String str = new String(dis.readNBytes(len));
-                System.out.println(len + " " + id + " " + dis.available() + " " + str);
                 ostream.write(arr);
             }
         }
@@ -244,8 +244,7 @@ public class Connection implements Runnable {
             t.interrupt();
         } catch (IllegalArgumentException iae) {
             throw new IOException();
-        }
-        catch(IOException ioe){
+        } catch (IOException ioe) {
             throw ioe;
         }
     }
@@ -255,8 +254,9 @@ public class Connection implements Runnable {
         istream.readNBytes(bitfield, 0, prefix - 1);
         String bin = Funcs.toBitString(bitfield);
         for (int i = torrent.getPieces().size(); i < (prefix - 1) * 8; i++) {
-            if (bin.charAt(i) != '0')
-            { closeSocket();}
+            if (bin.charAt(i) != '0') {
+                closeSocket();
+            }
         }
         state = ConnectionState.BITFIELD;
         char carr[] = bin.toCharArray();
@@ -384,7 +384,9 @@ public class Connection implements Runnable {
         }
     }
 
-    public Thread getThread(){return thread;}
+    public Thread getThread() {
+        return thread;
+    }
 
     private int getPiecesFromPeer() {
         int n = 0;

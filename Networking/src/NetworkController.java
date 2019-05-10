@@ -62,7 +62,6 @@ public class NetworkController {
         for (Torrent t : torrents)
             if (Arrays.equals(t.getInfoHash(), arr))
                 return t;
-
         return null;
     }
 
