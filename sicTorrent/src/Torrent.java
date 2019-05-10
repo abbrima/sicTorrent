@@ -200,7 +200,7 @@ public class Torrent implements Serializable {
         private boolean kill;
 
         public void run() {
-            if (status!=TorrentStatus.FINISHED) {
+            if (!isFinished()) {
                 if (peers.size() == 0)
                     try {
                         synchronized (peers) {
@@ -214,7 +214,7 @@ public class Torrent implements Serializable {
                     return;
             }
             while (!kill) {
-                if (status!=TorrentStatus.FINISHED) {
+                if (!isFinished()) {
                     if (peers.size() == 0) {
                         if (trackermanager!=null)
                         trackermanager.forceAnnounce();
@@ -332,7 +332,6 @@ public class Torrent implements Serializable {
         downloaded += l;
         progress=(double)downloaded/length;
         if (downloaded == length) {
-            status = TorrentStatus.FINISHED;
             trackermanager.announceFinished();
             System.out.println("FINISHED");
             for (Connection c : connections) {
@@ -362,7 +361,7 @@ public class Torrent implements Serializable {
     public Torrent(Parcel parcel) {
         this();
         progress=0;
-        status = TorrentStatus.NEW;
+        status = TorrentStatus.INACTIVE;
         connections = new ArrayList<>();
 
         trackermanager = new TrackerManager();
@@ -492,6 +491,7 @@ public class Torrent implements Serializable {
         }
         for (Piece p : pieces)
             p.cancelGet();
+        status = TorrentStatus.INACTIVE;
     }
 
     public ArrayList<Tracker> getTrackers() {
@@ -510,6 +510,7 @@ public class Torrent implements Serializable {
             file.validate();
         for (Piece p : pieces)
             p.cancelGet();
+        status = TorrentStatus.ACTIVE;
     }
     public void broadcastHave(Piece p){
         for (Connection c:connections)
@@ -528,11 +529,15 @@ public class Torrent implements Serializable {
         trackermanager.forceAnnounce();
     }
 
-    enum TorrentStatus {
-        FINISHED, STARTED, NEW
+
+    public boolean isFinished(){
+        return length == downloaded;
     }
 
     public TorrentStatus getStatus() {
         return status;
     }
+}
+enum TorrentStatus {
+    ACTIVE, INACTIVE
 }

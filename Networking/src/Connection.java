@@ -161,7 +161,7 @@ public class Connection implements Runnable {
                         }
                     }
                 }
-                if (peer_choking == false && torrent.getStatus()!= Torrent.TorrentStatus.FINISHED &&
+                if (peer_choking == false && !torrent.isFinished() &&
                         am_interested == true && getPiecesFromPeer() > 0) {
                     if (state!=ConnectionState.SENDINGBLOCK)
                     state = ConnectionState.REQUEST;

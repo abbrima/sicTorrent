@@ -277,5 +277,5 @@ class DataLocation implements Serializable {
 }
 
 enum PieceStatus implements Serializable {
-    HAVE, UNFINISHED, REQUESTED, DONOTDOWNLOAD, GETTING
+    HAVE, UNFINISHED, DONOTDOWNLOAD
 }

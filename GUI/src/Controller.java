@@ -104,7 +104,7 @@ public class Controller implements Initializable {
             currentTorrent=NetworkController.getTorrents().get(0);
 
 
-        if (currentTorrent!=null) {
+        {
             TorrentName.setCellValueFactory(new PropertyValueFactory<>("name"));
             TorrentDownloaded.setCellValueFactory(new PropertyValueFactory<>("downloaded"));
             TorrentUploaded.setCellValueFactory(new PropertyValueFactory<>("uploaded"));
@@ -120,6 +120,7 @@ public class Controller implements Initializable {
             });
             //TorrentStatus.setCellFactory(ProgressBarTableCell.<Torrent> forTableColumn());
             try {
+                if (NetworkController.getTorrents().size()>0)
                 Torrents.getItems().addAll(NetworkController.getTorrents());
             } catch (Exception ioobe) {Torrents.getItems().clear();
             }
@@ -247,6 +248,8 @@ public class Controller implements Initializable {
             NetworkController.addTorrent(torrent);
             torrent.invokeThreads();
             currentTorrent = torrent;
+            Torrents.getItems().clear();
+            Torrents.getItems().addAll(NetworkController.getTorrents());
         }catch(Exception ex){ex.printStackTrace();}
     }
 
