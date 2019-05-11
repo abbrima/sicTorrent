@@ -1,5 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import java.lang.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.effect.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
@@ -19,7 +25,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="800.0" prefWidth="1280.0" style="-fx-background-color: #FFFFFF;" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Controller">
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="800.0" prefWidth="1280.0" style="-fx-background-color: #FFFFFF;" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Controller">
    <children>
       <VBox prefHeight="800.0" prefWidth="345.0" style="-fx-background-color: #333645;" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="0.0">
          <children>
@@ -194,6 +200,21 @@
                                           <TableColumn fx:id="FileDownloaded" prefWidth="291.0" text="Downloaded" />
                                           <TableColumn fx:id="FileStatus" prefWidth="321.0" text="Status" />
                                        </columns>
+                                       <contextMenu>
+                                          <ContextMenu>
+                                            <items>
+                                              <MenuItem mnemonicParsing="false" text="Don't Download" />
+                                                <SeparatorMenuItem mnemonicParsing="false" />
+                                                <Menu mnemonicParsing="false" text="Download Priority">
+                                                  <items>
+                                                    <MenuItem mnemonicParsing="false" text="High" />
+                                                      <MenuItem mnemonicParsing="false" text="Medium" />
+                                                      <MenuItem mnemonicParsing="false" text="Low" />
+                                                  </items>
+                                                </Menu>
+                                            </items>
+                                          </ContextMenu>
+                                       </contextMenu>
                                     </TableView>
                                  </content>
                               </Tab>
@@ -207,6 +228,23 @@
                               <TableColumn fx:id="TorrentDownloaded" prefWidth="223.0" text="Downloaded" />
                               <TableColumn fx:id="TorrentUploaded" prefWidth="267.0" text="Uploaded" />
                           </columns>
+                           <contextMenu>
+                              <ContextMenu>
+                                <items>
+                                    <MenuItem mnemonicParsing="false" text="Resume" />
+                                    <SeparatorMenuItem mnemonicParsing="false" />
+                                  <MenuItem mnemonicParsing="false" text="Pause" />
+                                    <SeparatorMenuItem mnemonicParsing="false" />
+                                    <Menu mnemonicParsing="false" text="Download Priority">
+                                       <items>
+                                          <MenuItem mnemonicParsing="false" text="High" />
+                                          <MenuItem mnemonicParsing="false" text="Medium" />
+                                          <MenuItem mnemonicParsing="false" text="Low" />
+                                       </items>
+                                    </Menu>
+                                </items>
+                              </ContextMenu>
+                           </contextMenu>
                         </TableView>
                      </children>
                      <columnConstraints>
