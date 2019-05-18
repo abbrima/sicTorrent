@@ -513,9 +513,12 @@ public class Torrent implements Serializable {
         status = TorrentStatus.ACTIVE;
     }
     public void broadcastHave(Piece p){
-        for (Connection c:connections)
-            synchronized(c){
-            c.sendHave(p.getIndex());}
+        synchronized(connections) {
+            for (Connection c : connections)
+                synchronized (c) {
+                    c.sendHave(p.getIndex());
+                }
+        }
     }
     public ArrayList<Piece> getPieces() {
         return pieces;
