@@ -330,7 +330,7 @@ public class Torrent implements Serializable {
 
     public void addToDownloaded(int l) {
         downloaded += l;
-        progress=(double)downloaded/length;
+        progress=(double)downloaded/length * 100;
         if (downloaded == length) {
             trackermanager.announceFinished();
             System.out.println("FINISHED");

@@ -362,6 +362,7 @@ class HTTPTracker extends Tracker {
 
             is.close();
         } catch (MalformedURLException e) {
+            status = TrackerStatus.TIMEDOUT;
             throw new TimeoutException();
         }
         try {

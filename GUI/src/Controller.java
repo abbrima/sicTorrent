@@ -7,6 +7,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 
 import javafx.fxml.Initializable;
@@ -53,6 +54,10 @@ public class Controller implements Initializable {
     @FXML private TableColumn<Torrent,ProgressBar> TorrentStatus;
     @FXML private TableColumn<Torrent,Long> TorrentDownloaded;
     @FXML private TableColumn<Torrent,Long> TorrentUploaded;
+
+    @FXML private ContextMenu TorrentContextMenu;
+    @FXML private MenuItem TorrentPause;
+    @FXML private MenuItem TorrentResume;
 
     @FXML private TableView<Piece> Pieces;
     @FXML private TableColumn<Piece, Integer> PieceDownloaded;
@@ -117,6 +122,15 @@ public class Controller implements Initializable {
                         currentTorrent = row.getItem();
                 });
                 return row;
+            });
+
+            Torrents.addEventHandler(MouseEvent.MOUSE_CLICKED,e -> {
+
+
+                    if(e.getButton() == MouseButton.SECONDARY) {
+                        TorrentContextMenu.show(Torrents, e.getScreenX(), e.getScreenY());
+
+                }
             });
             //TorrentStatus.setCellFactory(ProgressBarTableCell.<Torrent> forTableColumn());
             try {
@@ -234,6 +248,16 @@ public class Controller implements Initializable {
             else
                 currentTorrent=null;
         }
+    }
+    public void pauseTorrent(ActionEvent e){
+        if (currentTorrent!=null)
+            currentTorrent.killThreads();
+        System.out.println("PAUSE");
+    }
+    public void resumeTorrent(ActionEvent e){
+        if (currentTorrent!=null)
+            currentTorrent.invokeThreads();
+        System.out.println("RESUME");
     }
     public void addTorrentBtnPress(ActionEvent e){
         FileChooser chooser = new FileChooser();
