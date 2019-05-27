@@ -108,6 +108,7 @@ public abstract class Tracker {
     protected int leeches;
     protected int downloaded;
     protected String uri;
+    protected Integer key;
     protected TrackerStatus status;
 }
 
@@ -165,7 +166,9 @@ class UDPTracker extends Tracker {
                 break;
         }
         ostream.writeInt(0);                        //IP (0 is default)
-        ostream.writeInt(rand.nextInt());              //key (random)
+        if (key==null)
+            key = rand.nextInt();
+        ostream.writeInt(key);              //key (random)
         ostream.writeInt(50);                       //numwant (-1 is default)
         ostream.writeShort(Info.getPort());            //My Port
         ostream.close();
@@ -333,7 +336,9 @@ class HTTPTracker extends Tracker {
         str += "&downloaded=" + String.valueOf(downloaded);
         str += "&left=" + String.valueOf(left);
         str += "&compact=1";
-        str += "&key=" + new Random().nextInt();
+        if (key==null)
+            key = new Random().nextInt();
+        str += "&key=" + key;
         switch (event) {
             case STARTED:
                 str += "&event=started";
