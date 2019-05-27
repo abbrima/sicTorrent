@@ -16,7 +16,7 @@ public abstract class Tracker {
         downloaded=0;
         interval = -1;
     }
-    public void disable(){status=TrackerStatus.DISABLED;}
+    public void setStatus(TrackerStatus s){status=s;}
     public static Tracker createTracker(String s) throws InvalidTrackerException,UnknownHostException {
         URL url;
         try {
@@ -67,7 +67,6 @@ public abstract class Tracker {
             throw new InvalidTrackerException("finally");
         }
     }
-    public String getStatusAsString(){return status.toString();}
     public static boolean checkIfExists(String uri,ArrayList<Tracker> trackers)
     {
         for (Tracker t:trackers)
@@ -110,8 +109,6 @@ public abstract class Tracker {
     protected int downloaded;
     protected String uri;
     protected TrackerStatus status;
-
-
 }
 
 class UDPTracker extends Tracker {
@@ -305,6 +302,8 @@ class UDPTracker extends Tracker {
                 continue;
             }
         }
+        status = TrackerStatus.TIMEDOUT;
+        interval = 300;
         throw new TimeoutException();
     }
 }
@@ -356,6 +355,15 @@ class HTTPTracker extends Tracker {
             InputStream is = url.openStream();
             byte chunk[] = new byte[16];
             int n;
+            if (is.available()==0)
+            {
+                Thread.sleep(5000);
+                if (is.available()==0)
+                {
+                    status = TrackerStatus.TIMEDOUT;
+                    throw new TimeoutException();
+                }
+            }
             while ((n = is.read(chunk)) > 0)
                 baos.write(chunk, 0, n);
             res = baos.toByteArray();
@@ -397,7 +405,10 @@ class HTTPTracker extends Tracker {
             for (int i = 0; i < parcel.getPeerIP().size(); i++)
                 list.add(new Pair<>(parcel.getPeerIP().get(i), parcel.getPeerPort().get(i)));
         else
+        {
+            status = TrackerStatus.TIMEDOUT;
             throw new InvalidReplyException("Missing Peers");
+        }
         status=TrackerStatus.WORKING;
         return list;
     }

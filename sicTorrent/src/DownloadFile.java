@@ -19,6 +19,10 @@ public class DownloadFile implements Serializable {
             status = FileStatus.DOWNLOADED;
             //validate();
     }
+    public void download(){
+        if (status==FileStatus.DONOTDOWNLOAD)
+            status = FileStatus.UNFINISHED;
+    }
 
     public void setPieces(ArrayList<Piece> pieces) {
         this.pieces = pieces;
@@ -33,9 +37,9 @@ public class DownloadFile implements Serializable {
     }
 
     public void doNotDownload() {
+        if (status==FileStatus.UNFINISHED)
         status = FileStatus.DONOTDOWNLOAD;
     }
-
     public synchronized void validate() {
         boolean b = true;
         for (Piece p : pieces) {

@@ -7,6 +7,16 @@ public class Funcs {
             sb.append(String.format("%02x", b));
         return sb.toString();
     }
+    public static byte[] hexToByteArray(String hex){
+        byte arr[] = new byte[hex.length()/2];
+        for (int i=0;i<hex.length();i+=2)
+        {
+            int s = Integer.parseInt(hex.substring(i,i+2),16);
+
+            arr[i/2] = (byte)s;
+        }
+        return arr;
+    }
 
     public static byte[] getByteByString(String binaryString) {
         byte arr[] = new byte[binaryString.length() / 8];

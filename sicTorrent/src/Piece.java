@@ -26,9 +26,12 @@ public class Piece implements Serializable {
     }
 
     public void doNotDownload() {
+        for (Block b:blocks)
+            b.cancelRequest();
         this.status = PieceStatus.DONOTDOWNLOAD;
     }
-
+    public void download() {if (status!=PieceStatus.HAVE)
+    status = PieceStatus.UNFINISHED;}
     public PieceStatus getStatus() {
         return status;
     }

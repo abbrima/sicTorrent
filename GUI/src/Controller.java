@@ -1,13 +1,7 @@
-
-import animatefx.animation.Jello;
 import animatefx.animation.RollIn;
 import animatefx.animation.Tada;
 import javafx.application.Platform;
-import javafx.collections.FXCollections;
-import javafx.collections.ListChangeListener;
-import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 
 import javafx.fxml.Initializable;
@@ -19,7 +13,6 @@ import java.net.URL;
 
 import javafx.geometry.Insets;
 import javafx.scene.control.*;
-import javafx.scene.control.cell.ProgressBarTableCell;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
@@ -27,10 +20,6 @@ import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
-
-import javax.print.attribute.SetOfIntegerSyntax;
-import javax.sound.midi.Track;
-
 
 public class Controller implements Initializable {
 
@@ -55,9 +44,14 @@ public class Controller implements Initializable {
     @FXML private TableColumn<Torrent,Long> TorrentDownloaded;
     @FXML private TableColumn<Torrent,Long> TorrentUploaded;
 
-    @FXML private ContextMenu TorrentContextMenu;
-    @FXML private MenuItem TorrentPause;
-    @FXML private MenuItem TorrentResume;
+    private ContextMenu TorrentContextMenu;
+    private Menu DownloadMode;
+    private Menu TorrentPriority;
+    private MenuItem TorrentHigh,TorrentNorm,TorrentLow;
+    private MenuItem TorrentResume;
+    private MenuItem TorrentPause;
+    private MenuItem SequentialMode;
+    private MenuItem RandomMode;
 
     @FXML private TableView<Piece> Pieces;
     @FXML private TableColumn<Piece, Integer> PieceDownloaded;
@@ -102,6 +96,10 @@ public class Controller implements Initializable {
     private GridPane torrnetGrid;
 
     private static Torrent currentTorrent;
+    private static DownloadFile currentFile;
+
+    private ContextMenu FilesMenu;
+    private MenuItem Download,DoNotDownload;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -110,6 +108,25 @@ public class Controller implements Initializable {
 
 
         {
+            TorrentContextMenu = new ContextMenu();
+            TorrentContextMenu.addEventHandler(MouseEvent.MOUSE_CLICKED,e->{TorrentContextMenu.hide();});
+            TorrentHigh = new MenuItem("High"); TorrentNorm = new MenuItem("Normal");
+            TorrentLow = new MenuItem("Low");
+            TorrentPriority = new Menu("Priority"); TorrentPriority.getItems().addAll(TorrentHigh,TorrentNorm,TorrentLow);
+            SequentialMode = new MenuItem("Sequential");
+            RandomMode = new MenuItem("Random");
+            TorrentPause = new MenuItem("Pause");
+            TorrentResume = new MenuItem("Resume");
+            DownloadMode = new Menu("Download Mode");
+            DownloadMode.getItems().addAll(SequentialMode,RandomMode);
+            TorrentContextMenu.getItems().addAll(TorrentResume,TorrentPause,TorrentPriority,DownloadMode);
+            TorrentPause.setOnAction(e->{pauseTorrent(e);});
+            TorrentResume.setOnAction(e->{resumeTorrent(e);});
+            SequentialMode.setOnAction(e->{setSequential(e);});
+            RandomMode.setOnAction(e->{setRandom(e);});
+
+
+
             TorrentName.setCellValueFactory(new PropertyValueFactory<>("name"));
             TorrentDownloaded.setCellValueFactory(new PropertyValueFactory<>("downloaded"));
             TorrentUploaded.setCellValueFactory(new PropertyValueFactory<>("uploaded"));
@@ -120,17 +137,13 @@ public class Controller implements Initializable {
                 row.setOnMouseClicked(event->{
                     if (event.getClickCount()==1 && event.getButton().equals(MouseButton.PRIMARY) && row.getItem()!=null)
                         currentTorrent = row.getItem();
+                    if (event.getClickCount()==1 && event.getButton().equals(MouseButton.SECONDARY) && row.getItem()!=null)
+                    {
+                        currentTorrent = row.getItem();
+                        TorrentContextMenu.show(row,event.getScreenX(),event.getScreenY());
+                    }
                 });
                 return row;
-            });
-
-            Torrents.addEventHandler(MouseEvent.MOUSE_CLICKED,e -> {
-
-
-                    if(e.getButton() == MouseButton.SECONDARY) {
-                        TorrentContextMenu.show(Torrents, e.getScreenX(), e.getScreenY());
-
-                }
             });
             //TorrentStatus.setCellFactory(ProgressBarTableCell.<Torrent> forTableColumn());
             try {
@@ -154,10 +167,32 @@ public class Controller implements Initializable {
             } catch (Exception e) {
             }
 
+            FilesMenu = new ContextMenu();
+            Download = new MenuItem("Download");
+            DoNotDownload = new MenuItem("Do not download");
+            FilesMenu.getItems().addAll(Download,DoNotDownload);
+            FilesMenu.addEventHandler(MouseEvent.MOUSE_CLICKED,e->{
+                FilesMenu.hide();
+            });
+            Download.setOnAction(e->{currentTorrent.downloadFile(currentFile);});
+            DoNotDownload.setOnAction(e->{currentTorrent.doNotDownload(currentFile);});
+
             FileName.setCellValueFactory(new PropertyValueFactory<DownloadFile, String>("path"));
             FileSize.setCellValueFactory(new PropertyValueFactory<DownloadFile, Long>("length"));
             FileStatus.setCellValueFactory(new PropertyValueFactory<DownloadFile, String>("status"));
             FileDownloaded.setCellValueFactory(new PropertyValueFactory<DownloadFile, Long>("downloaded"));
+            Files.setRowFactory(e-> {
+                TableRow<DownloadFile> row = new TableRow<>();
+                row.setOnMouseClicked(event->{
+                    if (event.getClickCount()==1 && event.getButton().equals(MouseButton.SECONDARY)
+                            && row.getItem()!=null)
+                    {
+                        currentFile = row.getItem();
+                        FilesMenu.show(row,event.getScreenX(),event.getScreenY());
+                    }
+                });
+                return row;
+            });
             try {
                 Files.getItems().addAll(currentTorrent.getFiles());
             } catch (Exception ioobe) {
@@ -252,12 +287,18 @@ public class Controller implements Initializable {
     public void pauseTorrent(ActionEvent e){
         if (currentTorrent!=null)
             currentTorrent.killThreads();
-        System.out.println("PAUSE");
     }
     public void resumeTorrent(ActionEvent e){
         if (currentTorrent!=null)
             currentTorrent.invokeThreads();
-        System.out.println("RESUME");
+    }
+    public void setSequential(ActionEvent e){
+        if (currentTorrent!=null)
+            currentTorrent.setLinear(true);
+    }
+    public void setRandom(ActionEvent e){
+        if (currentTorrent!=null)
+            currentTorrent.setLinear(false);
     }
     public void addTorrentBtnPress(ActionEvent e){
         FileChooser chooser = new FileChooser();
