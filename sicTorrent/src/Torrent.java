@@ -198,7 +198,7 @@ public class Torrent implements Serializable {
                         } else
                             System.out.println(tracker.getUri() + "  " + ire.getMessage());
                         try {
-                            Thread.sleep(120000);
+                            Thread.sleep(12000);
                         } catch (InterruptedException iee) {
                         }
                     }
@@ -365,6 +365,7 @@ public class Torrent implements Serializable {
             }
         }
         endgame = true;
+        System.out.println("endgame");
         return null;
     }
 

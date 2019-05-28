@@ -185,7 +185,7 @@ class UDPTracker extends Tracker {
 
         int action = istream.readInt();
         if (istream.readInt() != transactionID)
-            throw new InvalidReplyException("Incorrect transaction ID");
+           System.out.println("Incorrect transaction ID");
         if (action == 3) {
             istream.close();
             BufferedReader reader = new BufferedReader(new InputStreamReader(bais));
