@@ -97,7 +97,6 @@ public class Controller implements Initializable {
 
     private static Torrent currentTorrent;
     private static DownloadFile currentFile;
-
     private ContextMenu FilesMenu;
     private MenuItem Download,DoNotDownload;
 
@@ -315,7 +314,7 @@ public class Controller implements Initializable {
             currentTorrent = torrent;
             Torrents.getItems().clear();
             Torrents.getItems().addAll(NetworkController.getTorrents());
-        }catch(Exception ex){ex.printStackTrace();}
+        }catch(Exception ex){}
     }
 
     public void HandleClose(MouseEvent mouseEvent) {

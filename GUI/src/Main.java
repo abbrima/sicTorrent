@@ -37,9 +37,11 @@ public class Main extends Application {
         File fl = new File("torrents.list");
         if (fl.exists()) {
             ObjectInputStream ois = new ObjectInputStream(new FileInputStream(fl));
-            ArrayList<Torrent> torrents = (ArrayList<Torrent>)ois.readObject();
-            NetworkController.addTorrents(torrents);
-            NetworkController.invokeTorrents();
+            try {
+                ArrayList<Torrent> torrents = (ArrayList<Torrent>) ois.readObject();
+                NetworkController.addTorrents(torrents);
+                NetworkController.invokeTorrents();
+            }catch(Exception e){}
         }
         launch(args);
     }

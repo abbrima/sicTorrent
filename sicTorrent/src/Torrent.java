@@ -9,9 +9,16 @@ import java.util.concurrent.*;
 public class Torrent implements Serializable {
     private byte infohash[];
     private boolean linear;
-    private long downloaded, uploaded;
+    private long downloaded, uploaded; Long DownLoaded;
     private long length;
-
+    public void addConnection(Connection c) throws Exception{
+        synchronized(connections){
+            if (connections.size()<peermanager.getConnectionLimit() && status==TorrentStatus.ACTIVE)
+                connections.add(c);
+            else
+                throw new Exception();
+        }
+    }
     public long getLength() {
         return length;
     }
@@ -67,9 +74,16 @@ public class Torrent implements Serializable {
         private ArrayList<TrackerThread> tThreads;
 
         public void run() {
-            tThreads = new ArrayList<>();
-            trackerlist = new ArrayList<>();
+            if (tThreads==null)
+                tThreads = new ArrayList<>();
+            else
+                for (TrackerThread tt:tThreads)
+                    tt.start();
+            if (trackerlist==null)
+                 trackerlist = new ArrayList<>();
             ArrayList<String> strings = new ArrayList<>();
+            for (TrackerThread ttt:tThreads)
+                strings.add(ttt.getTracker().getUri());
             for (String str : trackerStrings) {
                 Thread t = new Thread(() -> {
                     Tracker tracker;
@@ -78,7 +92,6 @@ public class Torrent implements Serializable {
                             synchronized (strings) {
                                 if (!strings.contains(str)) {
                                     tracker = Tracker.createTracker(str);
-
                                     strings.add(str);
                                 } else
                                     tracker = null;
@@ -177,8 +190,8 @@ public class Torrent implements Serializable {
                                 break;
                             case STOPPED:
                                 return;
-                        }
-                        Thread.sleep(tracker.getInterval() * 1000);
+                        }try{
+                        Thread.sleep(tracker.getInterval() * 1000);}catch(IllegalArgumentException e){Thread.sleep(1000);}
                     } catch (TimeoutException te) {
                         try {
                             Thread.sleep(120000);
@@ -198,7 +211,7 @@ public class Torrent implements Serializable {
                         } else
                             System.out.println(tracker.getUri() + "  " + ire.getMessage());
                         try {
-                            Thread.sleep(12000);
+                            Thread.sleep(120000);
                         } catch (InterruptedException iee) {
                         }
                     }
@@ -218,6 +231,9 @@ public class Torrent implements Serializable {
             }
 
             public void start() {
+                if (thread!=null)
+                    kill();
+                mode = AnnounceEvent.STARTED;
                 thread = new Thread(this);
                 thread.start();
             }
@@ -282,7 +298,6 @@ public class Torrent implements Serializable {
                                 if (connections.size() < connectionLimit && !NetworkController.ipExists(ip)) {
                                     Thread t = new Thread(() -> {
                                         Connection c = new Connection(Torrent.this, ip, peers.get(ip));
-
                                         synchronized (connections) {
                                             connections.add(c);
                                         }
@@ -336,6 +351,8 @@ public class Torrent implements Serializable {
             if (peerThread != null)
                 peerThread.interrupt();
         }
+
+        public int getConnectionLimit(){return connectionLimit;}
     }
 
     public void test() {
@@ -365,7 +382,7 @@ public class Torrent implements Serializable {
             }
         }
         endgame = true;
-        System.out.println("endgame");
+        //System.out.println("endgame");
         return null;
     }
 
@@ -373,15 +390,22 @@ public class Torrent implements Serializable {
         return length - downloaded;
     }
 
-    public synchronized void addToDownloaded(int l) {
-        downloaded += l;
+    public void addToDownloaded(int l) {
+        synchronized(DownLoaded)
+        {
+            DownLoaded+=l;
+        }
+        downloaded = DownLoaded;
         progress = (double) downloaded / length * 100;
         if (downloaded == length) {
             trackermanager.announceFinished();
             System.out.println("FINISHED");
+            Thread t = new Thread(()->{
             for (Connection c : connections) {
                 c.setInterested(false);
-            }
+            }});
+            t.setDaemon(true);
+            t.start();
         }
     }
 
@@ -399,20 +423,21 @@ public class Torrent implements Serializable {
 
     public Torrent() {
         peers = Collections.synchronizedMap(new HashMap<>());
-        peermanager = new PeerManager(20);
+        peermanager = new PeerManager(50);
         trackermanager = new TrackerManager();
         connections = Collections.synchronizedList(new ArrayList<Connection>());
     }
 
     public Torrent(Parcel parcel) {
         this();
+        DownLoaded = (long)0;
         linear = false;
         progress = 0;
         status = TorrentStatus.INACTIVE;
         connections = new ArrayList<>();
 
         trackermanager = new TrackerManager();
-        peermanager = new PeerManager(10);
+        peermanager = new PeerManager(50);
         infohash = parcel.getInfoHash();
         downloaded = 0;
         uploaded = 0;
@@ -529,25 +554,24 @@ public class Torrent implements Serializable {
         synchronized (peers) {
             peers.notify();
         }
-
-        for (Connection c : connections) {
-            synchronized (c) {
-                try {
-                    if (c.getThread().getState() == Thread.State.BLOCKED)
+        status = TorrentStatus.INACTIVE;
+        synchronized (connections) {
+            for (Connection c : connections) {
+                {
+                    try {
+                        //if (c.getThread().getState() == Thread.State.BLOCKED)
+                            c.closeSocket();
+                        ///else
+                           // c.getThread().interrupt();
+                    } catch (Exception e) {
                         c.closeSocket();
-                    else
-                        c.getThread().interrupt();
-                } catch (Exception e) {
-                    c.closeSocket();
+                    }
                 }
             }
         }
         connections.clear();
-        trackerlist.clear();
-
         for (Piece p : pieces)
             p.cancelGet();
-        status = TorrentStatus.INACTIVE;
     }
 
     public ArrayList<Tracker> getTrackers() {
@@ -556,10 +580,11 @@ public class Torrent implements Serializable {
 
     public void invokeThreads() {
         peers = Collections.synchronizedMap(new HashMap<>());
-        peermanager = new PeerManager(20);
-        trackermanager = new TrackerManager();
-        trackermanager.addToTrackerList(trackerURLS);
-        connections = Collections.synchronizedList(new ArrayList<>());
+        peermanager = new PeerManager(50);
+        if (trackermanager==null) {trackermanager = new TrackerManager();
+        trackermanager.addToTrackerList(trackerURLS);}
+       // if (connections==null)
+            connections = Collections.synchronizedList(new ArrayList<>());
         trackermanager.start();
         peermanager.start();
         for (DownloadFile file : files)

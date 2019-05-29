@@ -120,7 +120,17 @@ class UDPTracker extends Tracker {
     private final long protocolID = Long.parseLong("41727101980", 16);
     private DatagramSocket socket;
     private Random rand;
+    private Integer TransactionID;
 
+    private void genTID(){
+        if (TransactionID==null)
+        {
+            TransactionID=rand.nextInt();
+            Thread t = new Thread(()->{try{Thread.sleep(2*60*1000);TransactionID=null;}catch(Exception e){}});
+            t.setDaemon(true);
+            t.start();
+        }
+    }
     public UDPTracker(InetAddress address, int port, String uri) {
         this.address = address;
         this.port = port;
@@ -139,13 +149,13 @@ class UDPTracker extends Tracker {
         }
         interval=-1;
         connect();
-        int transactionID = rand.nextInt();
+        genTID();
 
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         DataOutputStream ostream = new DataOutputStream(baos);
         ostream.writeLong(connectionID);               //Connection ID
         ostream.writeInt(1);                        //Action (1 is announce)
-        ostream.writeInt(transactionID);               //Transaction ID
+        ostream.writeInt(TransactionID);               //Transaction ID
         ostream.write(infohash);                       //Info Hash
         ostream.write(Info.getPeerID().getBytes());    //Peer ID
         ostream.writeLong(downloaded);                 //Downloaded
@@ -166,9 +176,10 @@ class UDPTracker extends Tracker {
                 break;
         }
         ostream.writeInt(0);                        //IP (0 is default)
-        if (key==null)
+        if (key==null) {
             key = rand.nextInt();
-        ostream.writeInt(key);              //key (random)
+        }
+        ostream.writeInt(key);                         //key (random)
         ostream.writeInt(50);                       //numwant (-1 is default)
         ostream.writeShort(Info.getPort());            //My Port
         ostream.close();
@@ -184,7 +195,7 @@ class UDPTracker extends Tracker {
         DataInputStream istream = new DataInputStream(bais);
 
         int action = istream.readInt();
-        if (istream.readInt() != transactionID)
+        if (istream.readInt() != TransactionID)
            System.out.println("Incorrect transaction ID");
         if (action == 3) {
             istream.close();
@@ -220,14 +231,14 @@ class UDPTracker extends Tracker {
         interval=-1;
         connect();
         status=TrackerStatus.SCRAPING;
-        int transactionID = rand.nextInt();
+        genTID();
 
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         DataOutputStream ostream = new DataOutputStream(baos);
 
         ostream.writeLong(connectionID);         //Connection ID
         ostream.writeInt(2);                  //Action (2 for scrape)
-        ostream.writeInt(transactionID);         //Transaction ID
+        ostream.writeInt(TransactionID);         //Transaction ID
         ostream.write(infohash);                 //Info Hash
         ostream.close();
 
@@ -242,7 +253,7 @@ class UDPTracker extends Tracker {
         DataInputStream istream = new DataInputStream(bais);
 
         int action = istream.readInt();
-        if (istream.readInt() != transactionID)
+        if (istream.readInt() != TransactionID)
             throw new InvalidReplyException("Incorrect transaction ID");
         if (action == 3) {
             istream.close();
@@ -260,13 +271,13 @@ class UDPTracker extends Tracker {
     }
 
     public void connect() throws InvalidReplyException, InterruptedException, IOException, TimeoutException {
-        int transactionID = rand.nextInt();
+        genTID();
 
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         DataOutputStream ostream = new DataOutputStream(baos);
         ostream.writeLong(protocolID);            //protocol
         ostream.writeInt(0);                   //action (0 is connect)
-        ostream.writeInt(transactionID);          //transaction ID
+        ostream.writeInt(TransactionID);          //transaction ID
         ostream.close();
 
         DatagramPacket outgoing = new DatagramPacket(baos.toByteArray(), baos.toByteArray().length,
@@ -279,7 +290,7 @@ class UDPTracker extends Tracker {
         ByteArrayInputStream bais = new ByteArrayInputStream(response);
         DataInputStream istream = new DataInputStream(bais);
         int action = istream.readInt();
-        if (istream.readInt() != transactionID)
+        if (istream.readInt() != TransactionID)
             throw new InvalidReplyException("Incorrect transaction ID");
         if (action == 3) {
             istream.close();

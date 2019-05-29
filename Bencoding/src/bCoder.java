@@ -107,11 +107,10 @@ public class bCoder {
    private static boolean keyRequiresBytes(String key){
        if (key.equals("pieces") || key.equals("peers"))
            return true;
-
        return false;
    }
 
-   public static Parcel decode(byte arr[],ParcelType type) throws InvalidBencodeException
+   public synchronized static Parcel decode(byte arr[],ParcelType type) throws InvalidBencodeException
    {
        String tempKey=" ";
        Parcel parcel;

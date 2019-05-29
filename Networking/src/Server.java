@@ -41,7 +41,6 @@ public class Server implements Runnable {
         while (true) {
             try {
                 Socket client = server.accept();
-                System.out.println(client.getInetAddress().getHostAddress());
                 if (!NetworkController.ipExists(client.getInetAddress().getHostAddress()))
                     NetworkController.getConnections().add(new Connection(client));
                 else

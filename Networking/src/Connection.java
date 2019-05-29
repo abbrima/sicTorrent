@@ -15,7 +15,7 @@ public class Connection implements Runnable {
 
 
     private ConnectionState state;
-
+    public boolean chocked(){return peer_choking;}
     private boolean peerHas[];
 
     private String debug = "D";
@@ -61,6 +61,11 @@ public class Connection implements Runnable {
             state = ConnectionState.HANDSSHOOK;
 
             torrent.getConnections().add(this);
+            try{
+                torrent.addConnection(this);
+            } catch (Exception e){
+                closeSocket();
+            }
 
             setInterested(true);
             setChoke(false);
@@ -73,7 +78,7 @@ public class Connection implements Runnable {
                 }
 
             thread = new Thread(this);
-            thread.setDaemon(true);
+            //thread.setDaemon(true);
             thread.start();
 
         } catch (Exception e) {
@@ -102,7 +107,7 @@ public class Connection implements Runnable {
 
 
             thread = new Thread(this);
-            thread.setDaemon(true);
+            //thread.setDaemon(true);
             thread.start();
 
         } catch (UnknownHostException uhe) {
@@ -171,7 +176,6 @@ public class Connection implements Runnable {
                         synchronized (ostream) {
                             ostream.write(ConnectionMessages.genRequest(request.getFirst(),
                                     request.getSecond(), request.getThird()));
-
                         }
                     }
                 }
@@ -187,6 +191,7 @@ public class Connection implements Runnable {
         try {
             if (socket != null)
                 socket.close();
+            thread.interrupt();
         } catch (Exception se) {
         }
 
@@ -331,7 +336,6 @@ public class Connection implements Runnable {
             closeSocket();
         }
     }
-
     public boolean failed() {
         return socket == null || socket.isClosed();
     }
@@ -357,7 +361,6 @@ public class Connection implements Runnable {
             ostream.write(ConnectionMessages.genMessage(type));
         }
     }
-
     public void setChoke(boolean b) {
         am_choking = b;
         try {
@@ -370,7 +373,6 @@ public class Connection implements Runnable {
             closeSocket();
         }
     }
-
     public void setInterested(boolean b) {
         am_interested = b;
         try {
@@ -383,7 +385,6 @@ public class Connection implements Runnable {
             closeSocket();
         }
     }
-
     public Thread getThread() {
         return thread;
     }

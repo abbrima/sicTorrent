@@ -7,7 +7,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 
 public class FileController {
-    public static void writeBytesToFile(byte[] arr, DownloadFile file, long offset)
+    public synchronized static void writeBytesToFile(byte[] arr, DownloadFile file, long offset)
             throws FileNotFoundException, IOException
     {
         File fl = new File(Parameters.downloadDir+file.getPath());
