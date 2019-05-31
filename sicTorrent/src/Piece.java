@@ -241,14 +241,17 @@ public class Piece implements Serializable {
 
     public byte[] getBlock(int offset, int size) throws FileNotFoundException, IOException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        int readBytes = 0, fileOffset = 0;
-        while (readBytes < size) {
+
+
+
+        int readBytes = 0, fileOffset;
             for (int i = 0; i < blockTable.size(); i++) {
                 if (readBytes == size) break;
                 DataLocation loc = blockTable.get(i);
                 fileOffset = (offset - loc.offsetInPiece) + readBytes;
                 if (i == blockTable.size() - 1) {
-                    FileController.readBytesFromFile(loc.file, loc.offsetInFile + fileOffset, size - readBytes);
+                    baos.writeBytes(FileController.readBytesFromFile(loc.file,
+                            loc.offsetInFile + fileOffset, size - readBytes));
                     readBytes = size;
                 } else {
                     if (offset >= blockTable.get(i + 1).offsetInPiece)
@@ -260,7 +263,8 @@ public class Piece implements Serializable {
                     }
                 }
             }
-        }
+            if (readBytes!=size)
+                throw new FileNotFoundException("HELLO");
         torrent.addToUploaded(baos.toByteArray().length);
         return baos.toByteArray();
     }

@@ -399,7 +399,6 @@ public class Torrent implements Serializable {
         progress = (double) downloaded / length * 100;
         if (downloaded == length) {
             trackermanager.announceFinished();
-            System.out.println("FINISHED");
             Thread t = new Thread(()->{
             for (Connection c : connections) {
                 c.setInterested(false);
@@ -436,7 +435,7 @@ public class Torrent implements Serializable {
         status = TorrentStatus.INACTIVE;
         connections = new ArrayList<>();
 
-        trackermanager = new TrackerManager();
+        //trackermanager = new TrackerManager();
         peermanager = new PeerManager(50);
         infohash = parcel.getInfoHash();
         downloaded = 0;
@@ -581,10 +580,11 @@ public class Torrent implements Serializable {
     public void invokeThreads() {
         peers = Collections.synchronizedMap(new HashMap<>());
         peermanager = new PeerManager(50);
-        if (trackermanager==null) {trackermanager = new TrackerManager();
-        trackermanager.addToTrackerList(trackerURLS);}
+        if (trackermanager==null) {trackermanager = new TrackerManager();}
        // if (connections==null)
-            connections = Collections.synchronizedList(new ArrayList<>());
+        connections = Collections.synchronizedList(new ArrayList<>());
+        trackermanager.addToTrackerList(trackerURLS);
+
         trackermanager.start();
         peermanager.start();
         for (DownloadFile file : files)
