@@ -22,16 +22,13 @@ public class Connection implements Runnable {
     private String ID;
     private String IP;
 
-    //reading
-    byte b4[] = new byte[4];
-    byte b1[] = new byte[1];
     private byte reserved[];
 
     private Torrent torrent;
     private Thread thread;
 
     private DataOutputStream ostream;
-    private LimitedBandwidthStream istream;
+    private DataInputStream istream;
 
     private InetAddress address;
     private int port;
@@ -49,7 +46,7 @@ public class Connection implements Runnable {
         state = ConnectionState.INCOMING;
         IP = socket.getInetAddress().getHostAddress();
         try {
-            istream = new LimitedBandwidthStream(socket.getInputStream(),100);
+            istream = new DataInputStream(socket.getInputStream());
             ostream = new DataOutputStream(socket.getOutputStream());
 
             receiveHandshake();
@@ -101,7 +98,7 @@ public class Connection implements Runnable {
             address = InetAddress.getByName(ip);
             socket = new Socket(address, port);
             ostream = new DataOutputStream(socket.getOutputStream());
-            istream = new LimitedBandwidthStream(socket.getInputStream(),100);
+            istream = new DataInputStream(socket.getInputStream());
 
             am_interested = true;
             am_choking = false;
@@ -119,10 +116,7 @@ public class Connection implements Runnable {
             socket = null;
         }
     }
-    public static int bytetoint(byte [] b)
-    {
-        return b[0] << 24 | (b[1] & 0xFF) << 16 | (b[2] & 0xFF) << 8 | (b[3] & 0xFF);
-    }
+
     public void run() {
         try {
             while (!Thread.interrupted()) {
@@ -136,13 +130,11 @@ public class Connection implements Runnable {
                     }
                 } else {
 
-                    int prefix = istream.read();
+                    int prefix = istream.readInt();
                     if (prefix == 0) {
                         //keep alive
                     } else {
-                        istream.read(b1);
-                        byte id = b1[0];
-                        System.out.println(b1[0]);
+                        byte id = istream.readByte();
                         switch (id) {
                             case 0: //choke
                                 peer_choking = true;
@@ -157,9 +149,7 @@ public class Connection implements Runnable {
                                 peer_interested = false;
                                 break;
                             case 4: //have
-                                istream.read(b4);
-                                System.out.println(b4);
-                                peerHas[bytetoint(b4)] = true;
+                                peerHas[istream.readInt()] = true;
                                 break;
                             case 5: //bitfield
                                 receiveBitfield(prefix);
@@ -235,8 +225,8 @@ public class Connection implements Runnable {
         });
         t.setDaemon(true);
         t.start();
-        try {istream.read(b1);
-            byte pstrlen = b1[0];
+        try {
+            byte pstrlen = istream.readByte();
             String pstrn = new String(istream.readNBytes(pstrlen));
             if (!pstrn.equals(ConnectionMessages.protocolString))
                 closeSocket();
@@ -284,12 +274,9 @@ public class Connection implements Runnable {
 
     private void receiveRequest() throws IOException {
         state = ConnectionState.SENDINGBLOCK;
-        istream.read(b4);
-        int index = bytetoint(b4);
-        istream.read(b4);
-        int offset = bytetoint(b4);
-        istream.read(b4);
-        int length = bytetoint(b4);
+        int index = istream.readInt();
+        int offset = istream.readInt();
+        int length = istream.readInt();
         if (index < 0 || index > torrent.getPieces().size())
             closeSocket();
         if (offset + length > torrent.getPieces().get(index).getLength() || offset + length < 0)
@@ -312,10 +299,8 @@ public class Connection implements Runnable {
     }
 
     private void receivePiece(int prefix) throws IOException {
-        istream.read(b4);
-        int index = bytetoint(b4);
-        istream.read(b4);
-        int offset = bytetoint(b4);
+        int index = istream.readInt();
+        int offset = istream.readInt();
         if (index < 0 || index > torrent.getPieces().size())
             closeSocket();
         Piece p = torrent.getPieces().get(index);
