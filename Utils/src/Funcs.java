@@ -1,4 +1,7 @@
+import java.util.Formatter;
 import java.util.Iterator;
+
+import static java.lang.Math.pow;
 
 public class Funcs {
     public static String byteArrayToHex(byte[] a) {
@@ -46,8 +49,21 @@ public class Funcs {
         }
         return String.valueOf(bits);
     }
-    public static int bytetoint(byte [] b)
-    {
-        return b[0] << 24 | (b[1] & 0xFF) << 16 | (b[2] & 0xFF) << 8 | (b[3] & 0xFF);
+    public static String lengthToStr(long length){
+        Formatter f = new Formatter();
+        if (length < pow(2,10))
+            return f.format("%d %s",length,"B").toString();
+        else if (length >= pow(2,10) && length < pow(2,20))
+        {
+            return f.format("%.2f %s",(double)length/pow(2,10),"KB").toString();
+        }
+        else if (length >= pow(2,20) && length < pow(2,30))
+        {
+            return f.format("%.2f %s",(double)length/pow(2,20),"MB").toString();
+        }
+        else
+        {
+            return f.format("%.2f %s",(double)length/pow(2,30),"GB").toString();
+        }
     }
 }

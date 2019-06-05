@@ -60,12 +60,13 @@ public class Connection implements Runnable {
 
             state = ConnectionState.HANDSSHOOK;
 
-            torrent.getConnections().add(this);
             try{
                 torrent.addConnection(this);
             } catch (Exception e){
+
                 closeSocket();
             }
+
 
             setInterested(true);
             setChoke(false);
@@ -119,7 +120,7 @@ public class Connection implements Runnable {
 
     public void run() {
         try {
-            while (!Thread.interrupted()) {
+            while (!socket.isClosed()) {
                 if (state == ConnectionState.INIT) {
                     receiveHandshake();
                     if (socket != null && !socket.isClosed()) {
@@ -168,16 +169,17 @@ public class Connection implements Runnable {
                 }
                 if (peer_choking == false && !torrent.isFinished() &&
                         am_interested == true && getPiecesFromPeer() > 0) {
-                    if (state!=ConnectionState.SENDINGBLOCK)
-                    state = ConnectionState.REQUEST;
-                    Triplet<Integer, Integer, Integer> request = torrent.createRequest(peerHas, this);
 
-                    if (request != null) {
-                        synchronized (ostream) {
-                            ostream.write(ConnectionMessages.genRequest(request.getFirst(),
-                                    request.getSecond(), request.getThird()));
+                        state = ConnectionState.REQUEST;
+                        Triplet<Integer, Integer, Integer> request = torrent.createRequest(peerHas, this);
+
+                        if (request != null) {
+                            synchronized (ostream) {
+                                ostream.write(ConnectionMessages.genRequest(request.getFirst(),
+                                        request.getSecond(), request.getThird()));
+                            }
                         }
-                    }
+
                 }
             }
             closeSocket();
@@ -265,12 +267,14 @@ public class Connection implements Runnable {
         }
         state = ConnectionState.BITFIELD;
         char carr[] = bin.toCharArray();
+        int count = 0;
         for (int i = 0; i < torrent.getPieces().size(); i++)
-            if (carr[i] == '1')
-                peerHas[i] = true;
+            if (carr[i] == '1') {
+                peerHas[i] = true; count++;
+            }
             else
                 peerHas[i] = false;
-
+            debug = new String(count + "/ " +torrent.getPieces().size());
     }
 
     private void receiveRequest() throws IOException {
@@ -278,7 +282,7 @@ public class Connection implements Runnable {
         int index = istream.readInt();
         int offset = istream.readInt();
         int length = istream.readInt();
-        if (index < 0 || index > torrent.getPieces().size())
+        if (index < 0 || index >= torrent.getPieces().size())
             closeSocket();
         if (offset + length > torrent.getPieces().get(index).getLength() || offset + length < 0)
             closeSocket();
@@ -287,12 +291,11 @@ public class Connection implements Runnable {
             if (p.getStatus() != PieceStatus.HAVE)
                 closeSocket();
             else {
-                state = ConnectionState.SENDINGBLOCK;
                 synchronized (ostream) {
                     try {
-                        ostream.write(ConnectionMessages.genBlock(index, offset, p.getBlock(offset, index)));
-                    } catch (FileNotFoundException fnfe) {
-                        //handle file not found (STUPID USER)
+                        byte[] blk = p.getBlock(offset,length);
+                        ostream.write(ConnectionMessages.genBlock(index, offset, blk));
+                    } catch (Exception fnfe) {
                     }
                 }
             }

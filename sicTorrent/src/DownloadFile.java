@@ -6,6 +6,11 @@ public class DownloadFile implements Serializable {
     private String path;
     private FileStatus status;
     private long downloaded;
+    private String LengthString;
+    private String DownloadedString;
+
+    public String getLengthString(){return LengthString;}
+    public String getDownloadedString(){return DownloadedString;}
 
     private ArrayList<Piece> pieces;
 
@@ -15,6 +20,7 @@ public class DownloadFile implements Serializable {
 
     public synchronized void addToDownloaded(int num) {
         downloaded += num;
+        DownloadedString = Funcs.lengthToStr(downloaded);
         if (length==downloaded)
             status = FileStatus.DOWNLOADED;
             //validate();
@@ -63,7 +69,10 @@ public class DownloadFile implements Serializable {
     public DownloadFile(long length, String path) {
         status = FileStatus.UNFINISHED;
         downloaded = 0;
+
         this.length = length;
+        LengthString = Funcs.lengthToStr(this.length);
+        DownloadedString = Funcs.lengthToStr(this.downloaded);
         this.path = path;
         try {
             FileController.createFile(this);

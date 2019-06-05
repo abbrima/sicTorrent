@@ -11,15 +11,18 @@ import java.util.List;
 
 public class Piece implements Serializable {
     private int index;
-    private int length;
-    private int downloaded;
+    private Integer length;
+    private Integer downloaded;
     private byte hash[];
-
+    private String DownloadedString;
+    private String LengthString;
     private ArrayList<Block> blocks;
 
     private PieceStatus status;
     private Torrent torrent;
 
+    public String getDownloadedString(){return DownloadedString;}
+    public String getLengthString(){return LengthString;}
 
     public int getIndex() {
         return index;
@@ -37,7 +40,7 @@ public class Piece implements Serializable {
         return status;
     }
 
-    public int getDownloaded() {
+    public Integer getDownloaded() {
         return downloaded;
     }
 
@@ -54,10 +57,13 @@ public class Piece implements Serializable {
     public Piece(int length, byte hash[], int index, Torrent torrent) {
         this.length = length;
         this.hash = hash;
+        downloaded = 0;
         status = PieceStatus.UNFINISHED;
         blockTable = new ArrayList<>();
         this.index = index;
         this.torrent = torrent;
+        DownloadedString = Funcs.lengthToStr(downloaded);
+        LengthString = Funcs.lengthToStr(this.length);
     }
 
     public void initBlocks() {
@@ -162,7 +168,7 @@ public class Piece implements Serializable {
         return null;
     }
 
-    public synchronized void applyBytes(byte[] bytes, int offset, Connection c) throws FileNotFoundException, IOException {
+    public void applyBytes(byte[] bytes, int offset, Connection c) throws FileNotFoundException, IOException {
         for (Block b : blocks)
             if (b.getOffset() == offset) {
                 if (b.getStatus()==BlockStatus.DOWNLOADED)
@@ -190,12 +196,15 @@ public class Piece implements Serializable {
                 }
             }
         }
-        downloaded += bytes.length;
-        torrent.addToDownloaded(bytes.length);
-        if (downloaded == length)
-            this.validate();
-        else
-            status = PieceStatus.UNFINISHED;
+        synchronized(downloaded) {
+            downloaded += bytes.length;
+            DownloadedString = Funcs.lengthToStr(downloaded);
+            torrent.addToDownloaded(bytes.length);
+            if (downloaded.equals(length))
+                this.validate();
+            else
+                status = PieceStatus.UNFINISHED;
+        }
     }
 
     ///reset blocks here
