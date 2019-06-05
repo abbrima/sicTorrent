@@ -270,6 +270,7 @@ public class Connection implements Runnable {
                 peerHas[i] = true;
             else
                 peerHas[i] = false;
+
     }
 
     private void receiveRequest() throws IOException {
