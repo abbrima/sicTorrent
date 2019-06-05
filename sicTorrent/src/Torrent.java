@@ -548,6 +548,8 @@ public class Torrent implements Serializable {
     }
 
     public void killThreads() {
+        if (status == TorrentStatus.INACTIVE)
+            return;
         trackermanager.kill();
         peermanager.kill();
         synchronized (peers) {
@@ -578,6 +580,8 @@ public class Torrent implements Serializable {
     }
 
     public void invokeThreads() {
+        if (status == TorrentStatus.ACTIVE)
+            return;
         peers = Collections.synchronizedMap(new HashMap<>());
         peermanager = new PeerManager(50);
         if (trackermanager==null) {trackermanager = new TrackerManager();}
