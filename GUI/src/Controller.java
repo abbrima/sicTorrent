@@ -33,16 +33,16 @@ public class Controller implements Initializable {
 
     @FXML private TableView<DownloadFile> Files;
     @FXML private TableColumn<DownloadFile,String> FileName;
-    @FXML private TableColumn<DownloadFile,Long> FileSize;
-    @FXML private TableColumn<DownloadFile,Long> FileDownloaded;
+    @FXML private TableColumn<DownloadFile,String> FileSize;
+    @FXML private TableColumn<DownloadFile,String> FileDownloaded;
     @FXML private TableColumn<DownloadFile,String> FileStatus;
 
     @FXML private TableView<Torrent> Torrents;
     @FXML private TableColumn<Torrent,String> TorrentName;
-    @FXML private TableColumn<Torrent,Long> TorrentSize;
-    @FXML private TableColumn<Torrent,ProgressBar> TorrentStatus;
-    @FXML private TableColumn<Torrent,Long> TorrentDownloaded;
-    @FXML private TableColumn<Torrent,Long> TorrentUploaded;
+    @FXML private TableColumn<Torrent,String> TorrentSize;
+    @FXML private TableColumn<Torrent,String> TorrentStatus;
+    @FXML private TableColumn<Torrent,String> TorrentDownloaded;
+    @FXML private TableColumn<Torrent,String> TorrentUploaded;
 
     private ContextMenu TorrentContextMenu;
     private Menu DownloadMode;
@@ -54,8 +54,8 @@ public class Controller implements Initializable {
     private MenuItem RandomMode;
 
     @FXML private TableView<Piece> Pieces;
-    @FXML private TableColumn<Piece, Integer> PieceDownloaded;
-    @FXML private TableColumn<Piece,Integer> PieceSize;
+    @FXML private TableColumn<Piece, String> PieceDownloaded;
+    @FXML private TableColumn<Piece,String> PieceSize;
     @FXML private TableColumn<Piece,String> PieceStatus;
     @FXML private TableColumn<Piece,Integer> PieceIndex;
 
@@ -127,9 +127,9 @@ public class Controller implements Initializable {
 
 
             TorrentName.setCellValueFactory(new PropertyValueFactory<>("name"));
-            TorrentDownloaded.setCellValueFactory(new PropertyValueFactory<>("downloaded"));
-            TorrentUploaded.setCellValueFactory(new PropertyValueFactory<>("uploaded"));
-            TorrentSize.setCellValueFactory(new PropertyValueFactory<>("length"));
+            TorrentDownloaded.setCellValueFactory(new PropertyValueFactory<>("DownloadedString"));
+            TorrentUploaded.setCellValueFactory(new PropertyValueFactory<>("UploadedString"));
+            TorrentSize.setCellValueFactory(new PropertyValueFactory<>("LengthString"));
             TorrentStatus.setCellValueFactory(new PropertyValueFactory<>("progress"));
             Torrents.setRowFactory(e-> {
                 TableRow<Torrent> row = new TableRow<>();
@@ -177,9 +177,9 @@ public class Controller implements Initializable {
             DoNotDownload.setOnAction(e->{currentTorrent.doNotDownload(currentFile);});
 
             FileName.setCellValueFactory(new PropertyValueFactory<DownloadFile, String>("path"));
-            FileSize.setCellValueFactory(new PropertyValueFactory<DownloadFile, Long>("length"));
+            FileSize.setCellValueFactory(new PropertyValueFactory<>("LengthString"));
             FileStatus.setCellValueFactory(new PropertyValueFactory<DownloadFile, String>("status"));
-            FileDownloaded.setCellValueFactory(new PropertyValueFactory<DownloadFile, Long>("downloaded"));
+            FileDownloaded.setCellValueFactory(new PropertyValueFactory<>("DownloadedString"));
             Files.setRowFactory(e-> {
                 TableRow<DownloadFile> row = new TableRow<>();
                 row.setOnMouseClicked(event->{
@@ -197,8 +197,8 @@ public class Controller implements Initializable {
             } catch (Exception ioobe) {
             }
 
-            PieceDownloaded.setCellValueFactory(new PropertyValueFactory<Piece, Integer>("downloaded"));
-            PieceSize.setCellValueFactory(new PropertyValueFactory<Piece, Integer>("length"));
+            PieceDownloaded.setCellValueFactory(new PropertyValueFactory<>("DownloadedString"));
+            PieceSize.setCellValueFactory(new PropertyValueFactory<>("LengthString"));
             PieceStatus.setCellValueFactory(new PropertyValueFactory<Piece, String>("status"));
             PieceIndex.setCellValueFactory(new PropertyValueFactory<Piece, Integer>("index"));
             try {

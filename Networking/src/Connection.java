@@ -120,7 +120,7 @@ public class Connection implements Runnable {
 
     public void run() {
         try {
-            while (!Thread.interrupted()) {
+            while (!socket.isClosed()) {
                 if (state == ConnectionState.INIT) {
                     receiveHandshake();
                     if (socket != null && !socket.isClosed()) {
@@ -296,7 +296,6 @@ public class Connection implements Runnable {
                         byte[] blk = p.getBlock(offset,length);
                         ostream.write(ConnectionMessages.genBlock(index, offset, blk));
                     } catch (Exception fnfe) {
-                        fnfe.printStackTrace();
                     }
                 }
             }
