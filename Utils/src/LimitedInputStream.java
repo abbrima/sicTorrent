@@ -1,8 +1,30 @@
+import java.io.DataInputStream;
 import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
-public class LimitedBandwidthStream extends FilterInputStream {
+
+
+public class LimitedInputStream extends DataInputStream {
+    public LimitedInputStream(InputStream is){
+        super(is);
+    }
+    public byte[] readNBytesLimited(int length)throws IOException{
+        byte inarr[] = new byte[length];
+        for (int i=0;i<length;i++)
+            inarr[i] = readByte();
+
+        return inarr;
+    }
+
+}
+
+
+
+
+
+
+ class LimitedBandwidthStream extends FilterInputStream {
     /**
      * Creates a <code>FilterInputStream</code>
      * by assigning the  argument <code>in</code>
