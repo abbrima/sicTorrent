@@ -15,7 +15,6 @@ public class LimitedInputStream extends DataInputStream {
         this.controller = ctrlr;
     }
     public byte[] readNBytesLimited(int length)throws IOException{
-        System.out.println("H");
         byte inarr[] = new byte[length];
         if (!controller.downstreamLimited()) {
            readNBytes(inarr,0,length);
@@ -24,16 +23,16 @@ public class LimitedInputStream extends DataInputStream {
             int readBytes = 0;
             while (readBytes<length){
                 int bps = controller.requestDownBandwidth(this);
-                System.out.println(bps/1024);
                 long startTime = System.currentTimeMillis();
                 if (bps<0)
                 {
                     readNBytes(inarr,readBytes,length-readBytes);
+                    readBytes = length;
                 }
                 else if (bps > 0 && bps < length - readBytes)
-                     readNBytes(inarr,readBytes,bps);
+                { readNBytes(inarr,readBytes,bps);readBytes += bps;}
                 else
-                     readNBytes(inarr,readBytes,length-readBytes);
+                { readNBytes(inarr,readBytes,length-readBytes);readBytes = length;}
 
                 controller.freeDownBandwidth(this);
                 if (readBytes!=length){
