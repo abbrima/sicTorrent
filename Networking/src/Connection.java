@@ -55,6 +55,8 @@ public class Connection implements Runnable {
                 closeSocket();
                 return;
             }
+            istream.setController(torrent.getBandwidthcontroller());
+            ostream.setController(torrent.getBandwidthcontroller());
 
             sendHandshake(new byte[8]);
 
@@ -101,6 +103,9 @@ public class Connection implements Runnable {
             ostream = new LimitedOutputStream(socket.getOutputStream());
             istream = new LimitedInputStream(socket.getInputStream());
 
+            istream.setController(torrent.getBandwidthcontroller());
+            ostream.setController(torrent.getBandwidthcontroller());
+
             am_interested = true;
             am_choking = false;
 
@@ -130,8 +135,13 @@ public class Connection implements Runnable {
                         setChoke(false);
                     }
                 } else {
-
+                    Thread t = new Thread(()->{
+                        try{Thread.sleep(120000); closeSocket();}catch(InterruptedException ie){return;}
+                    });
+                    t.setDaemon(true);
+                    t.start();
                     int prefix = istream.readInt();
+                    t.interrupt();
                     if (prefix == 0) {
                         //keep alive
                     } else {
