@@ -27,8 +27,8 @@ public class Connection implements Runnable {
     private Torrent torrent;
     private Thread thread;
 
-    private DataOutputStream ostream;
-    private DataInputStream istream;
+    private LimitedOutputStream ostream;
+    private LimitedInputStream istream;
 
     private InetAddress address;
     private int port;
@@ -46,8 +46,8 @@ public class Connection implements Runnable {
         state = ConnectionState.INCOMING;
         IP = socket.getInetAddress().getHostAddress();
         try {
-            istream = new DataInputStream(socket.getInputStream());
-            ostream = new DataOutputStream(socket.getOutputStream());
+            istream = new LimitedInputStream(socket.getInputStream());
+            ostream = new LimitedOutputStream(socket.getOutputStream());
 
             receiveHandshake();
 
@@ -98,8 +98,8 @@ public class Connection implements Runnable {
         try {
             address = InetAddress.getByName(ip);
             socket = new Socket(address, port);
-            ostream = new DataOutputStream(socket.getOutputStream());
-            istream = new DataInputStream(socket.getInputStream());
+            ostream = new LimitedOutputStream(socket.getOutputStream());
+            istream = new LimitedInputStream(socket.getInputStream());
 
             am_interested = true;
             am_choking = false;
@@ -208,10 +208,6 @@ public class Connection implements Runnable {
         if (torrent.getAvailiblePieces() > 0) {
             synchronized (ostream) {
                 byte arr[] = ConnectionMessages.genBitfield(torrent);
-                DataInputStream dis = new DataInputStream(new ByteArrayInputStream(arr));
-                int len = dis.readInt() - 1;
-                byte id = dis.readByte();
-                String str = new String(dis.readNBytes(len));
                 ostream.write(arr);
             }
         }
@@ -294,7 +290,7 @@ public class Connection implements Runnable {
                 synchronized (ostream) {
                     try {
                         byte[] blk = p.getBlock(offset,length);
-                        ostream.write(ConnectionMessages.genBlock(index, offset, blk));
+                        ostream.writeLimited(ConnectionMessages.genBlock(index, offset, blk));
                     } catch (Exception fnfe) {
                     }
                 }
@@ -310,8 +306,8 @@ public class Connection implements Runnable {
         Piece p = torrent.getPieces().get(index);
         if (prefix - 9 < 0)
             closeSocket();
-        byte arr[] = new byte[prefix - 9];
-        istream.readNBytes(arr, 0, prefix - 9);
+       // byte arr[] = new byte[prefix - 9];
+        byte arr[] = istream.readNBytesLimited(prefix - 9);
         if (offset + arr.length < 0 || offset + arr.length > p.getLength())
             closeSocket();
         try {
