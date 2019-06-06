@@ -6,15 +6,51 @@ import java.io.InputStream;
 
 
 public class LimitedInputStream extends DataInputStream {
+    private BandwidthController controller;
+
     public LimitedInputStream(InputStream is){
         super(is);
     }
+    public void setController(BandwidthController ctrlr){
+        this.controller = ctrlr;
+    }
     public byte[] readNBytesLimited(int length)throws IOException{
+        System.out.println("H");
         byte inarr[] = new byte[length];
-        for (int i=0;i<length;i++)
-            inarr[i] = readByte();
+        if (!controller.downstreamLimited()) {
+           readNBytes(inarr,0,length);
+        }
+        else{
+            int readBytes = 0;
+            while (readBytes<length){
+                int bps = controller.requestDownBandwidth(this);
+                System.out.println(bps/1024);
+                long startTime = System.currentTimeMillis();
+                if (bps<0)
+                {
+                    readNBytes(inarr,readBytes,length-readBytes);
+                }
+                else if (bps > 0 && bps < length - readBytes)
+                     readNBytes(inarr,readBytes,bps);
+                else
+                     readNBytes(inarr,readBytes,length-readBytes);
 
+                controller.freeDownBandwidth(this);
+                if (readBytes!=length){
+                    long endTime = System.currentTimeMillis();
+                    endTime = endTime - startTime;
+                    if (endTime > 0 && endTime < 1000)
+                    {
+                        try{Thread.sleep(endTime);}catch(InterruptedException ie){}
+                    }
+                }
+            }
+        }
         return inarr;
+    }
+    public void requestBandwidth(){
+
+        return;
     }
 
 }

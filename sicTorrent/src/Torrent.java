@@ -65,6 +65,7 @@ public class Torrent implements Serializable {
     private transient List<Connection> connections;
     private transient PeerManager peermanager;
     private transient boolean endgame = false;
+    private BandwidthController bandwidthcontroller;
 
     class TrackerManager implements Runnable {
         private ArrayList<String> trackerStrings;
@@ -210,6 +211,7 @@ public class Torrent implements Serializable {
                         } else
                             ;//System.out.println(tracker.getUri() + "  " + ire.getMessage());
                         try {
+                            if (!Thread.interrupted())
                             Thread.sleep(120000);
                         } catch (InterruptedException iee) {
 
@@ -426,16 +428,17 @@ public class Torrent implements Serializable {
 
     public Torrent() {
         peers = Collections.synchronizedMap(new HashMap<>());
-        peermanager = new PeerManager(50);
-        trackermanager = new TrackerManager();
         connections = Collections.synchronizedList(new ArrayList<Connection>());
+    }
+    public BandwidthController getBandwidthcontroller(){
+        return bandwidthcontroller;
     }
 
     public Torrent(Parcel parcel) {
         this();
         Downloaded = (long)0;        Uploaded = (long)0;
-
-
+        bandwidthcontroller = new BandwidthController(this);
+        status = TorrentStatus.INACTIVE;
         linear = true;
         progress = "0%";
         DownloadedString = Funcs.lengthToStr(Downloaded);
@@ -444,7 +447,7 @@ public class Torrent implements Serializable {
         connections = new ArrayList<>();
 
         //trackermanager = new TrackerManager();
-        peermanager = new PeerManager(50);
+       // peermanager = new PeerManager(50);
         infohash = parcel.getInfoHash();
         length = 0;
         for (int i = 0; i < parcel.getLength().size(); i++) length += parcel.getLength().get(i);
