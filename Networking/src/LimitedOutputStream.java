@@ -9,7 +9,7 @@ public class LimitedOutputStream extends DataOutputStream {
         super(os);
     }
     public void writeLimited(byte arr[]) throws IOException {
-        int kbps = controller.requestUpBandwidth(this);
+        int kbps = controller.requestUpBandwidth();
         if (kbps<0)
              write(arr);
         else if (kbps>0)
