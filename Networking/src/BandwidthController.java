@@ -39,27 +39,35 @@ public class BandwidthController implements Serializable {
         KBUp = up;
     }
 
-    public synchronized int requestDownBandwidth(LimitedInputStream is) {
-        istreamset.add(is);
+    public synchronized int requestDownBandwidth() {
         if (KBDown < 0)
             return KBDown;
         else
             return 1024 * KBDown / istreamset.size();
     }
 
-    public synchronized int requestUpBandwidth(LimitedOutputStream os) {
-        ostreamset.add(os);
+    public synchronized int requestUpBandwidth() {
         if (KBUp < 0)
             return KBUp;
         else
             return KBUp / ostreamset.size();
     }
+    public synchronized void startDownload(LimitedInputStream is){
+        istreamset.add(is);
+    }
+    public synchronized void startUpload(LimitedOutputStream os){
+        ostreamset.add(os);
+    }
 
     public void freeDownBandwidth(LimitedInputStream is) {
-        istreamset.remove(is);
+        try {
+            istreamset.remove(is);
+        }catch(Exception e){}
     }
 
     public void freeUpBandwidth(LimitedOutputStream os) {
-        ostreamset.remove(os);
+        try {
+            ostreamset.remove(os);
+        }catch(Exception e){}
     }
 }

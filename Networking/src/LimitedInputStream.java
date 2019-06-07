@@ -20,9 +20,10 @@ public class LimitedInputStream extends DataInputStream {
            readNBytes(inarr,0,length);
         }
         else{
+            controller.startDownload(this);
             int readBytes = 0;
             while (readBytes<length){
-                int bps = controller.requestDownBandwidth(this);
+                int bps = controller.requestDownBandwidth();
                 long startTime = System.currentTimeMillis();
                 if (bps<0)
                 {
@@ -34,16 +35,17 @@ public class LimitedInputStream extends DataInputStream {
                 else
                 { readNBytes(inarr,readBytes,length-readBytes);readBytes = length;}
 
-                controller.freeDownBandwidth(this);
                 if (readBytes!=length){
                     long endTime = System.currentTimeMillis();
                     endTime = endTime - startTime;
+
                     if (endTime > 0 && endTime < 1000)
                     {
                         try{Thread.sleep(endTime);}catch(InterruptedException ie){}
                     }
                 }
             }
+            controller.freeDownBandwidth(this);
         }
         return inarr;
     }
