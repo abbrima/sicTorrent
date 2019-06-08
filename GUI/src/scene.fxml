@@ -178,7 +178,7 @@
                                                         <TableColumn fx:id="FileName" prefWidth="240.0" text="Name" />
                                                         <TableColumn fx:id="FileSize" prefWidth="140.0" text="Size" />
                                                         <TableColumn fx:id="FileDownloaded" prefWidth="291.0" text="Downloaded" />
-                                                        <TableColumn fx:id="FileStatus" prefWidth="321.0" text="Status" />
+                                                        <TableColumn fx:id="FileStatuss" prefWidth="321.0" text="Status" />
                                                     </columns>
                                                 </TableView>
                                             </content>

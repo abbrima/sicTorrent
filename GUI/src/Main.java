@@ -22,7 +22,7 @@ public class Main extends Application {
                 fl.createNewFile();
                 ObjectOutputStream obs = new ObjectOutputStream(new FileOutputStream(fl));
                 obs.writeObject(NetworkController.getTorrents());
-            }catch (IOException ioe){}
+            }catch (IOException ioe){ioe.printStackTrace();}
         });
         Parent root = FXMLLoader.load(getClass().getResource("scene.fxml"));
         Controller.primaryStage=primaryStage;
@@ -49,7 +49,7 @@ public class Main extends Application {
                 ArrayList<Torrent> torrents = (ArrayList<Torrent>) ois.readObject();
                 NetworkController.addTorrents(torrents);
                 NetworkController.invokeTorrents();
-            }catch(Exception e){}
+            }catch(Exception e){e.printStackTrace();}
         }
         launch(args);
     }

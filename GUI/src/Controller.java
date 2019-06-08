@@ -6,6 +6,7 @@ import javafx.fxml.FXML;
 
 import javafx.fxml.Initializable;
 
+import java.awt.*;
 import java.io.File;
 import java.util.*;
 
@@ -13,6 +14,10 @@ import java.net.URL;
 
 import javafx.geometry.Insets;
 import javafx.scene.control.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.Menu;
+import javafx.scene.control.MenuItem;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
@@ -35,7 +40,7 @@ public class Controller implements Initializable {
     @FXML private TableColumn<DownloadFile,String> FileName;
     @FXML private TableColumn<DownloadFile,String> FileSize;
     @FXML private TableColumn<DownloadFile,String> FileDownloaded;
-    @FXML private TableColumn<DownloadFile,String> FileStatus;
+    @FXML private TableColumn<DownloadFile,String> FileStatuss;
 
     @FXML private TableView<Torrent> Torrents;
     @FXML private TableColumn<Torrent,String> TorrentName;
@@ -178,7 +183,7 @@ public class Controller implements Initializable {
 
             FileName.setCellValueFactory(new PropertyValueFactory<DownloadFile, String>("path"));
             FileSize.setCellValueFactory(new PropertyValueFactory<>("LengthString"));
-            FileStatus.setCellValueFactory(new PropertyValueFactory<DownloadFile, String>("status"));
+            FileStatuss.setCellValueFactory(new PropertyValueFactory<DownloadFile, String>("status"));
             FileDownloaded.setCellValueFactory(new PropertyValueFactory<>("DownloadedString"));
             Files.setRowFactory(e-> {
                 TableRow<DownloadFile> row = new TableRow<>();
@@ -188,6 +193,13 @@ public class Controller implements Initializable {
                     {
                         currentFile = row.getItem();
                         FilesMenu.show(row,event.getScreenX(),event.getScreenY());
+                    }
+                    else if (event.getClickCount() == 2 && event.getButton().equals(MouseButton.PRIMARY) &&
+                            row.getItem()!=null && row.getItem().getStatus() == FileStatus.DOWNLOADED)
+                    {
+                        Desktop desktop = Desktop.getDesktop();try {
+                        desktop.open(new File(Parameters.downloadDir+row.getItem().getPath()));
+                    }catch(Exception ex){ex.printStackTrace();}
                     }
                 });
                 return row;

@@ -61,7 +61,7 @@ public class Torrent implements Serializable {
     private ArrayList<DownloadFile> files; //length path
     private transient TrackerManager trackermanager;
     private transient Map<String, Integer> peers;
-    private TorrentStatus status;
+    private transient TorrentStatus status;
     private transient List<Connection> connections;
     private transient PeerManager peermanager;
     private transient boolean endgame = false;
@@ -403,7 +403,7 @@ public class Torrent implements Serializable {
                 trackermanager.announceFinished();
                 Thread t = new Thread(() -> {
                     for (Connection c : connections) {
-                        c.setInterested(false);
+                        try{c.setInterested(false);}catch(Exception e){}
                     }
                 });
                 t.setDaemon(true);

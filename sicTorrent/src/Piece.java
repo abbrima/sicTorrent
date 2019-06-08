@@ -52,6 +52,7 @@ public class Piece implements Serializable {
 
     public void setLength(int s) {
         this.length = s;
+        LengthString = Funcs.lengthToStr(s);
     }
 
     public Piece(int length, byte hash[], int index, Torrent torrent) {
