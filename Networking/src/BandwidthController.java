@@ -22,8 +22,8 @@ public class BandwidthController implements Serializable {
         return KBUp < 0;
     }
 //comment
-    private HashSet<LimitedInputStream> istreamset;
-    private HashSet<LimitedOutputStream> ostreamset;
+    private transient HashSet<LimitedInputStream> istreamset;
+    private transient HashSet<LimitedOutputStream> ostreamset;
 
     public BandwidthController(Torrent torrent) {
         this.torrent = torrent;
@@ -43,31 +43,35 @@ public class BandwidthController implements Serializable {
         if (KBDown < 0)
             return KBDown;
         else
-            return 1024 * KBDown / istreamset.size();
+            return 1024 * KBDown / (istreamset.size()+1);
     }
 
     public synchronized int requestUpBandwidth() {
         if (KBUp < 0)
             return KBUp;
         else
-            return KBUp / ostreamset.size();
+            return KBUp / (ostreamset.size()+1);
     }
     public synchronized void startDownload(LimitedInputStream is){
-        istreamset.add(is);
+        try{istreamset.add(is);}catch(Exception e){istreamset = new HashSet<>();
+            ostreamset = new HashSet<>();}
     }
     public synchronized void startUpload(LimitedOutputStream os){
-        ostreamset.add(os);
+        try{ostreamset.add(os);}catch(Exception e){istreamset = new HashSet<>();
+            ostreamset = new HashSet<>();}
     }
 
     public void freeDownBandwidth(LimitedInputStream is) {
         try {
             istreamset.remove(is);
-        }catch(Exception e){}
+        }catch(Exception e){istreamset = new HashSet<>();
+            ostreamset = new HashSet<>();}
     }
 
     public void freeUpBandwidth(LimitedOutputStream os) {
         try {
             ostreamset.remove(os);
-        }catch(Exception e){}
+        }catch(Exception e){istreamset = new HashSet<>();
+            ostreamset = new HashSet<>();}
     }
 }
