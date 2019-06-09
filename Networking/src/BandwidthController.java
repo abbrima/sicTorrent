@@ -30,7 +30,7 @@ public class BandwidthController implements Serializable {
         istreamset = new HashSet<>();
         ostreamset = new HashSet<>();
         KBUp = -1;
-        KBDown = 20;
+        KBDown = -1;
     }
 
     public BandwidthController(Torrent torrent, int down, int up) {

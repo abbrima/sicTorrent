@@ -217,6 +217,9 @@ public class Torrent implements Serializable {
 
                         }
                     }
+                    catch(Exception e){
+                        e.printStackTrace();
+                    }
                 }
 
             }
@@ -297,7 +300,7 @@ public class Torrent implements Serializable {
                         for (String ip : list) {
                             //try
                             {
-                                if (connections.size() < connectionLimit && !NetworkController.ipExists(ip)) {
+                                if (connections.size() < connectionLimit && !NetworkController.ipExists(ip) && !kill) {
                                     Thread t = new Thread(() -> {
                                         Connection c = new Connection(Torrent.this, ip, peers.get(ip));
                                         synchronized (connections) {
@@ -594,7 +597,7 @@ public class Torrent implements Serializable {
         if (status == TorrentStatus.ACTIVE)
             return;
         peers = Collections.synchronizedMap(new HashMap<>());
-        peermanager = new PeerManager(10);
+        peermanager = new PeerManager(30);
         if (trackermanager==null) {trackermanager = new TrackerManager();}
        // if (connections==null)
         connections = Collections.synchronizedList(new ArrayList<>());

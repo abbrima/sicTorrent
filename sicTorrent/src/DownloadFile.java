@@ -23,6 +23,8 @@ public class DownloadFile implements Serializable {
         DownloadedString = Funcs.lengthToStr(downloaded);
         if (length==downloaded)
             status = FileStatus.DOWNLOADED;
+        else
+            status = FileStatus.UNFINISHED;
             //validate();
     }
     public void download(){
