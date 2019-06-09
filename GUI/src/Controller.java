@@ -326,7 +326,7 @@ public class Controller implements Initializable {
             currentTorrent = torrent;
             Torrents.getItems().clear();
             Torrents.getItems().addAll(NetworkController.getTorrents());
-        }catch(Exception ex){}
+        }catch(Exception ex){ex.printStackTrace();}
     }
 
     public void HandleClose(MouseEvent mouseEvent) {

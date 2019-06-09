@@ -8,6 +8,7 @@ import java.util.stream.Stream;
 
 public class Connection implements Runnable {
     private Socket socket;
+    private int pieceCount;
     private boolean am_choking = false; //client is choking the peer
     private boolean am_interested = false; //client is interested in peer
     private boolean peer_choking = false;   //peer is chocking client
@@ -161,6 +162,7 @@ public class Connection implements Runnable {
                                 break;
                             case 4: //have
                                 peerHas[istream.readInt()] = true;
+                                debug = pieceCount + "/" + torrent.getPieces().size();
                                 break;
                             case 5: //bitfield
                                 receiveBitfield(prefix);
@@ -253,6 +255,8 @@ public class Connection implements Runnable {
             }
             byte[] peerID = new byte[20];
             istream.read(peerID);
+            if (new String(peerID,StandardCharsets.UTF_8).equals(Info.getPeerID()))
+                closeSocket();
             ID = new String(peerID);
             t.interrupt();
         } catch (IllegalArgumentException iae) {
@@ -281,6 +285,7 @@ public class Connection implements Runnable {
             else
                 peerHas[i] = false;
             debug = new String(count + "/ " +torrent.getPieces().size());
+            pieceCount = count;
     }
 
     private void receiveRequest() throws IOException {
@@ -323,6 +328,7 @@ public class Connection implements Runnable {
         try {
             p.applyBytes(arr, offset, this);
         } catch (FileNotFoundException fnfe) {
+            fnfe.printStackTrace();
             //handle (stupid user)
         }
     }

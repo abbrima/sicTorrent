@@ -8,7 +8,7 @@ import java.nio.file.Paths;
 
 public class FileController {
     public synchronized static void writeBytesToFile(byte[] arr, DownloadFile file, long offset)
-            throws FileNotFoundException, IOException
+            throws IOException
     {
         File fl = new File(Parameters.downloadDir+file.getPath());
         if (!fl.exists()) throw new FileNotFoundException();

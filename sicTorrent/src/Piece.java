@@ -104,7 +104,7 @@ public class Piece implements Serializable {
             status = BlockStatus.DOWNLOADED;
         }
 
-        public BlockStatus getStatus() {
+        public synchronized BlockStatus getStatus() {
             return status;
         }
 
@@ -114,7 +114,7 @@ public class Piece implements Serializable {
             if (status == BlockStatus.READY && !endgame) {
                 t = new Thread(() -> {
                     try {
-                        Thread.sleep(10000);
+                        Thread.sleep(15000);
                         cancelRequest();
                     } catch (InterruptedException e) {
                     }
@@ -201,8 +201,10 @@ public class Piece implements Serializable {
             downloaded += bytes.length;
             DownloadedString = Funcs.lengthToStr(downloaded);
             torrent.addToDownloaded(bytes.length);
-            if (downloaded.equals(length))
+            if (downloaded.compareTo(length) == 0)
                 this.validate();
+            else if (downloaded.compareTo(length)>0)
+                System.out.println("OVERFLOW");
             else
                 status = PieceStatus.UNFINISHED;
         }

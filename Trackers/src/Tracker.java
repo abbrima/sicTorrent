@@ -195,8 +195,10 @@ class UDPTracker extends Tracker {
         DataInputStream istream = new DataInputStream(bais);
 
         int action = istream.readInt();
-        if (istream.readInt() != TransactionID)
-           System.out.println("Incorrect transaction ID");
+        synchronized(TransactionID) {
+            if (istream.readInt() != TransactionID)
+                System.out.println("Incorrect transaction ID");
+        }
         if (action == 3) {
             istream.close();
             BufferedReader reader = new BufferedReader(new InputStreamReader(bais));
@@ -290,8 +292,10 @@ class UDPTracker extends Tracker {
         ByteArrayInputStream bais = new ByteArrayInputStream(response);
         DataInputStream istream = new DataInputStream(bais);
         int action = istream.readInt();
-        if (istream.readInt() != TransactionID)
-            throw new InvalidReplyException("Incorrect transaction ID");
+        synchronized(TransactionID) {
+            if (istream.readInt() != TransactionID)
+                throw new InvalidReplyException("Incorrect transaction ID");
+        }
         if (action == 3) {
             istream.close();
             BufferedReader reader = new BufferedReader(new InputStreamReader(bais));
@@ -391,7 +395,7 @@ class HTTPTracker extends Tracker {
         }
         try {
             parcel = bCoder.decode(res, ParcelType.RESPONSE);
-        } catch (InvalidBencodeException e) {
+        } catch (Exception e) {
             e.printStackTrace();
             throw new InvalidReplyException(e.getMessage() + new String(res, StandardCharsets.UTF_8));
         }
