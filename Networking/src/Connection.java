@@ -162,6 +162,7 @@ public class Connection implements Runnable {
                                 break;
                             case 4: //have
                                 peerHas[istream.readInt()] = true;
+                                pieceCount++;
                                 debug = pieceCount + "/" + torrent.getPieces().size();
                                 break;
                             case 5: //bitfield
@@ -195,7 +196,7 @@ public class Connection implements Runnable {
                 }
             }
             closeSocket();
-        } catch (IOException ioe) {
+        } catch (Exception ioe) {
 
             closeSocket();
         }
