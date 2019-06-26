@@ -11,5 +11,16 @@
     <orderEntry type="module" module-name="Bencoding" exported="" />
     <orderEntry type="module" module-name="sicTorrent" exported="" />
     <orderEntry type="library" name="lib" level="project" />
+    <orderEntry type="module-library" exported="">
+      <library>
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/../Utils/WaifUPnP.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES>
+          <root url="jar://$MODULE_DIR$/../Utils/WaifUPnP-sources.jar!/" />
+        </SOURCES>
+      </library>
+    </orderEntry>
   </component>
 </module>
