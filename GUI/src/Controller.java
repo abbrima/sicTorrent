@@ -51,8 +51,12 @@ public class Controller implements Initializable {
 
     private ContextMenu TorrentContextMenu;
     private Menu DownloadMode;
-    private Menu TorrentPriority;
-    private MenuItem TorrentHigh,TorrentNorm,TorrentLow;
+    private Menu DownLimit;
+    private Menu UpLimit;
+
+    private MenuItem _32d,_64d,_128d,_256d,_Unlimitedd;
+    private MenuItem _32u,_64u,_128u,_256u,_Unlimitedu;
+
     private MenuItem TorrentResume;
     private MenuItem TorrentPause;
     private MenuItem SequentialMode;
@@ -114,21 +118,42 @@ public class Controller implements Initializable {
         {
             TorrentContextMenu = new ContextMenu();
             TorrentContextMenu.addEventHandler(MouseEvent.MOUSE_CLICKED,e->{TorrentContextMenu.hide();});
-            TorrentHigh = new MenuItem("High"); TorrentNorm = new MenuItem("Normal");
-            TorrentLow = new MenuItem("Low");
-            TorrentPriority = new Menu("Priority"); TorrentPriority.getItems().addAll(TorrentHigh,TorrentNorm,TorrentLow);
+            _32d = new MenuItem("32 KB/s");
+            _64d = new MenuItem("64 KB/s");
+            _128d = new MenuItem("128 KB/s");
+            _Unlimitedd = new MenuItem("Unlimited");
+            _256d = new MenuItem("256 KB/s");
+            _32u = new MenuItem("32 KB/s");
+            _64u = new MenuItem("64 KB/s");
+            _128u = new MenuItem("128 KB/s");
+            _Unlimitedu = new MenuItem("Unlimited");
+            _256u = new MenuItem("256 KB/s");
+            DownLimit = new Menu("Downstream Limit");
+            DownLimit.getItems().addAll(_32d,_64d,_128d,_256d,_Unlimitedd);
+            UpLimit = new Menu("Upstream Limit");
+            UpLimit.getItems().addAll(_32u,_64u,_128u,_256u,_Unlimitedu);
             SequentialMode = new MenuItem("Sequential");
             RandomMode = new MenuItem("Random");
             TorrentPause = new MenuItem("Pause");
             TorrentResume = new MenuItem("Resume");
             DownloadMode = new Menu("Download Mode");
             DownloadMode.getItems().addAll(SequentialMode,RandomMode);
-            TorrentContextMenu.getItems().addAll(TorrentResume,TorrentPause,TorrentPriority,DownloadMode);
+            TorrentContextMenu.getItems().addAll(TorrentResume,TorrentPause,DownLimit,UpLimit,DownloadMode);
             TorrentPause.setOnAction(e->{pauseTorrent(e);});
             TorrentResume.setOnAction(e->{resumeTorrent(e);});
             SequentialMode.setOnAction(e->{setSequential(e);});
             RandomMode.setOnAction(e->{setRandom(e);});
+            _32d.setOnAction(e->{currentTorrent.setDownLimit(32);});
+            _64d.setOnAction(e->{currentTorrent.setDownLimit(64);});
+            _128d.setOnAction(e->{currentTorrent.setDownLimit(128);});
+            _256d.setOnAction(e->{currentTorrent.setDownLimit(256);});
+            _Unlimitedd.setOnAction(e->{currentTorrent.setDownLimit(-1);});
 
+            _32u.setOnAction(e->{currentTorrent.setUpLimit(32);});
+            _64u.setOnAction(e->{currentTorrent.setUpLimit(64);});
+            _128u.setOnAction(e->{currentTorrent.setUpLimit(128);});
+            _256u.setOnAction(e->{currentTorrent.setUpLimit(256);});
+            _Unlimitedu.setOnAction(e->{currentTorrent.setUpLimit(-1);});
 
 
             TorrentName.setCellValueFactory(new PropertyValueFactory<>("name"));

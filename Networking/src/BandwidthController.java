@@ -23,6 +23,12 @@ public class BandwidthController implements Serializable {
     }
 //comment
 
+    public void setDownstream(int down){
+        this.KBDown = down;
+    }
+    public void setUpstream(int up){
+        this.KBUp = up;
+    }
     public BandwidthController(Torrent torrent) {
         this.torrent = torrent;
         KBUp = -1;

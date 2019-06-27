@@ -23,6 +23,13 @@ public class Torrent implements Serializable {
         return length;
     }
 
+    public void setDownLimit(int down){
+        bandwidthcontroller.setDownstream(down);
+    }
+    public void setUpLimit(int up){
+        bandwidthcontroller.setUpstream(up);
+    }
+
     public String getProgress() {
         return progress;
     }
