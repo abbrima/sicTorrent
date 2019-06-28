@@ -7,6 +7,7 @@ import java.util.*;
 import java.util.concurrent.*;
 
 public class Torrent implements Serializable {
+    private String downloadDir;
     private byte infohash[];
     private boolean linear;
     Long Downloaded,Uploaded;
@@ -446,6 +447,7 @@ public class Torrent implements Serializable {
 
     public Torrent(Parcel parcel) {
         this();
+        downloadDir = Parameters.downloadDir;
         Downloaded = (long)0;        Uploaded = (long)0;
         bandwidthcontroller = new BandwidthController(this);
         status = TorrentStatus.INACTIVE;
@@ -485,17 +487,17 @@ public class Torrent implements Serializable {
         files = new ArrayList<>();
 
         if (parcel.getLength().size() == 1) {
-            files.add(new DownloadFile(parcel.getLength().get(0), parcel.getName()));
+            files.add(new DownloadFile(parcel.getLength().get(0), parcel.getName(),this));
         } else {
             for (int i = 0; i < parcel.getLength().size(); i++)
-                files.add(new DownloadFile(parcel.getLength().get(i), name + "/" + parcel.getPath().get(i)));
+                files.add(new DownloadFile(parcel.getLength().get(i), name + "/" + parcel.getPath().get(i),this));
         }
 
         mapPiecesToFiles();
         for (Piece p : pieces)
             p.initBlocks();
     }
-
+    public String getDownloadDir(){return downloadDir;}
     private void mapPiecesToFiles() {
         int fileIt = 0;
         DownloadFile currentFile;

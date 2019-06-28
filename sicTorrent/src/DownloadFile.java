@@ -8,6 +8,7 @@ public class DownloadFile implements Serializable {
     private long downloaded;
     private String LengthString;
     private String DownloadedString;
+    private Torrent torrent;
 
     public String getLengthString(){return LengthString;}
     public String getDownloadedString(){return DownloadedString;}
@@ -68,8 +69,9 @@ public class DownloadFile implements Serializable {
         return path;
     }
 
-    public DownloadFile(long length, String path) {
+    public DownloadFile(long length, String path,Torrent torrent) {
         status = FileStatus.UNFINISHED;
+        this.torrent = torrent;
         downloaded = 0;
 
         this.length = length;
@@ -77,7 +79,7 @@ public class DownloadFile implements Serializable {
         DownloadedString = Funcs.lengthToStr(this.downloaded);
         this.path = path;
         try {
-            FileController.createFile(this);
+            FileController.createFile(this,torrent.getDownloadDir());
         } catch (Exception e) {
             e.printStackTrace();
         }

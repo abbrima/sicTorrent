@@ -7,10 +7,10 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 
 public class FileController {
-    public synchronized static void writeBytesToFile(byte[] arr, DownloadFile file, long offset)
+    public synchronized static void writeBytesToFile(byte[] arr, DownloadFile file, long offset,String dir)
             throws IOException
     {
-        File fl = new File(Parameters.downloadDir+file.getPath());
+        File fl = new File(dir+file.getPath());
         if (!fl.exists()) throw new FileNotFoundException();
         RandomAccessFile raf = new RandomAccessFile(fl,"rw");
         raf.seek(offset);
@@ -19,10 +19,10 @@ public class FileController {
         file.validate();
     }
 
-    public static byte[] readBytesFromFile(DownloadFile file, long offset, long length)
+    public static byte[] readBytesFromFile(DownloadFile file, long offset, long length,String dir)
             throws FileNotFoundException, IOException
     {
-        byte arr[]=new byte[(int)length]; File fl = new File(Parameters.downloadDir+file.getPath());
+        byte arr[]=new byte[(int)length]; File fl = new File(dir+file.getPath());
         if (!fl.exists()) throw new FileNotFoundException();
         RandomAccessFile raf = new RandomAccessFile(fl,"r");
         raf.seek(offset);
@@ -30,12 +30,12 @@ public class FileController {
         return arr;
     }
 
-    public static void createFile(DownloadFile file) throws IOException,FileNotFoundException
+    public static void createFile(DownloadFile file,String dir) throws IOException,FileNotFoundException
     {
         Pair<String, String> pair = splitPath(file.getPath());
-        Files.createDirectories(Paths.get(Parameters.downloadDir+pair.getFirst()));
-        try{Files.createFile(Paths.get(Parameters.downloadDir+pair.getFirst()+pair.getSecond()));
-        File fl = new File(Parameters.downloadDir+file.getPath());
+        Files.createDirectories(Paths.get(dir+pair.getFirst()));
+        try{Files.createFile(Paths.get(dir+pair.getFirst()+pair.getSecond()));
+        File fl = new File(dir+file.getPath());
         if (!fl.exists()){throw new FileNotFoundException();}
         }catch(FileAlreadyExistsException e){}
     }

@@ -8,7 +8,7 @@ public class Info {
     static
     {
         peerID = new String();
-        peerID+="-SIC002-";
+        peerID+="-SIC015-";
         Random rand = new Random();
         for (int i=0;i<12;i++)
             peerID+=Integer.toString(rand.nextInt(10));
