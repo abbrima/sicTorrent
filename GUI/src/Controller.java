@@ -313,11 +313,15 @@ public class Controller implements Initializable {
         }
     }
     public void deleteTorrent(boolean delete){
+
         if (currentTorrent!=null){
             currentTorrent.killThreads();
+        try {
+            if (delete == true) {
+                currentTorrent.deleteFiles();
+            }
+        }catch(Exception e){e.printStackTrace();}
             NetworkController.getTorrents().remove(currentTorrent);
-            if (delete)
-               try{ currentTorrent.deleteFiles();}catch(Exception e){}
             if (NetworkController.getTorrents().size()>0)
                 currentTorrent = NetworkController.getTorrents().get(0);
             else
