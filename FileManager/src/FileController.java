@@ -29,6 +29,11 @@ public class FileController {
         raf.readFully(arr);
         return arr;
     }
+    public static void deleteFile(DownloadFile file,String dir)throws IOException,FileNotFoundException
+    {
+        File fl = new File(dir+file.getPath());
+        fl.delete();
+    }
 
     public static void createFile(DownloadFile file,String dir) throws IOException,FileNotFoundException
     {

@@ -1,3 +1,4 @@
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 
@@ -85,7 +86,9 @@ public class DownloadFile implements Serializable {
         }
         pieces = new ArrayList<>();
     }
-
+    public void deleteFile()throws IOException {
+        FileController.deleteFile(this,torrent.getDownloadDir());
+    }
 }
 
 enum FileStatus {

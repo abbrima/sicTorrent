@@ -51,12 +51,13 @@ public class Controller implements Initializable {
     private Menu DownloadMode;
     private Menu DownLimit;
     private Menu UpLimit;
+    private Menu DeleteMenu;
 
     private MenuItem _32d,_64d,_128d,_256d,_Unlimitedd;
     private MenuItem _32u,_64u,_128u,_256u,_Unlimitedu;
 
-    private MenuItem TorrentResume;
-    private MenuItem TorrentPause;
+    private MenuItem DeleteWithData;
+    private MenuItem Delete;
     private MenuItem SequentialMode;
     private MenuItem RandomMode;
 
@@ -132,13 +133,19 @@ public class Controller implements Initializable {
             UpLimit.getItems().addAll(_32u,_64u,_128u,_256u,_Unlimitedu);
             SequentialMode = new MenuItem("Sequential");
             RandomMode = new MenuItem("Random");
-            TorrentPause = new MenuItem("Pause");
-            TorrentResume = new MenuItem("Resume");
+            Delete = new MenuItem("Delete Torrent Only");
+            DeleteWithData = new MenuItem("Delete With Data");
             DownloadMode = new Menu("Download Mode");
             DownloadMode.getItems().addAll(SequentialMode,RandomMode);
-            TorrentContextMenu.getItems().addAll(TorrentResume,TorrentPause,DownLimit,UpLimit,DownloadMode);
-            TorrentPause.setOnAction(e->{pauseTorrent(e);});
-            TorrentResume.setOnAction(e->{resumeTorrent(e);});
+            DeleteMenu = new Menu("Delete");
+            DeleteMenu.getItems().addAll(Delete,DeleteWithData);
+            TorrentContextMenu.getItems().addAll(DeleteMenu,DownLimit,UpLimit,DownloadMode);
+            DeleteWithData.setOnAction(e->{
+                deleteTorrent(true);
+            });
+            Delete.setOnAction(e->{
+                deleteTorrent(false);
+            });
             SequentialMode.setOnAction(e->{setSequential(e);});
             RandomMode.setOnAction(e->{setRandom(e);});
             _32d.setOnAction(e->{currentTorrent.setDownLimit(32);});
@@ -295,20 +302,22 @@ public class Controller implements Initializable {
 
         if(event.getSource()==btnTorrents){
             labelStatus.setText("Torrents");
-            paneStatus.setBackground(new Background(new BackgroundFill(Color.rgb(0, 80, 58), CornerRadii.EMPTY, Insets.EMPTY)));
+            //paneStatus.setBackground(new Background(new BackgroundFill(Color.rgb(0, 80, 58), CornerRadii.EMPTY, Insets.EMPTY)));
             torrnetGrid.toFront();
         }
 
         else if(event.getSource()==btnSettings){
             labelStatus.setText("Settings");
-            paneStatus.setBackground(new Background(new BackgroundFill(Color.rgb(170, 0, 14), CornerRadii.EMPTY, Insets.EMPTY)));
+            //paneStatus.setBackground(new Background(new BackgroundFill(Color.rgb(170, 0, 14), CornerRadii.EMPTY, Insets.EMPTY)));
             settGrid.toFront();
         }
     }
-    public void deleteTorrentBtnPress(ActionEvent e){
+    public void deleteTorrent(boolean delete){
         if (currentTorrent!=null){
             currentTorrent.killThreads();
             NetworkController.getTorrents().remove(currentTorrent);
+            if (delete)
+               try{ currentTorrent.deleteFiles();}catch(Exception e){}
             if (NetworkController.getTorrents().size()>0)
                 currentTorrent = NetworkController.getTorrents().get(0);
             else

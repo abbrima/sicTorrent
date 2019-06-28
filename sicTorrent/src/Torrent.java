@@ -497,6 +497,10 @@ public class Torrent implements Serializable {
         for (Piece p : pieces)
             p.initBlocks();
     }
+    public void deleteFiles() throws IOException {
+        for (DownloadFile fl : files)
+            fl.deleteFile();
+    }
     public String getDownloadDir(){return downloadDir;}
     private void mapPiecesToFiles() {
         int fileIt = 0;
