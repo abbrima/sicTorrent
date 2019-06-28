@@ -1,5 +1,3 @@
-import animatefx.animation.RollIn;
-import animatefx.animation.Tada;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -298,14 +296,12 @@ public class Controller implements Initializable {
         if(event.getSource()==btnTorrents){
             labelStatus.setText("Torrents");
             paneStatus.setBackground(new Background(new BackgroundFill(Color.rgb(0, 80, 58), CornerRadii.EMPTY, Insets.EMPTY)));
-           new Tada(paneStatus).play();
             torrnetGrid.toFront();
         }
 
         else if(event.getSource()==btnSettings){
             labelStatus.setText("Settings");
             paneStatus.setBackground(new Background(new BackgroundFill(Color.rgb(170, 0, 14), CornerRadii.EMPTY, Insets.EMPTY)));
-            new RollIn(paneStatus).play();
             settGrid.toFront();
         }
     }
@@ -337,9 +333,11 @@ public class Controller implements Initializable {
     }
     public void addTorrentBtnPress(ActionEvent e){
         FileChooser chooser = new FileChooser();
-        File dir = new File("files/");
-        chooser.setInitialDirectory(dir);
-        File fl = chooser.showOpenDialog(primaryStage);
+            File dir = new File("files/");
+            if (dir.exists())
+            chooser.setInitialDirectory(dir);
+          File  fl = chooser.showOpenDialog(primaryStage);
+
         try {
             byte arr[] = TorrentFileReader.readFile(fl.getAbsolutePath());
             Torrent torrent = new Torrent(bCoder.decode(arr, ParcelType.TORRENT));

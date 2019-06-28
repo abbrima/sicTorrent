@@ -246,7 +246,7 @@ public class Piece implements Serializable {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         for (int i = 0; i < blockTable.size(); i++) {
             DataLocation loc = blockTable.get(i);
-            baos.writeBytes(FileController.readBytesFromFile(loc.file, loc.offsetInFile, loc.length));
+            baos.write(FileController.readBytesFromFile(loc.file, loc.offsetInFile, loc.length));
         }
         return baos.toByteArray();
     }
@@ -262,7 +262,7 @@ public class Piece implements Serializable {
                 DataLocation loc = blockTable.get(i);
                 fileOffset = (offset - loc.offsetInPiece) + readBytes;
                 if (i == blockTable.size() - 1) {
-                    baos.writeBytes(FileController.readBytesFromFile(loc.file,
+                    baos.write(FileController.readBytesFromFile(loc.file,
                             loc.offsetInFile + fileOffset, size - readBytes));
                     readBytes = size;
                 } else {
@@ -270,7 +270,7 @@ public class Piece implements Serializable {
                         continue;
                     else {
                         int readable = Math.min(blockTable.get(i + 1).offsetInPiece - offset - readBytes, size - readBytes);
-                        baos.writeBytes(FileController.readBytesFromFile(loc.file, loc.offsetInFile + fileOffset, readable));
+                        baos.write(FileController.readBytesFromFile(loc.file, loc.offsetInFile + fileOffset, readable));
                         readBytes += readable;
                     }
                 }

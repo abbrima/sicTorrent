@@ -35,6 +35,7 @@ public class Server implements Runnable {
         if (n > 8) {
             throw new IOException();
         }
+        System.out.println(port);
     }
 
     public void run()
@@ -42,6 +43,7 @@ public class Server implements Runnable {
         while (true) {
             try {
                 Socket client = server.accept();
+                System.out.println(client.getInetAddress().toString());
                 if (!NetworkController.ipExists(client.getInetAddress().getHostAddress()))
                     NetworkController.getConnections().add(new Connection(client));
                 else

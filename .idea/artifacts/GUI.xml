@@ -1,0 +1,26 @@
+<component name="ArtifactManager">
+  <artifact type="javafx" build-on-make="true" name="GUI">
+    <output-path>$PROJECT_DIR$/out/artifacts/GUI</output-path>
+    <properties id="javafx-properties">
+      <options>
+        <option name="appClass" value="Main" />
+        <option name="description" value="" />
+        <option name="htmlPlaceholderId" value="" />
+        <option name="title" value="" />
+        <option name="vendor" value="" />
+        <option name="version" value="" />
+      </options>
+    </properties>
+    <root id="root">
+      <element id="archive" name="GUI.jar">
+        <element id="module-output" name="GUI" />
+        <element id="module-output" name="Bencoding" />
+        <element id="module-output" name="FileManager" />
+        <element id="module-output" name="Networking" />
+        <element id="module-output" name="sicTorrent" />
+        <element id="module-output" name="Trackers" />
+        <element id="module-output" name="Utils" />
+      </element>
+    </root>
+  </artifact>
+</component>
