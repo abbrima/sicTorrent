@@ -350,10 +350,4 @@ public class Controller implements Initializable {
             Torrents.getItems().addAll(NetworkController.getTorrents());
         }catch(Exception ex){ex.printStackTrace();}
     }
-
-    public void HandleClose(MouseEvent mouseEvent) {
-        if(mouseEvent.getSource()==btnclose){
-            System.exit(0);
-        }
-    }
 }
