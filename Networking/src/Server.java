@@ -1,4 +1,3 @@
-import com.dosse.upnp.UPnP;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -36,7 +35,6 @@ public class Server implements Runnable {
         if (n > 8) {
             throw new IOException();
         }
-        UPnP.openPortTCP(port);
     }
 
     public void run()

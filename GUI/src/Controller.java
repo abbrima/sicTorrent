@@ -180,7 +180,6 @@ public class Controller implements Initializable {
                 Torrents.getItems().addAll(NetworkController.getTorrents());
             } catch (Exception ioobe) {Torrents.getItems().clear();
             }
-
             trackersID.setCellValueFactory(new PropertyValueFactory<Tracker, String>("uri"));
             trackersStatus.setCellValueFactory(new PropertyValueFactory<Tracker, String>("Status"));
             try {
