@@ -73,7 +73,7 @@
                                                 <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
                                             </HBox.margin>
                                         </Button>
-                                        <Button alignment="CENTER" graphicTextGap="15.0" layoutX="20.0" layoutY="20.0" mnemonicParsing="false" prefHeight="45.0" prefWidth="90.0" style="-fx-background-color: #405ed6;" text="Resume" textAlignment="CENTER" textFill="WHITE" wrapText="true">
+                                        <Button alignment="CENTER" graphicTextGap="15.0" layoutX="20.0" layoutY="20.0" mnemonicParsing="false" onAction="#resumeTorrent" prefHeight="45.0" prefWidth="90.0" style="-fx-background-color: #405ed6;" text="Resume" textAlignment="CENTER" textFill="WHITE" wrapText="true">
                                             <effect>
                                                 <Blend mode="LIGHTEN" />
                                             </effect>
@@ -87,7 +87,7 @@
                                                 <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
                                             </HBox.margin>
                                         </Button>
-                              <Button alignment="CENTER" graphicTextGap="15.0" layoutX="117.0" layoutY="30.0" mnemonicParsing="false" prefHeight="45.0" prefWidth="90.0" style="-fx-background-color: #405ed6;" text="Pause" textAlignment="CENTER" textFill="WHITE" wrapText="true">
+                              <Button alignment="CENTER" graphicTextGap="15.0" layoutX="117.0" layoutY="30.0" mnemonicParsing="false" onAction="#pauseTorrent" prefHeight="45.0" prefWidth="90.0" style="-fx-background-color: #405ed6;" text="Pause" textAlignment="CENTER" textFill="WHITE" wrapText="true">
                                  <effect>
                                     <Blend mode="LIGHTEN" />
                                  </effect>
