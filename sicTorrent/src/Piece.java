@@ -184,14 +184,14 @@ public class Piece implements Serializable {
                 DataLocation loc = blockTable.get(i);
                 fileOffset = (offset - loc.offsetInPiece) + appliedBytes;
                 if (i == blockTable.size() - 1) {
-                    FileController.writeBytesToFile(Arrays.copyOfRange(bytes, appliedBytes, bytes.length), loc.file, loc.offsetInFile + fileOffset);
+                    FileController.writeBytesToFile(Arrays.copyOfRange(bytes, appliedBytes, bytes.length), loc.file, loc.offsetInFile + fileOffset,torrent.getDownloadDir());
                     appliedBytes = bytes.length;
                 } else {
                     if (offset >= blockTable.get(i + 1).offsetInPiece) {
                         continue;
                     } else {
                         int writable = Math.min(blockTable.get(i + 1).offsetInPiece - offset - appliedBytes, bytes.length - appliedBytes);
-                        FileController.writeBytesToFile(Arrays.copyOfRange(bytes, appliedBytes, appliedBytes + writable), loc.file, loc.offsetInFile + fileOffset);
+                        FileController.writeBytesToFile(Arrays.copyOfRange(bytes, appliedBytes, appliedBytes + writable), loc.file, loc.offsetInFile + fileOffset,torrent.getDownloadDir());
                         appliedBytes += writable;
                     }
                 }
@@ -246,7 +246,7 @@ public class Piece implements Serializable {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         for (int i = 0; i < blockTable.size(); i++) {
             DataLocation loc = blockTable.get(i);
-            baos.write(FileController.readBytesFromFile(loc.file, loc.offsetInFile, loc.length));
+            baos.write(FileController.readBytesFromFile(loc.file, loc.offsetInFile, loc.length,torrent.getDownloadDir()));
         }
         return baos.toByteArray();
     }
@@ -263,14 +263,14 @@ public class Piece implements Serializable {
                 fileOffset = (offset - loc.offsetInPiece) + readBytes;
                 if (i == blockTable.size() - 1) {
                     baos.write(FileController.readBytesFromFile(loc.file,
-                            loc.offsetInFile + fileOffset, size - readBytes));
+                            loc.offsetInFile + fileOffset, size - readBytes,torrent.getDownloadDir()));
                     readBytes = size;
                 } else {
                     if (offset >= blockTable.get(i + 1).offsetInPiece)
                         continue;
                     else {
                         int readable = Math.min(blockTable.get(i + 1).offsetInPiece - offset - readBytes, size - readBytes);
-                        baos.write(FileController.readBytesFromFile(loc.file, loc.offsetInFile + fileOffset, readable));
+                        baos.write(FileController.readBytesFromFile(loc.file, loc.offsetInFile + fileOffset, readable,torrent.getDownloadDir()));
                         readBytes += readable;
                     }
                 }
