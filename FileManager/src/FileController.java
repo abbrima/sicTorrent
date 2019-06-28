@@ -2,11 +2,18 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
-import java.nio.file.FileAlreadyExistsException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
+import java.nio.file.*;
 
 public class FileController {
+   private static boolean deleteDirectory(File directoryToBeDeleted) {
+        File[] allContents = directoryToBeDeleted.listFiles();
+        if (allContents != null) {
+            for (File file : allContents) {
+                deleteDirectory(file);
+            }
+        }
+        return directoryToBeDeleted.delete();
+    }
     public synchronized static void writeBytesToFile(byte[] arr, DownloadFile file, long offset,String dir)
             throws IOException
     {
@@ -31,10 +38,17 @@ public class FileController {
     }
     public static void deleteFile(DownloadFile file,String dir)throws IOException,FileNotFoundException
     {
-        File fl = new File(dir+file.getPath());
-        fl.delete();
+        try {
+            Files.delete(Paths.get(dir + file.getPath()));
+        }catch(Exception e){e.printStackTrace();}
     }
-
+    public static void deleteDirectory(DownloadFile file,String dir)throws IOException, FileNotFoundException
+    {
+        String arr[] = file.getPath().split("/");
+        try {
+            System.err.println(deleteDirectory(new File(dir+arr[0])));
+        }catch(Exception e){e.printStackTrace();}
+    }
     public static void createFile(DownloadFile file,String dir) throws IOException,FileNotFoundException
     {
         Pair<String, String> pair = splitPath(file.getPath());

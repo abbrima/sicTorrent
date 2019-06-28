@@ -498,8 +498,10 @@ public class Torrent implements Serializable {
             p.initBlocks();
     }
     public void deleteFiles() throws IOException {
-        for (DownloadFile fl : files)
-            fl.deleteFile();
+       // for (DownloadFile fl : files)
+         //   fl.deleteFile();
+        FileController.deleteDirectory(files.get(0),downloadDir);
+
     }
     public String getDownloadDir(){return downloadDir;}
     private void mapPiecesToFiles() {
