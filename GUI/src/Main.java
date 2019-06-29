@@ -92,7 +92,8 @@ public class Main extends Application {
                         NetworkController.killTorrents();
                         //save torrent objects
                     });
-                        loadStage.hide();
+                    try{Thread.sleep(2000); }catch(Exception e){}
+                    loadStage.hide();
                     primaryStage.show();
                     primaryStage.setMaximized(true);
                    }catch(Exception e){}

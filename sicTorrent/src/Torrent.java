@@ -311,11 +311,14 @@ public class Torrent implements Serializable {
                                 if (connections.size() < connectionLimit && !NetworkController.ipExists(ip) && !kill) {
                                     Thread t = new Thread(() -> {
                                         Connection c = new Connection(Torrent.this, ip, peers.get(ip));
-                                        synchronized (connections) {
-                                            connections.add(c);
-                                        }
-                                        synchronized (NetworkController.getConnections()) {
-                                            NetworkController.getConnections().add(c);
+
+                                        if (status == TorrentStatus.ACTIVE) {
+                                            synchronized (connections) {
+                                                connections.add(c);
+                                            }
+                                            synchronized (NetworkController.getConnections()) {
+                                                NetworkController.getConnections().add(c);
+                                            }
                                         }
                                     });
                                     t.setDaemon(true);
