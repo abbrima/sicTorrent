@@ -93,7 +93,7 @@
                                             </HBox.margin>
                                         </Button>
                               <Separator orientation="VERTICAL" prefHeight="200.0" />
-                                        <Button alignment="CENTER" graphicTextGap="15.0" layoutX="20.0" layoutY="20.0" mnemonicParsing="false" onAction="#resumeTorrent" prefHeight="45.0" prefWidth="90.0" style="-fx-background-color: #405ed6;" text="Resume" textAlignment="CENTER" textFill="WHITE" wrapText="true">
+                                        <Button fx:id="ResumeTorrentButton" alignment="CENTER" graphicTextGap="15.0" layoutX="20.0" layoutY="20.0" mnemonicParsing="false" onAction="#resumeTorrent" prefHeight="45.0" prefWidth="90.0" style="-fx-background-color: #405ed6;" text="Resume" textAlignment="CENTER" textFill="WHITE" wrapText="true">
                                             <effect>
                                                 <Blend mode="LIGHTEN" />
                                             </effect>
@@ -107,7 +107,7 @@
                                                 <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
                                             </HBox.margin>
                                         </Button>
-                              <Button alignment="CENTER" graphicTextGap="15.0" layoutX="117.0" layoutY="30.0" mnemonicParsing="false" onAction="#pauseTorrent" prefHeight="45.0" prefWidth="90.0" style="-fx-background-color: #405ed6;" text="Pause" textAlignment="CENTER" textFill="WHITE" wrapText="true">
+                              <Button fx:id="PauseTorrentButton" alignment="CENTER" graphicTextGap="15.0" layoutX="117.0" layoutY="30.0" mnemonicParsing="false" onAction="#pauseTorrent" prefHeight="45.0" prefWidth="90.0" style="-fx-background-color: #405ed6;" text="Pause" textAlignment="CENTER" textFill="WHITE" wrapText="true">
                                  <effect>
                                     <Blend mode="LIGHTEN" />
                                  </effect>
@@ -122,7 +122,10 @@
                                  </HBox.margin>
                               </Button>
                               <Separator orientation="VERTICAL" prefHeight="200.0" />
-                                        <Label fx:id="speedlbl" alignment="CENTER" prefHeight="60.0" prefWidth="169.0" text="0.0 KBPS" />
+                                        <Label fx:id="speedlbl" prefHeight="60.0" prefWidth="126.0" text="0.0 KBPS">
+                                 <HBox.margin>
+                                    <Insets left="15.0" />
+                                 </HBox.margin></Label>
                                     </children>
                                     <padding>
                                         <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
@@ -133,6 +136,18 @@
                                 </HBox>
                                 <TabPane prefHeight="369.0" prefWidth="1280.0" tabClosingPolicy="UNAVAILABLE" GridPane.rowIndex="2">
                                     <tabs>
+                                        <Tab text="Files">
+                                            <content>
+                                                <TableView fx:id="Files" editable="true" prefHeight="367.0" prefWidth="626.0">
+                                                    <columns>
+                                                        <TableColumn fx:id="FileName" prefWidth="240.0" text="Name" />
+                                                        <TableColumn fx:id="FileSize" prefWidth="140.0" text="Size" />
+                                                        <TableColumn fx:id="FileDownloaded" prefWidth="291.0" text="Downloaded" />
+                                                        <TableColumn fx:id="FileStatuss" prefWidth="321.0" text="Status" />
+                                                    </columns>
+                                                </TableView>
+                                            </content>
+                                        </Tab>
                                         <Tab text="Peers">
                                             <content>
                                                 <TableView fx:id="peers" prefHeight="200.0" prefWidth="200.0">
@@ -166,25 +181,13 @@
                                                 </TableView>
                                             </content>
                                         </Tab>
-                                        <Tab text="Files">
-                                            <content>
-                                                <TableView fx:id="Files" editable="true" prefHeight="367.0" prefWidth="626.0">
-                                                    <columns>
-                                                        <TableColumn fx:id="FileName" prefWidth="240.0" text="Name" />
-                                                        <TableColumn fx:id="FileSize" prefWidth="140.0" text="Size" />
-                                                        <TableColumn fx:id="FileDownloaded" prefWidth="291.0" text="Downloaded" />
-                                                        <TableColumn fx:id="FileStatuss" prefWidth="321.0" text="Status" />
-                                                    </columns>
-                                                </TableView>
-                                            </content>
-                                        </Tab>
                                     </tabs>
                                 </TabPane>
                                 <TableView fx:id="Torrents" prefHeight="200.0" prefWidth="200.0" GridPane.rowIndex="1">
                                     <columns>
                                         <TableColumn fx:id="TorrentName" prefWidth="300.0" text="Name" />
                                         <TableColumn fx:id="TorrentSize" minWidth="0.0" prefWidth="150.0" text="Size" />
-                                        <TableColumn fx:id="TorrentStatus" prefWidth="100.0" text="Progress" />
+                                        <TableColumn fx:id="Torrentstatus" prefWidth="100.0" text="Progress" />
                                         <TableColumn fx:id="TorrentDownloaded" prefWidth="150.0" text="Downloaded" />
                                         <TableColumn fx:id="TorrentUploaded" prefWidth="150.0" text="Uploaded" />
                                     </columns>
@@ -229,7 +232,7 @@
                         </Label>
                     </children>
                 </Pane>
-                <Button fx:id="btnTorrents" alignment="BASELINE_LEFT" graphicTextGap="15.0" mnemonicParsing="false" onAction="#Handleclicks" prefHeight="55.0" prefWidth="342.0" style="-fx-background-color: #EF6C00;" text="Torrents" textFill="#fff3e0">
+                <Button fx:id="btnTorrents" alignment="BASELINE_LEFT" graphicTextGap="15.0" mnemonicParsing="false" onAction="#Handleclicks" prefHeight="55.0" prefWidth="433.0" style="-fx-background-color: #EF6C00;" text="Torrents" textFill="#fff3e0">
                     <font>
                         <Font size="20.0" />
                     </font>

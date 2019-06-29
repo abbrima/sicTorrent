@@ -602,6 +602,11 @@ public class Torrent implements Serializable {
             p.cancelGet();
         for (Tracker t:trackerlist)
             t.setStatus(TrackerStatus.NONE);
+        if (Downloaded == length)
+            progress = "Finished";
+        else
+            progress = "Paused";
+
     }
 
     public ArrayList<Tracker> getTrackers() {

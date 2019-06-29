@@ -14,7 +14,6 @@ public class Connection implements Runnable {
     private boolean peer_choking = false;   //peer is chocking client
     private boolean peer_interested = false; // peer is interested
 
-
     private ConnectionState state;
     public boolean chocked(){return peer_choking;}
     private boolean peerHas[];

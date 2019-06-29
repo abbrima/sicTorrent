@@ -31,6 +31,23 @@ import javafx.stage.*;
 
 public class Controller implements Initializable {
 
+    void setSidePanelButtonBackground(Button btn,boolean enable){
+        if (enable)
+             btn.setStyle("-fx-background-color:  #FF9800;");
+        else
+             btn.setStyle("-fx-background-color:  #EF6C00;");
+    }
+    void setTorrentControlButtons(TorrentStatus status){
+        if (status == TorrentStatus.ACTIVE)
+        {
+            ResumeTorrentButton.setDisable(true);
+            PauseTorrentButton.setDisable(false);
+        }
+        else{
+            ResumeTorrentButton.setDisable(false);
+            PauseTorrentButton.setDisable(true);
+        }
+    }
     public static Stage primaryStage;
     @FXML
     private TableView<Tracker> trackers;
@@ -42,7 +59,8 @@ public class Controller implements Initializable {
     private Button Refresh;
     private static ArrayList<Long> downloadeds = new ArrayList<>();
 
-
+    @FXML private Button PauseTorrentButton;
+    @FXML private Button ResumeTorrentButton;
 
     @FXML
     private TableView<DownloadFile> Files;
@@ -62,7 +80,7 @@ public class Controller implements Initializable {
     @FXML
     private TableColumn<Torrent, String> TorrentSize;
     @FXML
-    private TableColumn<Torrent, String> TorrentStatus;
+    private TableColumn<Torrent, String> Torrentstatus;
     @FXML
     private TableColumn<Torrent, String> TorrentDownloaded;
     @FXML
@@ -146,9 +164,13 @@ public class Controller implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
+        ResumeTorrentButton.setDisable(true);
+        PauseTorrentButton.setDisable(true);
         if (NetworkController.getTorrents().size() > 0)
+        {
             currentTorrent = NetworkController.getTorrents().get(0);
-
+            setTorrentControlButtons(currentTorrent.getStatus());
+        }
 
         {
             TorrentContextMenu = new ContextMenu();
@@ -221,21 +243,23 @@ public class Controller implements Initializable {
             _Unlimitedu.setOnAction(e -> {
                 currentTorrent.setUpLimit(-1);
             });
-
-
             TorrentName.setCellValueFactory(new PropertyValueFactory<>("name"));
             TorrentDownloaded.setCellValueFactory(new PropertyValueFactory<>("DownloadedString"));
             TorrentUploaded.setCellValueFactory(new PropertyValueFactory<>("UploadedString"));
             TorrentSize.setCellValueFactory(new PropertyValueFactory<>("LengthString"));
-            TorrentStatus.setCellValueFactory(new PropertyValueFactory<>("progress"));
+            Torrentstatus.setCellValueFactory(new PropertyValueFactory<>("progress"));
             Torrents.setRowFactory(e -> {
                 TableRow<Torrent> row = new TableRow<>();
                 row.setOnMouseClicked(event -> {
                     if (event.getClickCount() == 1 && event.getButton().equals(MouseButton.PRIMARY) && row.getItem() != null)
-                        currentTorrent = row.getItem();
+                    { currentTorrent = row.getItem();            setTorrentControlButtons(currentTorrent.getStatus());
+                    }
                     if (event.getClickCount() == 1 && event.getButton().equals(MouseButton.SECONDARY) && row.getItem() != null) {
-                        currentTorrent = row.getItem();
-                        TorrentContextMenu.show(row, event.getScreenX(), event.getScreenY());
+                        {
+                            currentTorrent = row.getItem();
+                            setTorrentControlButtons(currentTorrent.getStatus());
+                        }
+                            TorrentContextMenu.show(row, event.getScreenX(), event.getScreenY());
                     }
                 });
                 return row;
@@ -291,6 +315,8 @@ public class Controller implements Initializable {
                 currentTorrent.doNotDownload(currentFile);
             });
 
+            setSidePanelButtonBackground(btnTorrents,true);
+
             FileName.setCellValueFactory(new PropertyValueFactory<DownloadFile, String>("path"));
             FileSize.setCellValueFactory(new PropertyValueFactory<>("LengthString"));
             FileStatuss.setCellValueFactory(new PropertyValueFactory<DownloadFile, String>("status"));
@@ -318,7 +344,6 @@ public class Controller implements Initializable {
                 Files.getItems().addAll(currentTorrent.getFiles());
             } catch (Exception ioobe) {
             }
-
             PieceDownloaded.setCellValueFactory(new PropertyValueFactory<>("DownloadedString"));
             PieceSize.setCellValueFactory(new PropertyValueFactory<>("LengthString"));
             PieceStatus.setCellValueFactory(new PropertyValueFactory<Piece, String>("status"));
@@ -383,10 +408,14 @@ public class Controller implements Initializable {
 
         if (event.getSource() == btnTorrents) {
             labelStatus.setText("Torrents");
+            setSidePanelButtonBackground(btnTorrents,true);
+            setSidePanelButtonBackground(btnSettings,false);
             //paneStatus.setBackground(new Background(new BackgroundFill(Color.rgb(0, 80, 58), CornerRadii.EMPTY, Insets.EMPTY)));
             torrnetGrid.toFront();
         } else if (event.getSource() == btnSettings) {
             labelStatus.setText("Settings");
+            setSidePanelButtonBackground(btnTorrents,false);
+            setSidePanelButtonBackground(btnSettings,true);
             //paneStatus.setBackground(new Background(new BackgroundFill(Color.rgb(170, 0, 14), CornerRadii.EMPTY, Insets.EMPTY)));
             settGrid.toFront();
         }
@@ -404,21 +433,32 @@ public class Controller implements Initializable {
                 e.printStackTrace();
             }
             NetworkController.getTorrents().remove(currentTorrent);
-            if (NetworkController.getTorrents().size() > 0)
+            if (NetworkController.getTorrents().size() > 0) {
                 currentTorrent = NetworkController.getTorrents().get(0);
+                setTorrentControlButtons(currentTorrent.getStatus());
+            }
             else
-                currentTorrent = null;
+            {currentTorrent = null;
+            PauseTorrentButton.setDisable(true);
+            ResumeTorrentButton.setDisable(true);
+            }
         }
     }
 
     public void pauseTorrent(ActionEvent e) {
         if (currentTorrent != null)
+        {
             currentTorrent.killThreads();
+            setTorrentControlButtons(currentTorrent.getStatus());
+        }
     }
 
     public void resumeTorrent(ActionEvent e) {
         if (currentTorrent != null)
+        {
             currentTorrent.invokeThreads();
+            setTorrentControlButtons(currentTorrent.getStatus());
+        }
     }
 
     public void setSequential(ActionEvent e) {
@@ -446,6 +486,7 @@ public class Controller implements Initializable {
             NetworkController.addTorrent(torrent);
             torrent.invokeThreads();
             currentTorrent = torrent;
+            setTorrentControlButtons(currentTorrent.getStatus());
             Torrents.getItems().clear();
             Torrents.getItems().addAll(NetworkController.getTorrents());
         } catch (Exception ex) {
