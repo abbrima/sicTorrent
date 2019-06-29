@@ -56,6 +56,9 @@ public class Controller implements Initializable {
     private MenuItem _32d,_64d,_128d,_256d,_Unlimitedd;
     private MenuItem _32u,_64u,_128u,_256u,_Unlimitedu;
 
+    private Menu PeersMenu;
+    private MenuItem AddPeerMenuItem;
+
     private MenuItem DeleteWithData;
     private MenuItem Delete;
     private MenuItem SequentialMode;
@@ -98,7 +101,7 @@ public class Controller implements Initializable {
     private Button btnclose;
 
     @FXML
-    private GridPane settGrid;
+    private Pane settGrid;
 
     @FXML
     private GridPane torrnetGrid;
@@ -199,6 +202,9 @@ public class Controller implements Initializable {
                 peers.getItems().addAll(currentTorrent.getConnections());
             } catch (Exception e) {
             }
+            PeersMenu = new Menu("Peers");
+            AddPeerMenuItem = new MenuItem("Add Peer");
+
 
             FilesMenu = new ContextMenu();
             Download = new MenuItem("Download");
