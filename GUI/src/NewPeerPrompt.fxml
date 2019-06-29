@@ -6,17 +6,16 @@
 <?import javafx.scene.effect.Blend?>
 <?import javafx.scene.layout.AnchorPane?>
 
-
-<AnchorPane focusTraversable="true" prefHeight="175.0" prefWidth="300.0" style="-fx-background-color: #405ed6;" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Controller">
+<AnchorPane focusTraversable="true" prefHeight="175.0" prefWidth="300.0" style="-fx-background-color: #405ed6;" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="PromptController">
    <effect>
       <Blend mode="LIGHTEN" />
    </effect>
    <children>
-      <TextField layoutX="103.0" layoutY="32.0" translateX="-10.0" />
-      <TextField layoutX="83.0" layoutY="75.0" translateX="10.0" />
-      <Button layoutX="222.0" layoutY="120.0" mnemonicParsing="false" style="-fx-background-color: #FF9800;" text="Add" textFill="#fff3e0" />
+      <TextField fx:id="ipPrompt" layoutX="103.0" layoutY="32.0" translateX="-10.0" />
+      <TextField fx:id="portPrompt" layoutX="83.0" layoutY="75.0" translateX="10.0" />
+      <Button layoutX="222.0" layoutY="120.0" mnemonicParsing="false" onAction="#addPrompt" style="-fx-background-color: #FF9800;" text="Add" textFill="#fff3e0" />
       <Label layoutX="19.0" layoutY="36.0" text="IP Address" textFill="#fff3e0" />
       <Label layoutX="36.0" layoutY="79.0" text="Port" textFill="#fff3e0" />
-      <Button layoutX="150.0" layoutY="120.0" mnemonicParsing="false" style="-fx-background-color: #FF9800;" text="Cancel" textFill="#fff3e0" />
+      <Button layoutX="150.0" layoutY="120.0" mnemonicParsing="false" onAction="#cancelPrompt" style="-fx-background-color: #FF9800;" text="Cancel" textFill="#fff3e0" />
    </children>
 </AnchorPane>

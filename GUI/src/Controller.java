@@ -1,7 +1,9 @@
 import javafx.application.Platform;
+import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 
+import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 
 import java.awt.*;
@@ -11,41 +13,60 @@ import java.util.*;
 import java.net.URL;
 
 import javafx.geometry.Insets;
+import javafx.geometry.Rectangle2D;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
+import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
-import javafx.stage.FileChooser;
-import javafx.stage.Stage;
+import javafx.stage.*;
 
 public class Controller implements Initializable {
 
     public static Stage primaryStage;
-    @FXML private TableView<Tracker> trackers;
-    @FXML private TableColumn<Tracker,String> trackersID;
-    @FXML private TableColumn<Tracker,String> trackersStatus;
-    @FXML private Button Refresh;
+    @FXML
+    private TableView<Tracker> trackers;
+    @FXML
+    private TableColumn<Tracker, String> trackersID;
+    @FXML
+    private TableColumn<Tracker, String> trackersStatus;
+    @FXML
+    private Button Refresh;
     private static ArrayList<Long> downloadeds = new ArrayList<>();
 
 
-    @FXML private TableView<DownloadFile> Files;
-    @FXML private TableColumn<DownloadFile,String> FileName;
-    @FXML private TableColumn<DownloadFile,String> FileSize;
-    @FXML private TableColumn<DownloadFile,String> FileDownloaded;
-    @FXML private TableColumn<DownloadFile,String> FileStatuss;
 
-    @FXML private TableView<Torrent> Torrents;
-    @FXML private TableColumn<Torrent,String> TorrentName;
-    @FXML private TableColumn<Torrent,String> TorrentSize;
-    @FXML private TableColumn<Torrent,String> TorrentStatus;
-    @FXML private TableColumn<Torrent,String> TorrentDownloaded;
-    @FXML private TableColumn<Torrent,String> TorrentUploaded;
+    @FXML
+    private TableView<DownloadFile> Files;
+    @FXML
+    private TableColumn<DownloadFile, String> FileName;
+    @FXML
+    private TableColumn<DownloadFile, String> FileSize;
+    @FXML
+    private TableColumn<DownloadFile, String> FileDownloaded;
+    @FXML
+    private TableColumn<DownloadFile, String> FileStatuss;
+
+    @FXML
+    private TableView<Torrent> Torrents;
+    @FXML
+    private TableColumn<Torrent, String> TorrentName;
+    @FXML
+    private TableColumn<Torrent, String> TorrentSize;
+    @FXML
+    private TableColumn<Torrent, String> TorrentStatus;
+    @FXML
+    private TableColumn<Torrent, String> TorrentDownloaded;
+    @FXML
+    private TableColumn<Torrent, String> TorrentUploaded;
 
     private ContextMenu TorrentContextMenu;
     private Menu DownloadMode;
@@ -53,8 +74,8 @@ public class Controller implements Initializable {
     private Menu UpLimit;
     private Menu DeleteMenu;
 
-    private MenuItem _32d,_64d,_128d,_256d,_Unlimitedd;
-    private MenuItem _32u,_64u,_128u,_256u,_Unlimitedu;
+    private MenuItem _32d, _64d, _128d, _256d, _Unlimitedd;
+    private MenuItem _32u, _64u, _128u, _256u, _Unlimitedu;
 
     private ContextMenu PeersMenu;
     private MenuItem AddPeerMenuItem;
@@ -64,30 +85,42 @@ public class Controller implements Initializable {
     private MenuItem SequentialMode;
     private MenuItem RandomMode;
 
-    @FXML private TableView<Piece> Pieces;
-    @FXML private TableColumn<Piece, String> PieceDownloaded;
-    @FXML private TableColumn<Piece,String> PieceSize;
-    @FXML private TableColumn<Piece,String> PieceStatus;
-    @FXML private TableColumn<Piece,Integer> PieceIndex;
+    @FXML
+    private TableView<Piece> Pieces;
+    @FXML
+    private TableColumn<Piece, String> PieceDownloaded;
+    @FXML
+    private TableColumn<Piece, String> PieceSize;
+    @FXML
+    private TableColumn<Piece, String> PieceStatus;
+    @FXML
+    private TableColumn<Piece, Integer> PieceIndex;
 
-    @FXML private TableView<Connection> peers;
-    @FXML private TableColumn<Connection,String> PeerID;
-    @FXML private TableColumn<Connection,String> PeerStatus;
-    @FXML private TableColumn<Connection,String> PeerDebug;
+    @FXML
+    private TableView<Connection> peers;
+    @FXML
+    private TableColumn<Connection, String> PeerID;
+    @FXML
+    private TableColumn<Connection, String> PeerStatus;
+    @FXML
+    private TableColumn<Connection, String> PeerDebug;
 
     @FXML
     private Pane paneStatus;
 
     @FXML
     private Button btnTorrents;
-    @FXML private Button addTorrentBtn;
+    @FXML
+    private Button addTorrentBtn;
 
     @FXML
     private Button btnSettings;
 
-    @FXML private Button btnDelete;
+    @FXML
+    private Button btnDelete;
 
-    @FXML private Label speedlbl;
+    @FXML
+    private Label speedlbl;
 
     @FXML
     private Button btnAddTorrent;
@@ -106,20 +139,22 @@ public class Controller implements Initializable {
     @FXML
     private GridPane torrnetGrid;
 
-    private static Torrent currentTorrent;
+    public static Torrent currentTorrent;
     private static DownloadFile currentFile;
     private ContextMenu FilesMenu;
-    private MenuItem Download,DoNotDownload;
+    private MenuItem Download, DoNotDownload;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        if (NetworkController.getTorrents().size()>0)
-            currentTorrent=NetworkController.getTorrents().get(0);
+        if (NetworkController.getTorrents().size() > 0)
+            currentTorrent = NetworkController.getTorrents().get(0);
 
 
         {
             TorrentContextMenu = new ContextMenu();
-            TorrentContextMenu.addEventHandler(MouseEvent.MOUSE_CLICKED,e->{TorrentContextMenu.hide();});
+            TorrentContextMenu.addEventHandler(MouseEvent.MOUSE_CLICKED, e -> {
+                TorrentContextMenu.hide();
+            });
             _32d = new MenuItem("32 KB/s");
             _64d = new MenuItem("64 KB/s");
             _128d = new MenuItem("128 KB/s");
@@ -131,37 +166,61 @@ public class Controller implements Initializable {
             _Unlimitedu = new MenuItem("Unlimited");
             _256u = new MenuItem("256 KB/s");
             DownLimit = new Menu("Downstream Limit");
-            DownLimit.getItems().addAll(_32d,_64d,_128d,_256d,_Unlimitedd);
+            DownLimit.getItems().addAll(_32d, _64d, _128d, _256d, _Unlimitedd);
             UpLimit = new Menu("Upstream Limit");
-            UpLimit.getItems().addAll(_32u,_64u,_128u,_256u,_Unlimitedu);
+            UpLimit.getItems().addAll(_32u, _64u, _128u, _256u, _Unlimitedu);
             SequentialMode = new MenuItem("Sequential");
             RandomMode = new MenuItem("Random");
             Delete = new MenuItem("Delete Torrent Only");
             DeleteWithData = new MenuItem("Delete With Data");
             DownloadMode = new Menu("Download Mode");
-            DownloadMode.getItems().addAll(SequentialMode,RandomMode);
+            DownloadMode.getItems().addAll(SequentialMode, RandomMode);
             DeleteMenu = new Menu("Delete");
-            DeleteMenu.getItems().addAll(Delete,DeleteWithData);
-            TorrentContextMenu.getItems().addAll(DeleteMenu,DownLimit,UpLimit,DownloadMode);
-            DeleteWithData.setOnAction(e->{
+            DeleteMenu.getItems().addAll(Delete, DeleteWithData);
+            TorrentContextMenu.getItems().addAll(DeleteMenu, DownLimit, UpLimit, DownloadMode);
+            DeleteWithData.setOnAction(e -> {
                 deleteTorrent(true);
             });
-            Delete.setOnAction(e->{
+            Delete.setOnAction(e -> {
                 deleteTorrent(false);
             });
-            SequentialMode.setOnAction(e->{setSequential(e);});
-            RandomMode.setOnAction(e->{setRandom(e);});
-            _32d.setOnAction(e->{currentTorrent.setDownLimit(32);});
-            _64d.setOnAction(e->{currentTorrent.setDownLimit(64);});
-            _128d.setOnAction(e->{currentTorrent.setDownLimit(128);});
-            _256d.setOnAction(e->{currentTorrent.setDownLimit(256);});
-            _Unlimitedd.setOnAction(e->{currentTorrent.setDownLimit(-1);});
+            SequentialMode.setOnAction(e -> {
+                setSequential(e);
+            });
+            RandomMode.setOnAction(e -> {
+                setRandom(e);
+            });
+            _32d.setOnAction(e -> {
+                currentTorrent.setDownLimit(32);
+            });
+            _64d.setOnAction(e -> {
+                currentTorrent.setDownLimit(64);
+            });
+            _128d.setOnAction(e -> {
+                currentTorrent.setDownLimit(128);
+            });
+            _256d.setOnAction(e -> {
+                currentTorrent.setDownLimit(256);
+            });
+            _Unlimitedd.setOnAction(e -> {
+                currentTorrent.setDownLimit(-1);
+            });
 
-            _32u.setOnAction(e->{currentTorrent.setUpLimit(32);});
-            _64u.setOnAction(e->{currentTorrent.setUpLimit(64);});
-            _128u.setOnAction(e->{currentTorrent.setUpLimit(128);});
-            _256u.setOnAction(e->{currentTorrent.setUpLimit(256);});
-            _Unlimitedu.setOnAction(e->{currentTorrent.setUpLimit(-1);});
+            _32u.setOnAction(e -> {
+                currentTorrent.setUpLimit(32);
+            });
+            _64u.setOnAction(e -> {
+                currentTorrent.setUpLimit(64);
+            });
+            _128u.setOnAction(e -> {
+                currentTorrent.setUpLimit(128);
+            });
+            _256u.setOnAction(e -> {
+                currentTorrent.setUpLimit(256);
+            });
+            _Unlimitedu.setOnAction(e -> {
+                currentTorrent.setUpLimit(-1);
+            });
 
 
             TorrentName.setCellValueFactory(new PropertyValueFactory<>("name"));
@@ -169,24 +228,24 @@ public class Controller implements Initializable {
             TorrentUploaded.setCellValueFactory(new PropertyValueFactory<>("UploadedString"));
             TorrentSize.setCellValueFactory(new PropertyValueFactory<>("LengthString"));
             TorrentStatus.setCellValueFactory(new PropertyValueFactory<>("progress"));
-            Torrents.setRowFactory(e-> {
+            Torrents.setRowFactory(e -> {
                 TableRow<Torrent> row = new TableRow<>();
-                row.setOnMouseClicked(event->{
-                    if (event.getClickCount()==1 && event.getButton().equals(MouseButton.PRIMARY) && row.getItem()!=null)
+                row.setOnMouseClicked(event -> {
+                    if (event.getClickCount() == 1 && event.getButton().equals(MouseButton.PRIMARY) && row.getItem() != null)
                         currentTorrent = row.getItem();
-                    if (event.getClickCount()==1 && event.getButton().equals(MouseButton.SECONDARY) && row.getItem()!=null)
-                    {
+                    if (event.getClickCount() == 1 && event.getButton().equals(MouseButton.SECONDARY) && row.getItem() != null) {
                         currentTorrent = row.getItem();
-                        TorrentContextMenu.show(row,event.getScreenX(),event.getScreenY());
+                        TorrentContextMenu.show(row, event.getScreenX(), event.getScreenY());
                     }
                 });
                 return row;
             });
             //TorrentStatus.setCellFactory(ProgressBarTableCell.<Torrent> forTableColumn());
             try {
-                if (NetworkController.getTorrents().size()>0)
-                Torrents.getItems().addAll(NetworkController.getTorrents());
-            } catch (Exception ioobe) {Torrents.getItems().clear();
+                if (NetworkController.getTorrents().size() > 0)
+                    Torrents.getItems().addAll(NetworkController.getTorrents());
+            } catch (Exception ioobe) {
+                Torrents.getItems().clear();
             }
             trackersID.setCellValueFactory(new PropertyValueFactory<Tracker, String>("uri"));
             trackersStatus.setCellValueFactory(new PropertyValueFactory<Tracker, String>("Status"));
@@ -204,16 +263,16 @@ public class Controller implements Initializable {
             }
             PeersMenu = new ContextMenu();
             AddPeerMenuItem = new MenuItem("Add Peer");
-            AddPeerMenuItem.setOnAction(e->addPeer());
+            AddPeerMenuItem.setOnAction(e -> addPeer());
             PeersMenu.getItems().add(AddPeerMenuItem);
-            PeersMenu.addEventHandler(MouseEvent.MOUSE_CLICKED,e->{
+            PeersMenu.addEventHandler(MouseEvent.MOUSE_CLICKED, e -> {
                 PeersMenu.hide();
             });
-            peers.setRowFactory(e->{
+            peers.setRowFactory(e -> {
                 TableRow<Connection> row = new TableRow<>();
-                row.setOnMouseClicked(event->{
-                    if (event.getClickCount()==1 && event.getButton().equals(MouseButton.SECONDARY))
-                        PeersMenu.show(row,event.getScreenX(),event.getScreenY());
+                row.setOnMouseClicked(event -> {
+                    if (event.getClickCount() == 1 && event.getButton().equals(MouseButton.SECONDARY))
+                        PeersMenu.show(row, event.getScreenX(), event.getScreenY());
                 });
                 return row;
             });
@@ -221,32 +280,36 @@ public class Controller implements Initializable {
             FilesMenu = new ContextMenu();
             Download = new MenuItem("Download");
             DoNotDownload = new MenuItem("Do not download");
-            FilesMenu.getItems().addAll(Download,DoNotDownload);
-            FilesMenu.addEventHandler(MouseEvent.MOUSE_CLICKED,e->{
+            FilesMenu.getItems().addAll(Download, DoNotDownload);
+            FilesMenu.addEventHandler(MouseEvent.MOUSE_CLICKED, e -> {
                 FilesMenu.hide();
             });
-            Download.setOnAction(e->{currentTorrent.downloadFile(currentFile);});
-            DoNotDownload.setOnAction(e->{currentTorrent.doNotDownload(currentFile);});
+            Download.setOnAction(e -> {
+                currentTorrent.downloadFile(currentFile);
+            });
+            DoNotDownload.setOnAction(e -> {
+                currentTorrent.doNotDownload(currentFile);
+            });
 
             FileName.setCellValueFactory(new PropertyValueFactory<DownloadFile, String>("path"));
             FileSize.setCellValueFactory(new PropertyValueFactory<>("LengthString"));
             FileStatuss.setCellValueFactory(new PropertyValueFactory<DownloadFile, String>("status"));
             FileDownloaded.setCellValueFactory(new PropertyValueFactory<>("DownloadedString"));
-            Files.setRowFactory(e-> {
+            Files.setRowFactory(e -> {
                 TableRow<DownloadFile> row = new TableRow<>();
-                row.setOnMouseClicked(event->{
-                    if (event.getClickCount()==1 && event.getButton().equals(MouseButton.SECONDARY)
-                            && row.getItem()!=null)
-                    {
+                row.setOnMouseClicked(event -> {
+                    if (event.getClickCount() == 1 && event.getButton().equals(MouseButton.SECONDARY)
+                            && row.getItem() != null) {
                         currentFile = row.getItem();
-                        FilesMenu.show(row,event.getScreenX(),event.getScreenY());
-                    }
-                    else if (event.getClickCount() == 2 && event.getButton().equals(MouseButton.PRIMARY) &&
-                            row.getItem()!=null && row.getItem().getStatus() == FileStatus.DOWNLOADED)
-                    {
-                        Desktop desktop = Desktop.getDesktop();try {
-                        desktop.open(new File(Parameters.downloadDir+row.getItem().getPath()));
-                    }catch(Exception ex){ex.printStackTrace();}
+                        FilesMenu.show(row, event.getScreenX(), event.getScreenY());
+                    } else if (event.getClickCount() == 2 && event.getButton().equals(MouseButton.PRIMARY) &&
+                            row.getItem() != null && row.getItem().getStatus() == FileStatus.DOWNLOADED) {
+                        Desktop desktop = Desktop.getDesktop();
+                        try {
+                            desktop.open(new File(Parameters.downloadDir + row.getItem().getPath()));
+                        } catch (Exception ex) {
+                            ex.printStackTrace();
+                        }
                     }
                 });
                 return row;
@@ -265,23 +328,22 @@ public class Controller implements Initializable {
             } catch (Exception ioobe) {
             }
         }
-        RefreshTimer T= new RefreshTimer();
+        RefreshTimer T = new RefreshTimer();
         T.start();
     }
 
     public void setRefresh() {
-        try{
-            if (downloadeds.size()==NetworkController.getTorrents().size())
-            {
-                long data=0;
-                for (int i=0;i<downloadeds.size();i++){
-                    data+=NetworkController.getTorrents().get(i).getDownloaded()-downloadeds.get(i);
+        try {
+            if (downloadeds.size() == NetworkController.getTorrents().size()) {
+                long data = 0;
+                for (int i = 0; i < downloadeds.size(); i++) {
+                    data += NetworkController.getTorrents().get(i).getDownloaded() - downloadeds.get(i);
                 }
-                double speed = (double)data/1024.0;
-                Platform.runLater(()->speedlbl.setText(String.format("%.2f KB/s",speed)));
+                double speed = (double) data / 1024.0;
+                Platform.runLater(() -> speedlbl.setText(String.format("%.2f KB/s", speed)));
             }
             downloadeds.clear();
-            for (Torrent t:NetworkController.getTorrents())
+            for (Torrent t : NetworkController.getTorrents())
                 downloadeds.add(t.getDownloaded());
 
             Torrents.getItems().clear();
@@ -295,11 +357,12 @@ public class Controller implements Initializable {
             Files.getItems().addAll(currentTorrent.getFiles());
             peers.getItems().addAll(currentTorrent.getConnections());
             Torrents.getItems().addAll(NetworkController.getTorrents());
-            }catch(Exception ioobe){}
+        } catch (Exception ioobe) {
+        }
     }
 
 
-   public class RefreshTimer {
+    public class RefreshTimer {
         private Timer timer = new Timer(true);
         TimerTask task = new TimerTask() {
             @Override
@@ -316,72 +379,106 @@ public class Controller implements Initializable {
 
 
     @FXML
-    private void Handleclicks(ActionEvent event){
+    private void Handleclicks(ActionEvent event) {
 
-        if(event.getSource()==btnTorrents){
+        if (event.getSource() == btnTorrents) {
             labelStatus.setText("Torrents");
             //paneStatus.setBackground(new Background(new BackgroundFill(Color.rgb(0, 80, 58), CornerRadii.EMPTY, Insets.EMPTY)));
             torrnetGrid.toFront();
-        }
-
-        else if(event.getSource()==btnSettings){
+        } else if (event.getSource() == btnSettings) {
             labelStatus.setText("Settings");
             //paneStatus.setBackground(new Background(new BackgroundFill(Color.rgb(170, 0, 14), CornerRadii.EMPTY, Insets.EMPTY)));
             settGrid.toFront();
         }
     }
-    public void deleteTorrent(boolean delete){
 
-        if (currentTorrent!=null){
+    public void deleteTorrent(boolean delete) {
+
+        if (currentTorrent != null) {
             currentTorrent.killThreads();
-        try {
-            if (delete == true) {
-                currentTorrent.deleteFiles();
+            try {
+                if (delete == true) {
+                    currentTorrent.deleteFiles();
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
             }
-        }catch(Exception e){e.printStackTrace();}
             NetworkController.getTorrents().remove(currentTorrent);
-            if (NetworkController.getTorrents().size()>0)
+            if (NetworkController.getTorrents().size() > 0)
                 currentTorrent = NetworkController.getTorrents().get(0);
             else
-                currentTorrent=null;
+                currentTorrent = null;
         }
     }
-    public void pauseTorrent(ActionEvent e){
-        if (currentTorrent!=null)
+
+    public void pauseTorrent(ActionEvent e) {
+        if (currentTorrent != null)
             currentTorrent.killThreads();
     }
-    public void resumeTorrent(ActionEvent e){
-        if (currentTorrent!=null)
+
+    public void resumeTorrent(ActionEvent e) {
+        if (currentTorrent != null)
             currentTorrent.invokeThreads();
     }
-    public void setSequential(ActionEvent e){
-        if (currentTorrent!=null)
+
+    public void setSequential(ActionEvent e) {
+        if (currentTorrent != null)
             currentTorrent.setLinear(true);
     }
-    public void setRandom(ActionEvent e){
-        if (currentTorrent!=null)
+
+    public void setRandom(ActionEvent e) {
+        if (currentTorrent != null)
             currentTorrent.setLinear(false);
     }
-    public void addTorrentBtnPress(ActionEvent e){
+
+    public void addTorrentBtnPress(ActionEvent e) {
         FileChooser chooser = new FileChooser();
-            File dir = new File("files/");
-            if (dir.exists())
+        File dir = new File("files/");
+        if (dir.exists())
             chooser.setInitialDirectory(dir);
-          File  fl = chooser.showOpenDialog(primaryStage);
+        File fl = chooser.showOpenDialog(primaryStage);
 
         try {
             byte arr[] = TorrentFileReader.readFile(fl.getAbsolutePath());
             Torrent torrent = new Torrent(bCoder.decode(arr, ParcelType.TORRENT));
-            if (NetworkController.checkIfTorrentExists(torrent.getInfoHash())!=null)
+            if (NetworkController.checkIfTorrentExists(torrent.getInfoHash()) != null)
                 return;
             NetworkController.addTorrent(torrent);
             torrent.invokeThreads();
             currentTorrent = torrent;
             Torrents.getItems().clear();
             Torrents.getItems().addAll(NetworkController.getTorrents());
-        }catch(Exception ex){ex.printStackTrace();}
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
     }
-    private void addPeer(){
 
+
+
+    private void addPeer() {
+
+        new Thread(new Task() {
+            protected Object call() {
+                try {
+                    Parent root = FXMLLoader.load(getClass().getResource("NewPeerPrompt.fxml"));
+                    Platform.runLater(()->{
+                    Stage prompt = new Stage();
+                        prompt.initStyle(StageStyle.UNDECORATED);
+
+                        Scene scene = new Scene(root);
+                    prompt.setScene(scene);
+                    prompt.initModality(Modality.APPLICATION_MODAL);
+                        Rectangle2D primScreenBounds = Screen.getPrimary().getVisualBounds();
+                        prompt.show();
+                        prompt.setX((primScreenBounds.getWidth() - prompt.getWidth()) / 2);
+                        prompt.setY((primScreenBounds.getHeight() - prompt.getHeight()) / 2);
+                        PromptController.promptStage = prompt;
+                    });
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                return null;
+            }
+        }).start();
     }
 }
