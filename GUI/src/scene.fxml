@@ -178,20 +178,20 @@
                                 <RowConstraints maxHeight="497.0" minHeight="10.0" prefHeight="345.0" vgrow="SOMETIMES" />
                             </rowConstraints>
                         </GridPane>
-                  <Pane prefHeight="200.0" prefWidth="200.0" style="-fx-background-color: #fff3e0;">
+                  <Pane fx:id="settGrid" prefHeight="200.0" prefWidth="200.0" style="-fx-background-color: #fff3e0;">
                      <children>
-                        <CheckBox layoutX="76.0" layoutY="46.0" mnemonicParsing="false" text="Close program when all active downloads are done">
+                        <CheckBox alignment="TOP_RIGHT" layoutX="76.0" layoutY="46.0" mnemonicParsing="false" text="Close program when all active downloads are done">
                            <font>
                               <Font size="18.0" />
                            </font>
                         </CheckBox>
-                        <Label layoutX="53.0" layoutY="115.0" text="Download directory">
+                        <Label layoutX="77.0" layoutY="115.0" text="Download directory">
                            <font>
                               <Font size="18.0" />
                            </font>
                         </Label>
                         <TextField layoutX="272.0" layoutY="116.0" prefHeight="25.0" prefWidth="319.0" />
-                        <Button alignment="CENTER" graphicTextGap="15.0" layoutX="647.0" layoutY="106.0" mnemonicParsing="false" prefHeight="45.0" prefWidth="84.0" style="-fx-background-color: #405ed6;" text="Browse" textAlignment="CENTER" textFill="WHITE" wrapText="true">
+                        <Button alignment="CENTER" graphicTextGap="15.0" layoutX="633.0" layoutY="106.0" mnemonicParsing="false" prefHeight="45.0" prefWidth="84.0" style="-fx-background-color: #405ed6;" text="Browse" textAlignment="CENTER" textFill="WHITE" wrapText="true">
                            <effect>
                               <Blend mode="LIGHTEN" />
                            </effect>
