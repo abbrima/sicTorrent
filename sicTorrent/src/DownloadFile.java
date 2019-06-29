@@ -11,8 +11,13 @@ public class DownloadFile implements Serializable {
     private String DownloadedString;
     private Torrent torrent;
 
-    public String getLengthString(){return LengthString;}
-    public String getDownloadedString(){return DownloadedString;}
+    public String getLengthString() {
+        return LengthString;
+    }
+
+    public String getDownloadedString() {
+        return DownloadedString;
+    }
 
     private ArrayList<Piece> pieces;
 
@@ -23,15 +28,21 @@ public class DownloadFile implements Serializable {
     public synchronized void addToDownloaded(int num) {
         downloaded += num;
         DownloadedString = Funcs.lengthToStr(downloaded);
-        if (length==downloaded)
+        if (length == downloaded)
             status = FileStatus.DOWNLOADED;
         else
-            status = FileStatus.UNFINISHED;
-            //validate();
+        {
+            if (status != FileStatus.DONOTDOWNLOAD)
+                 status = FileStatus.UNFINISHED;
+        }
+        //validate();
     }
-    public void download(){
-        if (status==FileStatus.DONOTDOWNLOAD)
+
+    public void download() {
+        if (status == FileStatus.DONOTDOWNLOAD) {
             status = FileStatus.UNFINISHED;
+
+        }
     }
 
     public void setPieces(ArrayList<Piece> pieces) {
@@ -47,9 +58,9 @@ public class DownloadFile implements Serializable {
     }
 
     public void doNotDownload() {
-        if (status==FileStatus.UNFINISHED)
         status = FileStatus.DONOTDOWNLOAD;
     }
+
     public synchronized void validate() {
         boolean b = true;
         for (Piece p : pieces) {
@@ -70,7 +81,7 @@ public class DownloadFile implements Serializable {
         return path;
     }
 
-    public DownloadFile(long length, String path,Torrent torrent) {
+    public DownloadFile(long length, String path, Torrent torrent) {
         status = FileStatus.UNFINISHED;
         this.torrent = torrent;
         downloaded = 0;
@@ -80,14 +91,15 @@ public class DownloadFile implements Serializable {
         DownloadedString = Funcs.lengthToStr(this.downloaded);
         this.path = path;
         try {
-            FileController.createFile(this,torrent.getDownloadDir());
+            FileController.createFile(this, torrent.getDownloadDir());
         } catch (Exception e) {
             e.printStackTrace();
         }
         pieces = new ArrayList<>();
     }
-    public void deleteFile()throws IOException {
-        FileController.deleteFile(this,torrent.getDownloadDir());
+
+    public void deleteFile() throws IOException {
+        FileController.deleteFile(this, torrent.getDownloadDir());
     }
 }
 

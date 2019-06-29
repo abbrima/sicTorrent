@@ -64,7 +64,7 @@ public class Main extends Application {
                 Thread t = new Thread(() -> {
                     while (true) {
                         try {
-                            Thread.sleep(60000);
+                            Thread.sleep(30000);
                         } catch (InterruptedException ie) {
                             return;
                         }

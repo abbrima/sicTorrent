@@ -394,7 +394,11 @@ public class Torrent implements Serializable {
                 }
             }
         }
-        endgame = true;
+        boolean state = true;
+        for (DownloadFile fl:files)
+            if (fl.getStatus()==FileStatus.DONOTDOWNLOAD)
+                state = false;
+        endgame = state;
         //System.out.println("endgame");
         return null;
     }
@@ -547,6 +551,7 @@ public class Torrent implements Serializable {
 
     public void doNotDownload(DownloadFile fl) {
         if (fl.getStatus() == FileStatus.UNFINISHED) {
+            fl.doNotDownload();
             Piece start = fl.getPieces().get(0);
             Piece finish = fl.getPieces().size()>1?fl.getPieces().get(fl.getPieces().size()-1):null;
             for (int i=1;i<fl.getPieces().size()-1;i++)
@@ -560,15 +565,32 @@ public class Torrent implements Serializable {
                 if (!files.get(findex+1).getPieces().contains(finish))
                     finish.doNotDownload();
             }catch (Exception e){finish.doNotDownload();}
-            fl.doNotDownload();
         }
     }
 
     public void downloadFile(DownloadFile fl) {
         endgame=false;
-        for (Piece p : fl.getPieces())
-            p.download();
+        synchronized(fl.getPieces()) {
+            for (Piece p : fl.getPieces())
+            {
+                synchronized(p) {
+                    p.download();
+                }
+            }
+        }
         fl.download();
+        Thread t = new Thread(() -> {
+            synchronized (connections) {
+                for (Connection c : connections) {
+                    try {
+                        c.request();
+                    }catch(Exception e){e.printStackTrace();}
+                }
+            }
+
+        });
+        t.setDaemon(true);
+        t.start();
     }
 
     public ArrayList<DownloadFile> getFiles() {

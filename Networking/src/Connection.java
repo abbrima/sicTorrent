@@ -136,7 +136,7 @@ public class Connection implements Runnable {
                     }
                 } else {
                     Thread t = new Thread(()->{
-                        try{Thread.sleep(120000); closeSocket();}catch(InterruptedException ie){return;}
+                        try{Thread.sleep(30000); closeSocket();}catch(InterruptedException ie){return;}
                     });
                     t.setDaemon(true);
                     t.start();
@@ -179,20 +179,7 @@ public class Connection implements Runnable {
                         }
                     }
                 }
-                if (peer_choking == false && !torrent.isFinished() &&
-                        am_interested == true && getPiecesFromPeer() > 0) {
-
-                        state = ConnectionState.REQUEST;
-                        Triplet<Integer, Integer, Integer> request = torrent.createRequest(peerHas, this);
-
-                        if (request != null) {
-                            synchronized (ostream) {
-                                ostream.write(ConnectionMessages.genRequest(request.getFirst(),
-                                        request.getSecond(), request.getThird()));
-                            }
-                        }
-
-                }
+                request();
             }
             closeSocket();
         } catch (Exception ioe) {
@@ -201,6 +188,21 @@ public class Connection implements Runnable {
         }
     }
 
+    public void request() throws IOException{
+        if (peer_choking == false && !torrent.isFinished() &&
+                am_interested == true && getPiecesFromPeer() > 0) {
+
+            state = ConnectionState.REQUEST;
+            Triplet<Integer, Integer, Integer> request = torrent.createRequest(peerHas, this);
+            if (request != null) {
+                synchronized (ostream) {
+                    ostream.write(ConnectionMessages.genRequest(request.getFirst(),
+                            request.getSecond(), request.getThird()));
+                }
+            }
+
+        }
+    }
     public void closeSocket() {
         try {
             if (socket != null)
