@@ -56,7 +56,7 @@ public class Controller implements Initializable {
     private MenuItem _32d,_64d,_128d,_256d,_Unlimitedd;
     private MenuItem _32u,_64u,_128u,_256u,_Unlimitedu;
 
-    private Menu PeersMenu;
+    private ContextMenu PeersMenu;
     private MenuItem AddPeerMenuItem;
 
     private MenuItem DeleteWithData;
@@ -202,9 +202,21 @@ public class Controller implements Initializable {
                 peers.getItems().addAll(currentTorrent.getConnections());
             } catch (Exception e) {
             }
-            PeersMenu = new Menu("Peers");
+            PeersMenu = new ContextMenu();
             AddPeerMenuItem = new MenuItem("Add Peer");
-
+            AddPeerMenuItem.setOnAction(e->addPeer());
+            PeersMenu.getItems().add(AddPeerMenuItem);
+            PeersMenu.addEventHandler(MouseEvent.MOUSE_CLICKED,e->{
+                PeersMenu.hide();
+            });
+            peers.setRowFactory(e->{
+                TableRow<Connection> row = new TableRow<>();
+                row.setOnMouseClicked(event->{
+                    if (event.getClickCount()==1 && event.getButton().equals(MouseButton.SECONDARY))
+                        PeersMenu.show(row,event.getScreenX(),event.getScreenY());
+                });
+                return row;
+            });
 
             FilesMenu = new ContextMenu();
             Download = new MenuItem("Download");
@@ -368,5 +380,8 @@ public class Controller implements Initializable {
             Torrents.getItems().clear();
             Torrents.getItems().addAll(NetworkController.getTorrents());
         }catch(Exception ex){ex.printStackTrace();}
+    }
+    private void addPeer(){
+
     }
 }
