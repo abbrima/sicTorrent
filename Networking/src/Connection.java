@@ -69,7 +69,6 @@ public class Connection implements Runnable {
             try {
                 torrent.addConnection(this);
             } catch (Exception e) {
-
                 closeSocket();
             }
 
@@ -102,7 +101,7 @@ public class Connection implements Runnable {
         peerHas = new boolean[torrent.getPieces().size()];
         this.port = port;
         socket = new Socket();
-        socket.connect(new InetSocketAddress(ip, port), 5000);
+        socket.connect(new InetSocketAddress(ip, port), 1000);
         ostream = new LimitedOutputStream(socket.getOutputStream());
         istream = new LimitedInputStream(socket.getInputStream());
 

@@ -29,8 +29,11 @@ import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.stage.*;
 
-public class Controller implements Initializable {
+public class Controller implements Initializable,Announcable {
 
+    public void announceFinished(Torrent torrent){
+        System.out.println(torrent.getName() + "\n HAS FINISHED!!");
+    }
     void setSidePanelButtonBackground(Button btn,boolean enable){
         if (enable)
              btn.setStyle("-fx-background-color:  #FF9800;");
@@ -527,6 +530,7 @@ public class Controller implements Initializable {
             if (NetworkController.checkIfTorrentExists(torrent.getInfoHash()) != null)
                 return;
             NetworkController.addTorrent(torrent);
+            torrent.setUI(this);
             torrent.invokeThreads();
             currentTorrent = torrent;
             setTorrentControlButtons(currentTorrent.getStatus());
