@@ -12,10 +12,10 @@ class ConnectionMessages{
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         DataOutputStream os = new DataOutputStream(baos);
         os.writeByte(19);
-        os.writeBytes(protocolString);
+        os.write(protocolString.getBytes());
         os.write(reserved);
         os.write(infoHash);
-        os.writeBytes(Info.getPeerID());
+        os.write(Info.getPeerID().getBytes());
         return baos.toByteArray();
     }
     public static byte[] genMessage(MessageType type) throws IOException{
