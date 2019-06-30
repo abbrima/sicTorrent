@@ -92,16 +92,18 @@ public class Controller implements Initializable {
     private Menu UpLimit;
     private Menu DeleteMenu;
 
-    private MenuItem _32d, _64d, _128d, _256d, _Unlimitedd;
-    private MenuItem _32u, _64u, _128u, _256u, _Unlimitedu;
+    private CheckMenuItem _32d, _64d, _128d, _256d, _Unlimitedd;
+    private CheckMenuItem _32u, _64u, _128u, _256u, _Unlimitedu;
+    private CheckMenuItem downLimitarr[] = new CheckMenuItem[5];
+    private CheckMenuItem upLimitarr[] = new CheckMenuItem[5];
 
     private ContextMenu PeersMenu;
     private MenuItem AddPeerMenuItem;
 
     private MenuItem DeleteWithData;
     private MenuItem Delete;
-    private MenuItem SequentialMode;
-    private MenuItem RandomMode;
+    private CheckMenuItem SequentialMode;
+    private CheckMenuItem RandomMode;
 
     @FXML
     private TableView<Piece> Pieces;
@@ -160,7 +162,7 @@ public class Controller implements Initializable {
     public static Torrent currentTorrent;
     private static DownloadFile currentFile;
     private ContextMenu FilesMenu;
-    private MenuItem Download, DoNotDownload;
+    private CheckMenuItem Download;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -177,22 +179,26 @@ public class Controller implements Initializable {
             TorrentContextMenu.addEventHandler(MouseEvent.MOUSE_CLICKED, e -> {
                 TorrentContextMenu.hide();
             });
-            _32d = new MenuItem("32 KB/s");
-            _64d = new MenuItem("64 KB/s");
-            _128d = new MenuItem("128 KB/s");
-            _Unlimitedd = new MenuItem("Unlimited");
-            _256d = new MenuItem("256 KB/s");
-            _32u = new MenuItem("32 KB/s");
-            _64u = new MenuItem("64 KB/s");
-            _128u = new MenuItem("128 KB/s");
-            _Unlimitedu = new MenuItem("Unlimited");
-            _256u = new MenuItem("256 KB/s");
+            _32d = new CheckMenuItem("32 KB/s");
+            _64d = new CheckMenuItem("64 KB/s");
+            _128d = new CheckMenuItem("128 KB/s");
+            _Unlimitedd = new CheckMenuItem("Unlimited");
+            _256d = new CheckMenuItem("256 KB/s");
+            _32u = new CheckMenuItem("32 KB/s");
+            _64u = new CheckMenuItem("64 KB/s");
+            _128u = new CheckMenuItem("128 KB/s");
+            _Unlimitedu = new CheckMenuItem("Unlimited");
+            _256u = new CheckMenuItem("256 KB/s");
+
+            downLimitarr[0] = _32d; downLimitarr[1] = _64d; downLimitarr[2] = _128d; downLimitarr[3] = _256d; downLimitarr[4] = _Unlimitedd;
+            upLimitarr[0] = _32u;   upLimitarr[1] = _64u;   upLimitarr[2]   = _128u; upLimitarr[3]   = _256u; upLimitarr[4]   = _Unlimitedu;
+
             DownLimit = new Menu("Downstream Limit");
             DownLimit.getItems().addAll(_32d, _64d, _128d, _256d, _Unlimitedd);
             UpLimit = new Menu("Upstream Limit");
             UpLimit.getItems().addAll(_32u, _64u, _128u, _256u, _Unlimitedu);
-            SequentialMode = new MenuItem("Sequential");
-            RandomMode = new MenuItem("Random");
+            SequentialMode = new CheckMenuItem("Sequential");
+            RandomMode = new CheckMenuItem("Random");
             Delete = new MenuItem("Delete Torrent Only");
             DeleteWithData = new MenuItem("Delete With Data");
             DownloadMode = new Menu("Download Mode");
@@ -255,10 +261,40 @@ public class Controller implements Initializable {
                     { currentTorrent = row.getItem();            setTorrentControlButtons(currentTorrent.getStatus());
                     }
                     if (event.getClickCount() == 1 && event.getButton().equals(MouseButton.SECONDARY) && row.getItem() != null) {
-                        {
+
                             currentTorrent = row.getItem();
                             setTorrentControlButtons(currentTorrent.getStatus());
-                        }
+                            SequentialMode.setSelected(row.getItem().getLinear());
+                            RandomMode.setSelected(!row.getItem().getLinear());
+                            for (CheckMenuItem item:downLimitarr)
+                                item.setSelected(false);
+                            for (CheckMenuItem item:upLimitarr)
+                                item.setSelected(false);
+                            switch(row.getItem().getBandwidthcontroller().getDown()){
+                                case 32:
+                                    _32d.setSelected(true);
+                                    break;
+                                case 64:
+                                    _64d.setSelected(true); break;
+                                case 128:
+                                    _128d.setSelected(true); break;
+                                case 256:
+                                    _256d.setSelected(true); break;
+                                case -1:
+                                    _Unlimitedd.setSelected(true); break;
+                            }
+                            switch(row.getItem().getBandwidthcontroller().getUp()){
+                                case 32:
+                                    _32u.setSelected(true); break;
+                                case 64:
+                                    _64u.setSelected(true); break;
+                                case 128:
+                                    _128u.setSelected(true); break;
+                                case 256:
+                                    _256u.setSelected(true); break;
+                                case -1:
+                                    _Unlimitedu.setSelected(true); break;
+                            }
                             TorrentContextMenu.show(row, event.getScreenX(), event.getScreenY());
                     }
                 });
@@ -302,17 +338,18 @@ public class Controller implements Initializable {
             });
 
             FilesMenu = new ContextMenu();
-            Download = new MenuItem("Download");
-            DoNotDownload = new MenuItem("Do not download");
-            FilesMenu.getItems().addAll(Download, DoNotDownload);
+            Download = new CheckMenuItem("Download");
+            FilesMenu.getItems().addAll(Download);
             FilesMenu.addEventHandler(MouseEvent.MOUSE_CLICKED, e -> {
                 FilesMenu.hide();
             });
             Download.setOnAction(e -> {
-                currentTorrent.downloadFile(currentFile);
-            });
-            DoNotDownload.setOnAction(e -> {
-                currentTorrent.doNotDownload(currentFile);
+                if (currentFile.getStatus()!=FileStatus.DOWNLOADED) {
+                    if (Download.isSelected())
+                        currentTorrent.doNotDownload(currentFile);
+                    else
+                        currentTorrent.downloadFile(currentFile);
+                }
             });
 
             setSidePanelButtonBackground(btnTorrents,true);
@@ -327,6 +364,7 @@ public class Controller implements Initializable {
                     if (event.getClickCount() == 1 && event.getButton().equals(MouseButton.SECONDARY)
                             && row.getItem() != null) {
                         currentFile = row.getItem();
+                        Download.setSelected(row.getItem().getStatus()!=FileStatus.DONOTDOWNLOAD);
                         FilesMenu.show(row, event.getScreenX(), event.getScreenY());
                     } else if (event.getClickCount() == 2 && event.getButton().equals(MouseButton.PRIMARY) &&
                             row.getItem() != null && row.getItem().getStatus() == FileStatus.DOWNLOADED) {

@@ -5,16 +5,9 @@ public class BandwidthController implements Serializable {
     private Torrent torrent;
     private int KBDown;
     private int KBUp;
-    private String DownString;
-    private String UpString;
+    public int getDown(){return KBDown;}
+    public int getUp(){return KBUp;}
 
-    public String getDownString() {
-        return DownString;
-    }
-
-    public String getUpString() {
-        return UpString;
-    }
     public boolean downstreamLimited(){
         return KBDown > 0;
     }
@@ -35,11 +28,6 @@ public class BandwidthController implements Serializable {
         KBDown = -1;
     }
 
-    public BandwidthController(Torrent torrent, int down, int up) {
-        this(torrent);
-        KBDown = down;
-        KBUp = up;
-    }
 
     public synchronized int requestDownBandwidth() {
         if (KBDown < 0)

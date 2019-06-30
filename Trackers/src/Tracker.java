@@ -371,8 +371,11 @@ class HTTPTracker extends Tracker {
         byte res[] = null;
         try {
             url = new URL(str);
+            URLConnection connection = url.openConnection();
+            connection.setConnectTimeout(5000);
+            connection.setReadTimeout(5000);
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            InputStream is = url.openStream();
+            InputStream is = connection.getInputStream();
             byte chunk[] = new byte[16];
             int n;
             if (is.available()==0)
@@ -381,6 +384,7 @@ class HTTPTracker extends Tracker {
                 if (is.available()==0)
                 {
                     status = TrackerStatus.TIMEDOUT;
+                    interval = 300;
                     throw new TimeoutException();
                 }
             }
@@ -390,6 +394,10 @@ class HTTPTracker extends Tracker {
 
             is.close();
         } catch (MalformedURLException e) {
+            status = TrackerStatus.TIMEDOUT;
+            interval = 300;
+            throw new TimeoutException();
+        }catch (IOException ioe){
             status = TrackerStatus.TIMEDOUT;
             throw new TimeoutException();
         }
@@ -427,6 +435,7 @@ class HTTPTracker extends Tracker {
         else
         {
             status = TrackerStatus.TIMEDOUT;
+            interval = 300;
             throw new InvalidReplyException("Missing Peers");
         }
         status=TrackerStatus.WORKING;

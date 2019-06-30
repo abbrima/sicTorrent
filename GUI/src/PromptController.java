@@ -30,7 +30,10 @@ public class PromptController implements Initializable {
             int port = Integer.parseInt(portPrompt.getText());
             if (port<0 || port > 65535)
                 throw new Exception();
-            Controller.currentTorrent.getConnections().add(new Connection(Controller.currentTorrent,address.getHostName(),port));
+            Thread t = new Thread(()->{
+            Controller.currentTorrent.getConnections().add(new Connection(Controller.currentTorrent,ipPrompt.getText(),port));});
+            t.setDaemon(true);
+            t.start();
             promptStage.close();
         }catch(Exception e){System.out.println("FAILED");}
     }

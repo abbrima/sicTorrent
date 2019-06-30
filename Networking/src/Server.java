@@ -35,7 +35,6 @@ public class Server implements Runnable {
         if (n > 8) {
             throw new IOException();
         }
-        System.out.println(port);
     }
 
     public void run()
