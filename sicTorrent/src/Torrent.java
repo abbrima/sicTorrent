@@ -8,12 +8,16 @@ import java.util.*;
 import java.util.concurrent.*;
 
 public class Torrent implements Serializable {
+    private String UpSpeed;
+    private String DownSpeed;
     private String downloadDir;
     private byte infohash[];
     private boolean linear;
     private Long Downloaded, Uploaded;
     private long length;
     private Announcable ui;
+    private transient Thread speedCalculator;
+    private long oldDownloaded,oldUploaded;
     public void addConnection(Connection c) throws Exception {
         synchronized (connections) {
             if (connections.size() < Parameters.peerLimit && status == TorrentStatus.ACTIVE)
@@ -23,12 +27,33 @@ public class Torrent implements Serializable {
         }
 
     }
+
+    private void startCalculatingSpeeds(){
+        speedCalculator = new Thread(()->{
+            while (!Thread.interrupted()){
+
+            }
+        });
+        speedCalculator.setDaemon(true);
+        speedCalculator.start();
+    }
+    private void stopCalculatingSpeeds(){
+
+    }
+
     public void setUI(Announcable ui){
         this.ui=ui;
     }
 
     public long getLength() {
         return length;
+    }
+
+    public String getDownSpeed(){
+        return DownSpeed;
+    }
+    public String getUpSpeed(){
+        return UpSpeed;
     }
 
     public boolean getLinear() {
@@ -326,7 +351,7 @@ public class Torrent implements Serializable {
 
                             }
                         }
-                    }
+                   }
                    if (sleep){
                        try {
                            Thread.sleep(1000);
@@ -340,11 +365,9 @@ public class Torrent implements Serializable {
                     return;
             }
         }
-
         public PeerManager() {
             kill = false;
         }
-
         public void start() {
             counter = new AtomicCounter();
             peerThread = new Thread(this);
@@ -666,6 +689,8 @@ public class Torrent implements Serializable {
                 }
             }
         }
+        DownSpeed = Funcs.lengthToStr(0) + "/s";
+        UpSpeed = Funcs.lengthToStr(0) + "/s";
         connections.clear();
         for (Piece p : pieces)
             p.cancelGet();
