@@ -15,7 +15,11 @@ public class Connection implements Runnable {
     private boolean peer_interested = false; // peer is interested
 
     private ConnectionState state;
-    public boolean chocked(){return peer_choking;}
+
+    public boolean chocked() {
+        return peer_choking;
+    }
+
     private boolean peerHas[];
 
     private String debug = "D";
@@ -62,9 +66,9 @@ public class Connection implements Runnable {
 
             state = ConnectionState.HANDSSHOOK;
 
-            try{
+            try {
                 torrent.addConnection(this);
-            } catch (Exception e){
+            } catch (Exception e) {
 
                 closeSocket();
             }
@@ -89,7 +93,7 @@ public class Connection implements Runnable {
         }
     }
 
-    public Connection(Torrent torrent, String ip, int port) {
+    public Connection(Torrent torrent, String ip, int port) throws Exception {
         this();
         peer_interested = true;
         debug = "outgoing";
@@ -97,31 +101,24 @@ public class Connection implements Runnable {
         this.torrent = torrent;
         peerHas = new boolean[torrent.getPieces().size()];
         this.port = port;
-        try {
-            address = InetAddress.getByName(ip);
-            socket = new Socket(address, port);
-            ostream = new LimitedOutputStream(socket.getOutputStream());
-            istream = new LimitedInputStream(socket.getInputStream());
+        socket = new Socket();
+        socket.connect(new InetSocketAddress(ip, port), 5000);
+        ostream = new LimitedOutputStream(socket.getOutputStream());
+        istream = new LimitedInputStream(socket.getInputStream());
 
-            istream.setController(torrent.getBandwidthcontroller());
-            ostream.setController(torrent.getBandwidthcontroller());
+        istream.setController(torrent.getBandwidthcontroller());
+        ostream.setController(torrent.getBandwidthcontroller());
 
-            am_interested = true;
-            am_choking = false;
+        am_interested = true;
+        am_choking = false;
 
-            sendHandshake(new byte[8]);
+        sendHandshake(new byte[8]);
 
 
-            thread = new Thread(this);
-            //thread.setDaemon(true);
-            thread.start();
-
-        } catch (UnknownHostException uhe) {
-            socket = null;
-        } catch (IOException ioe) {
-            socket = null;
-        }
-    }
+        thread = new Thread(this);
+        //thread.setDaemon(true);
+        thread.start();
+}
 
     public void run() {
         try {
@@ -135,8 +132,13 @@ public class Connection implements Runnable {
                         setChoke(false);
                     }
                 } else {
-                    Thread t = new Thread(()->{
-                        try{Thread.sleep(30000); closeSocket();}catch(InterruptedException ie){return;}
+                    Thread t = new Thread(() -> {
+                        try {
+                            Thread.sleep(30000);
+                            closeSocket();
+                        } catch (InterruptedException ie) {
+                            return;
+                        }
                     });
                     t.setDaemon(true);
                     t.start();
@@ -188,7 +190,7 @@ public class Connection implements Runnable {
         }
     }
 
-    public void request() throws IOException{
+    public void request() throws IOException {
         if (peer_choking == false && !torrent.isFinished() &&
                 am_interested == true && getPiecesFromPeer() > 0) {
 
@@ -203,6 +205,7 @@ public class Connection implements Runnable {
 
         }
     }
+
     public void closeSocket() {
         try {
             if (socket != null)
@@ -257,7 +260,7 @@ public class Connection implements Runnable {
             }
             byte[] peerID = new byte[20];
             istream.read(peerID);
-            if (new String(peerID,StandardCharsets.UTF_8).equals(Info.getPeerID()))
+            if (new String(peerID, StandardCharsets.UTF_8).equals(Info.getPeerID()))
                 closeSocket();
             ID = new String(peerID);
             t.interrupt();
@@ -282,12 +285,12 @@ public class Connection implements Runnable {
         int count = 0;
         for (int i = 0; i < torrent.getPieces().size(); i++)
             if (carr[i] == '1') {
-                peerHas[i] = true; count++;
-            }
-            else
+                peerHas[i] = true;
+                count++;
+            } else
                 peerHas[i] = false;
-            debug = new String(count + "/ " +torrent.getPieces().size());
-            pieceCount = count;
+        debug = new String(count + "/ " + torrent.getPieces().size());
+        pieceCount = count;
     }
 
     private void receiveRequest() throws IOException {
@@ -306,7 +309,7 @@ public class Connection implements Runnable {
             else {
                 synchronized (ostream) {
                     try {
-                        byte[] blk = p.getBlock(offset,length);
+                        byte[] blk = p.getBlock(offset, length);
                         ostream.writeLimited(ConnectionMessages.genBlock(index, offset, blk));
                     } catch (Exception fnfe) {
                     }
@@ -323,7 +326,7 @@ public class Connection implements Runnable {
         Piece p = torrent.getPieces().get(index);
         if (prefix - 9 < 0)
             closeSocket();
-       // byte arr[] = new byte[prefix - 9];
+        // byte arr[] = new byte[prefix - 9];
         byte arr[] = istream.readNBytesLimited(prefix - 9);
         if (offset + arr.length < 0 || offset + arr.length > p.getLength())
             closeSocket();
@@ -354,6 +357,7 @@ public class Connection implements Runnable {
             closeSocket();
         }
     }
+
     public boolean failed() {
         return socket == null || socket.isClosed();
     }
@@ -379,6 +383,7 @@ public class Connection implements Runnable {
             ostream.write(ConnectionMessages.genMessage(type));
         }
     }
+
     public void setChoke(boolean b) {
         am_choking = b;
         try {
@@ -391,6 +396,7 @@ public class Connection implements Runnable {
             closeSocket();
         }
     }
+
     public void setInterested(boolean b) {
         am_interested = b;
         try {
@@ -403,6 +409,7 @@ public class Connection implements Runnable {
             closeSocket();
         }
     }
+
     public Thread getThread() {
         return thread;
     }

@@ -40,8 +40,8 @@
                               <Font size="18.0" />
                            </font>
                         </Label>
-                        <TextField layoutX="248.0" layoutY="124.0" prefHeight="30.0" prefWidth="314.0" />
-                        <Button alignment="CENTER" graphicTextGap="15.0" layoutX="605.0" layoutY="119.0" mnemonicParsing="false" prefHeight="38.0" prefWidth="84.0" style="-fx-background-color: #405ed6;" text="Browse" textAlignment="CENTER" textFill="WHITE" wrapText="true">
+                        <TextField fx:id="DownloadPath" layoutX="248.0" layoutY="124.0" prefHeight="30.0" prefWidth="314.0" />
+                        <Button fx:id="BrowseButton" alignment="CENTER" graphicTextGap="15.0" layoutX="605.0" layoutY="119.0" mnemonicParsing="false" onAction="#BrowseButtonClicked" prefHeight="38.0" prefWidth="84.0" style="-fx-background-color: #405ed6;" text="Browse" textAlignment="CENTER" textFill="WHITE" wrapText="true">
                            <effect>
                               <Blend mode="LIGHTEN" />
                            </effect>

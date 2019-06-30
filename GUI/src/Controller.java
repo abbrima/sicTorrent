@@ -59,6 +59,9 @@ public class Controller implements Initializable {
     private Button Refresh;
     private static ArrayList<Long> downloadeds = new ArrayList<>();
 
+    @FXML Button BrowseButton;
+    @FXML TextField DownloadPath;
+
     @FXML private Button PauseTorrentButton;
     @FXML private Button ResumeTorrentButton;
 
@@ -168,6 +171,8 @@ public class Controller implements Initializable {
     public void initialize(URL location, ResourceBundle resources) {
         ResumeTorrentButton.setDisable(true);
         PauseTorrentButton.setDisable(true);
+       // DownloadPath.setEditable(false);
+       // DownloadPath.setText(Parameters.downloadDir);
         if (NetworkController.getTorrents().size() > 0)
         {
             currentTorrent = NetworkController.getTorrents().get(0);
@@ -559,5 +564,18 @@ public class Controller implements Initializable {
                 return null;
             }
         }).start();
+    }
+
+    @FXML void BrowseButtonClicked(){
+        DirectoryChooser chooser = new DirectoryChooser();
+        chooser.setInitialDirectory(new File(Parameters.downloadDir));
+        try{
+            File fl = chooser.showDialog(primaryStage);
+            if (fl.exists() && fl.canExecute() && fl.canRead() && fl.canWrite())
+            {
+                Parameters.downloadDir = fl.getPath();
+                DownloadPath.setText(fl.getPath());
+            }
+        }catch(Exception e){e.printStackTrace();}
     }
 }
