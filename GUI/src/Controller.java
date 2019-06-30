@@ -174,8 +174,8 @@ public class Controller implements Initializable,Announcable {
     public void initialize(URL location, ResourceBundle resources) {
         ResumeTorrentButton.setDisable(true);
         PauseTorrentButton.setDisable(true);
-       // DownloadPath.setEditable(false);
-       // DownloadPath.setText(Parameters.downloadDir);
+        DownloadPath.setEditable(false);
+        DownloadPath.setText(Parameters.downloadDir);
         if (NetworkController.getTorrents().size() > 0)
         {
             currentTorrent = NetworkController.getTorrents().get(0);

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.text.*?>
+<?import java.lang.*?>
+<?import java.util.*?>
+<?import javafx.scene.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="286.0" prefWidth="640.0" style="-fx-background-color: #405ed6;" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="AboutController">
+   <children>
+      <VBox layoutX="111.0" layoutY="31.0" prefHeight="166.0" prefWidth="409.0">
+         <children>
+            <Text fill="#fff3e0" strokeType="OUTSIDE" strokeWidth="0.0" text="ABOUT SICTORRENT" />
+            <Text fill="#fff3e0" strokeType="OUTSIDE" strokeWidth="0.0" text="A BitTorrent client for windows." />
+            <Text fill="#fff3e0" strokeType="OUTSIDE" strokeWidth="0.0" text="Developed by:" />
+            <Text fill="#fff3e0" strokeType="OUTSIDE" strokeWidth="0.0" text="Adam abdalwahab" />
+            <Text fill="#fff3e0" strokeType="OUTSIDE" strokeWidth="0.0" text="Leen balkhi" />
+            <Text fill="#fff3e0" strokeType="OUTSIDE" strokeWidth="0.0" text="Jawad rahwanji" />
+            <Text fill="#fff3e0" strokeType="OUTSIDE" strokeWidth="0.0" text="Rami kass youseef" />
+            <Text fill="#fff3e0" strokeType="OUTSIDE" strokeWidth="0.0" text="Version 1.0" />
+         </children>
+      </VBox>
+      <Button layoutX="557.0" layoutY="230.0" mnemonicParsing="false" onAction="#addPrompt" style="-fx-background-color: #FF9800;" text="OK" textFill="#fff3e0" />
+   </children>
+</AnchorPane>
