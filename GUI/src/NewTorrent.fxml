@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.text.*?>
+<?import java.lang.*?>
+<?import java.util.*?>
+<?import javafx.scene.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="399.0" prefWidth="427.0" style="-fx-background-color: #405ed6;" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="NewTorrentController">
+   <children>
+      <Text fill="#fff3e0" layoutX="116.0" layoutY="78.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Name" />
+      <Text fill="#fff3e0" layoutX="115.0" layoutY="130.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Path" />
+      <Text fill="#fff3e0" layoutX="116.0" layoutY="179.0" strokeType="OUTSIDE" strokeWidth="0.0" text="infohash" />
+      <Text fill="#fff3e0" layoutX="113.0" layoutY="232.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Total size" />
+      <Text fill="#fff3e0" layoutX="115.0" layoutY="279.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Number of Files" />
+      <TextField layoutX="188.0" layoutY="57.0" />
+      <TextField layoutX="188.0" layoutY="109.0" />
+      <TextField editable="false" layoutX="188.0" layoutY="158.0" />
+      <TextField editable="false" layoutX="194.0" layoutY="211.0" />
+      <TextField editable="false" layoutX="236.0" layoutY="258.0" prefHeight="31.0" prefWidth="139.0" />
+      <Button layoutX="337.0" layoutY="331.0" mnemonicParsing="false" onAction="#cancelPrompt" style="-fx-background-color: FF9800;" text="CLOSE" textFill="#fff3e0" />
+      <Button layoutX="256.0" layoutY="331.0" mnemonicParsing="false" style="-fx-background-color: FF9800;" text="ADD" textFill="#fff3e0" />
+   </children>
+</AnchorPane>

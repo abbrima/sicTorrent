@@ -538,11 +538,35 @@ public class Controller implements Initializable,Announcable {
                 return;
             NetworkController.addTorrent(torrent);
             torrent.setUI(this);
-            torrent.invokeThreads();
-            currentTorrent = torrent;
-            setTorrentControlButtons(currentTorrent.getStatus());
-            Torrents.getItems().clear();
-            Torrents.getItems().addAll(NetworkController.getTorrents());
+            new Thread(new Task() {
+                protected Object call() {
+                    try {
+                        Parent root = FXMLLoader.load(getClass().getResource("NewTorrent.fxml"));
+                        Platform.runLater(()->{
+                            Stage prompt = new Stage();
+                            prompt.initStyle(StageStyle.UNDECORATED);
+
+                            Scene scene = new Scene(root);
+                            prompt.setScene(scene);
+                            prompt.initModality(Modality.APPLICATION_MODAL);
+                            Rectangle2D primScreenBounds = Screen.getPrimary().getVisualBounds();
+                            prompt.show();
+                            prompt.setX((primScreenBounds.getWidth() - prompt.getWidth()) / 2);
+                            prompt.setY((primScreenBounds.getHeight() - prompt.getHeight()) / 2);
+                            NewTorrentController.promptStage = prompt;
+                        });
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                    return null;
+                }
+            }).start();
+            //move
+            //torrent.invokeThreads();
+           // currentTorrent = torrent;
+           // setTorrentControlButtons(currentTorrent.getStatus());
+          //  Torrents.getItems().clear();
+           // Torrents.getItems().addAll(NetworkController.getTorrents());
         } catch (Exception ex) {
             ex.printStackTrace();
         }
@@ -602,6 +626,11 @@ public class Controller implements Initializable,Announcable {
                 return null;
             }
         }).start();
+    }
+
+    @FXML private void AddTorrent() {
+
+
     }
 
     @FXML void BrowseButtonClicked(){
