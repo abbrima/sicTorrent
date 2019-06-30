@@ -132,6 +132,10 @@ public class Controller implements Initializable,Announcable {
     private TableColumn<Connection, String> PeerDebug;
 
     @FXML
+    private TableColumn<Torrent, String> DownSpeed;
+    @FXML
+    private TableColumn<Connection, String> UpSpeed;
+    @FXML
     private Pane paneStatus;
 
     @FXML
@@ -262,6 +266,9 @@ public class Controller implements Initializable,Announcable {
             TorrentUploaded.setCellValueFactory(new PropertyValueFactory<>("UploadedString"));
             TorrentSize.setCellValueFactory(new PropertyValueFactory<>("LengthString"));
             Torrentstatus.setCellValueFactory(new PropertyValueFactory<>("progress"));
+            DownSpeed.setCellValueFactory(new PropertyValueFactory<>("DownSpeed"));
+            UpSpeed.setCellValueFactory(new PropertyValueFactory<>("UpSpeed"));
+
             Torrents.setRowFactory(e -> {
                 TableRow<Torrent> row = new TableRow<>();
                 row.setOnMouseClicked(event -> {
@@ -561,6 +568,33 @@ public class Controller implements Initializable,Announcable {
                         prompt.setX((primScreenBounds.getWidth() - prompt.getWidth()) / 2);
                         prompt.setY((primScreenBounds.getHeight() - prompt.getHeight()) / 2);
                         PromptController.promptStage = prompt;
+                    });
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                return null;
+            }
+        }).start();
+    }
+
+    @FXML private void About() {
+
+        new Thread(new Task() {
+            protected Object call() {
+                try {
+                    Parent root = FXMLLoader.load(getClass().getResource("About.fxml"));
+                    Platform.runLater(()->{
+                        Stage prompt = new Stage();
+                        prompt.initStyle(StageStyle.UNDECORATED);
+
+                        Scene scene = new Scene(root);
+                        prompt.setScene(scene);
+                        prompt.initModality(Modality.APPLICATION_MODAL);
+                        Rectangle2D primScreenBounds = Screen.getPrimary().getVisualBounds();
+                        prompt.show();
+                        prompt.setX((primScreenBounds.getWidth() - prompt.getWidth()) / 2);
+                        prompt.setY((primScreenBounds.getHeight() - prompt.getHeight()) / 2);
+                        AboutController.promptStage = prompt;
                     });
                 } catch (Exception e) {
                     e.printStackTrace();

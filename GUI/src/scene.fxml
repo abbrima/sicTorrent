@@ -83,7 +83,7 @@
                               <Font size="18.0" />
                            </font>
                         </CheckBox>
-                        <Button fx:id="AboutBtn" alignment="CENTER" graphicTextGap="15.0" layoutX="818.0" layoutY="578.0" mnemonicParsing="false" onAction="#BrowseButtonClicked" prefHeight="38.0" prefWidth="84.0" style="-fx-background-color: #405ed6;" text="About" textAlignment="CENTER" textFill="WHITE" wrapText="true">
+                        <Button fx:id="AboutBtn" alignment="CENTER" graphicTextGap="15.0" layoutX="818.0" layoutY="578.0" mnemonicParsing="false" onAction="#About" prefHeight="38.0" prefWidth="84.0" style="-fx-background-color: #405ed6;" text="About" textAlignment="CENTER" textFill="WHITE" wrapText="true">
                            <effect>
                               <Blend mode="LIGHTEN" />
                            </effect>
@@ -212,8 +212,8 @@
                                         <TableColumn fx:id="Torrentstatus" prefWidth="156.0" text="Progress" />
                                         <TableColumn fx:id="TorrentDownloaded" prefWidth="147.0" text="Downloaded" />
                                         <TableColumn fx:id="TorrentUploaded" prefWidth="122.0" text="Uploaded" />
-                              <TableColumn prefWidth="92.0" text="Down" />
-                              <TableColumn prefWidth="99.0" text="Up" />
+                              <TableColumn fx:id="Down" prefWidth="92.0" text="Down" />
+                              <TableColumn fx:id="Up" prefWidth="99.0" text="Up" />
                                     </columns>
                                 </TableView>
                             </children>
