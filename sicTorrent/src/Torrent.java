@@ -25,22 +25,24 @@ public class Torrent implements Serializable {
             else
                 throw new Exception();
         }
-
     }
 
     private void startCalculatingSpeeds(){
         speedCalculator = new Thread(()->{
             while (!Thread.interrupted()){
-
+                oldDownloaded = Downloaded;
+                oldUploaded = Uploaded;
+                try{Thread.sleep(1000);}catch(InterruptedException ie){return;}
+                DownSpeed = Funcs.lengthToStr(Downloaded-oldDownloaded) + "/s";
+                UpSpeed = Funcs.lengthToStr(Uploaded-oldUploaded) + "/s";
             }
         });
         speedCalculator.setDaemon(true);
         speedCalculator.start();
     }
     private void stopCalculatingSpeeds(){
-
+        speedCalculator.interrupt();
     }
-
     public void setUI(Announcable ui){
         this.ui=ui;
     }
@@ -692,6 +694,7 @@ public class Torrent implements Serializable {
         DownSpeed = Funcs.lengthToStr(0) + "/s";
         UpSpeed = Funcs.lengthToStr(0) + "/s";
         connections.clear();
+        stopCalculatingSpeeds();
         for (Piece p : pieces)
             p.cancelGet();
         for (Tracker t : trackerlist)
@@ -718,7 +721,6 @@ public class Torrent implements Serializable {
         if (trackermanager == null) {
             trackermanager = new TrackerManager();
         }
-        // if (connections==null)
         connections = Collections.synchronizedList(new ArrayList<>());
         trackermanager.start();
         peermanager.start();
@@ -727,6 +729,7 @@ public class Torrent implements Serializable {
         for (Piece p : pieces)
             p.cancelGet();
         status = TorrentStatus.ACTIVE;
+        startCalculatingSpeeds();
     }
 
     public void broadcastHave(Piece p) {
