@@ -132,9 +132,9 @@ public class Controller implements Initializable,Announcable {
     private TableColumn<Connection, String> PeerDebug;
 
     @FXML
-    private TableColumn<Torrent, String> DownSpeed;
+    private TableColumn<Torrent, String> Down;
     @FXML
-    private TableColumn<Connection, String> UpSpeed;
+    private TableColumn<Connection, String> Up;
     @FXML
     private Pane paneStatus;
 
@@ -266,8 +266,8 @@ public class Controller implements Initializable,Announcable {
             TorrentUploaded.setCellValueFactory(new PropertyValueFactory<>("UploadedString"));
             TorrentSize.setCellValueFactory(new PropertyValueFactory<>("LengthString"));
             Torrentstatus.setCellValueFactory(new PropertyValueFactory<>("progress"));
-            DownSpeed.setCellValueFactory(new PropertyValueFactory<>("DownSpeed"));
-            UpSpeed.setCellValueFactory(new PropertyValueFactory<>("UpSpeed"));
+            Down.setCellValueFactory(new PropertyValueFactory<>("DownSpeed"));
+            Up.setCellValueFactory(new PropertyValueFactory<>("UpSpeed"));
 
             Torrents.setRowFactory(e -> {
                 TableRow<Torrent> row = new TableRow<>();
