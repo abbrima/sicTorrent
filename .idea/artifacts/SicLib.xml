@@ -1,0 +1,13 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="SicLib">
+    <output-path>$PROJECT_DIR$/out/artifacts/SicLib</output-path>
+    <root id="archive" name="SicLib.jar">
+      <element id="module-output" name="Bencoding" />
+      <element id="module-output" name="FileManager" />
+      <element id="module-output" name="Networking" />
+      <element id="module-output" name="sicTorrent" />
+      <element id="module-output" name="Trackers" />
+      <element id="module-output" name="Utils" />
+    </root>
+  </artifact>
+</component>

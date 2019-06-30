@@ -1,5 +1,5 @@
 <component name="ArtifactManager">
-  <artifact type="javafx" build-on-make="true" name="GUI">
+  <artifact type="javafx" name="GUI">
     <output-path>D:/SicTorrent</output-path>
     <properties id="javafx-properties">
       <options>
