@@ -101,7 +101,7 @@ public class Connection implements Runnable {
         peerHas = new boolean[torrent.getPieces().size()];
         this.port = port;
         socket = new Socket();
-        socket.connect(new InetSocketAddress(ip, port), 1000);
+        socket.connect(new InetSocketAddress(ip, port), 2000);
         ostream = new LimitedOutputStream(socket.getOutputStream());
         istream = new LimitedInputStream(socket.getInputStream());
 
@@ -288,7 +288,7 @@ public class Connection implements Runnable {
                 count++;
             } else
                 peerHas[i] = false;
-        debug = new String(count + "/ " + torrent.getPieces().size());
+        debug = new String(count + "/" + torrent.getPieces().size());
         pieceCount = count;
     }
 

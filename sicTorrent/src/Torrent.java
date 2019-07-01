@@ -40,6 +40,9 @@ public class Torrent implements Serializable {
         speedCalculator.setDaemon(true);
         speedCalculator.start();
     }
+    public void setName(String name){
+        this.name = name;
+    }
     private void stopCalculatingSpeeds(){
         speedCalculator.interrupt();
     }
@@ -50,7 +53,6 @@ public class Torrent implements Serializable {
     public long getLength() {
         return length;
     }
-
     public String getDownSpeed(){
         return DownSpeed;
     }
@@ -142,7 +144,6 @@ public class Torrent implements Serializable {
         }
 
         public void forceAnnounce() {
-            System.out.println("FORCING");
             for (TrackerHandler handler : handlers.values()) {
                 handler.forceAnnounce();
             }
@@ -238,6 +239,11 @@ public class Torrent implements Serializable {
                             }
                         } catch (TimeoutException toe) {
                             try {
+                                if (event == AnnounceEvent.STOPPED)
+                                {
+                                    tracker.setStatus(TrackerStatus.NONE);
+                                    return;
+                                }
                                 tracker.setStatus(TrackerStatus.TIMEDOUT);
                                 Thread.sleep(120000);
                             } catch (InterruptedException ie) {
@@ -245,6 +251,11 @@ public class Torrent implements Serializable {
                             }
                         } catch (IOException ioe) {
                             tracker.setStatus(TrackerStatus.UNKNOWN_HOST);
+                            if (event == AnnounceEvent.STOPPED)
+                            {
+                                tracker.setStatus(TrackerStatus.NONE);
+                                return;
+                            }
                             try {
                                 Thread.sleep(12000);
                             } catch (InterruptedException ie) {
@@ -252,6 +263,11 @@ public class Torrent implements Serializable {
                         } catch (InterruptedException ie) {
 
                         } catch (InvalidReplyException ire) {
+                            if (event == AnnounceEvent.STOPPED)
+                            {
+                                tracker.setStatus(TrackerStatus.NONE);
+                                return;
+                            }
                             if (ire.getMessage().equals("Torrent not registered")) {
                                 tracker.setStatus(TrackerStatus.DISABLED);
                                 return;
@@ -514,7 +530,7 @@ public class Torrent implements Serializable {
         Uploaded = (long) 0;
         bandwidthcontroller = new BandwidthController(this);
         status = TorrentStatus.INACTIVE;
-        linear = true;
+        linear = false;
         progress = "0%";
         DownloadedString = Funcs.lengthToStr(Downloaded);
         UploadedString = Funcs.lengthToStr(Uploaded);

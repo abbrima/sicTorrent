@@ -60,7 +60,6 @@ public class Controller implements Initializable,Announcable {
     private TableColumn<Tracker, String> trackersStatus;
     @FXML
     private Button Refresh;
-    private static ArrayList<Long> downloadeds = new ArrayList<>();
 
     @FXML Button BrowseButton;
     @FXML TextField DownloadPath;
@@ -149,8 +148,6 @@ public class Controller implements Initializable,Announcable {
     @FXML
     private Button btnDelete;
 
-    @FXML
-    private Label speedlbl;
 
     @FXML
     private Button btnAddTorrent;
@@ -412,17 +409,6 @@ public class Controller implements Initializable,Announcable {
 
     public void setRefresh() {
         try {
-            if (downloadeds.size() == NetworkController.getTorrents().size()) {
-                long data = 0;
-                for (int i = 0; i < downloadeds.size(); i++) {
-                    data += NetworkController.getTorrents().get(i).getDownloaded() - downloadeds.get(i);
-                }
-                double speed = (double) data / 1024.0;
-                Platform.runLater(() -> speedlbl.setText(String.format("%.2f KB/s", speed)));
-            }
-            downloadeds.clear();
-            for (Torrent t : NetworkController.getTorrents())
-                downloadeds.add(t.getDownloaded());
 
             Torrents.getItems().clear();
             trackers.getItems().clear();
@@ -536,11 +522,12 @@ public class Controller implements Initializable,Announcable {
             Torrent torrent = new Torrent(bCoder.decode(arr, ParcelType.TORRENT));
             if (NetworkController.checkIfTorrentExists(torrent.getInfoHash()) != null)
                 return;
-            NetworkController.addTorrent(torrent);
             torrent.setUI(this);
+            currentTorrent = torrent;
             new Thread(new Task() {
                 protected Object call() {
                     try {
+                        NewTorrentController.torrent = torrent;
                         Parent root = FXMLLoader.load(getClass().getResource("NewTorrent.fxml"));
                         Platform.runLater(()->{
                             Stage prompt = new Stage();
@@ -554,6 +541,21 @@ public class Controller implements Initializable,Announcable {
                             prompt.setX((primScreenBounds.getWidth() - prompt.getWidth()) / 2);
                             prompt.setY((primScreenBounds.getHeight() - prompt.getHeight()) / 2);
                             NewTorrentController.promptStage = prompt;
+                            prompt.setOnHiding(e->{
+                                if (NewTorrentController.add)
+                                {
+                                    Platform.runLater(()->{
+                                        NetworkController.addTorrent(torrent);
+                                        torrent.invokeThreads();
+                                     setTorrentControlButtons(currentTorrent.getStatus());
+                                      Torrents.getItems().clear();
+                                      Torrents.getItems().addAll(NetworkController.getTorrents());});
+                                }
+                                else if (NetworkController.getTorrents().size()>0)
+                                    currentTorrent=NetworkController.getTorrents().get(0);
+                                else
+                                    currentTorrent=null;
+                            });
                         });
                     } catch (Exception e) {
                         e.printStackTrace();
@@ -562,11 +564,7 @@ public class Controller implements Initializable,Announcable {
                 }
             }).start();
             //move
-            //torrent.invokeThreads();
-           // currentTorrent = torrent;
-           // setTorrentControlButtons(currentTorrent.getStatus());
-          //  Torrents.getItems().clear();
-           // Torrents.getItems().addAll(NetworkController.getTorrents());
+
         } catch (Exception ex) {
             ex.printStackTrace();
         }

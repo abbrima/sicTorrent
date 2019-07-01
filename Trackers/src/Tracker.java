@@ -180,7 +180,7 @@ class UDPTracker extends Tracker {
             key = rand.nextInt();
         }
         ostream.writeInt(key);                         //key (random)
-        ostream.writeInt(50);                       //numwant (-1 is default)
+        ostream.writeInt(100);                       //numwant (-1 is default)
         ostream.writeShort(Info.getPort());            //My Port
         ostream.close();
 
@@ -292,6 +292,7 @@ class UDPTracker extends Tracker {
         ByteArrayInputStream bais = new ByteArrayInputStream(response);
         DataInputStream istream = new DataInputStream(bais);
         int action = istream.readInt();
+
         synchronized(TransactionID) {
             if (istream.readInt() != TransactionID)
                 throw new InvalidReplyException("Incorrect transaction ID");
@@ -350,6 +351,7 @@ class HTTPTracker extends Tracker {
         str += "&uploaded=" + String.valueOf(uploaded);
         str += "&downloaded=" + String.valueOf(downloaded);
         str += "&left=" + String.valueOf(left);
+        str += "&numwant=" + String.valueOf(100);
         str += "&compact=1";
         if (key==null)
             key = new Random().nextInt();
