@@ -15,7 +15,7 @@ public class Torrent implements Serializable {
     private boolean linear;
     private Long Downloaded, Uploaded;
     private long length;
-    private Announcable ui;
+    private transient Announcable ui;
     private transient Thread speedCalculator;
     private long oldDownloaded,oldUploaded;
     public void addConnection(Connection c) throws Exception {
@@ -316,10 +316,19 @@ public class Torrent implements Serializable {
     class PeerManager implements Runnable {
         private Thread peerThread;
         private Thread gb;
-        private AtomicCounter counter;
         private boolean kill;
 
         public void run() {
+            if (!isFinished()) {
+                if (peers.size() == 0)
+                    try {
+                        synchronized (peers) {
+                            peers.wait();
+                        }
+                    } catch (InterruptedException ie) {if (kill) return; }
+                if (kill)
+                    return;
+            }
             while (!kill) {
                 if (!isFinished()) {
                     if (peers.size() == 0) {
@@ -330,68 +339,66 @@ public class Torrent implements Serializable {
                                 peers.wait();
                             }
                         } catch (InterruptedException ie) {
+                            if (kill)
+                                return;
                         }
                         if (kill) return;
                     }
-                    boolean sleep = false;
                     synchronized (peers) {
-                        if (peers.entrySet().iterator().hasNext()) {
-                            Map.Entry<String, Integer> entry = peers.entrySet().iterator().next();
-                            if (connections.size() < Parameters.peerLimit &&
-                                    !NetworkController.ipExists(entry.getKey())
-                                    && !kill && counter.getValue() < Parameters.peerLimit) {
-                                counter.increment();
-                                Thread t = new Thread(() -> {
-                                    try {
-                                        Connection c = new Connection(Torrent.this, entry.getKey(), entry.getValue());
+                        ArrayList<String> list = new ArrayList<String>();
+                        list.addAll(peers.keySet());
+                        Collections.shuffle(list);
+                        for (String ip : list) {
+                            //try
+                            {
+                                if (connections.size() < Parameters.peerLimit && !NetworkController.ipExists(ip) && !kill) {
+                                    Thread t = new Thread(() -> {
+                                        try {
+                                            Connection c = new Connection(Torrent.this, ip, peers.get(ip));
 
-                                        if (status == TorrentStatus.ACTIVE) {
-                                            synchronized (connections) {
-                                                connections.add(c);
+                                            if (status == TorrentStatus.ACTIVE) {
+                                                synchronized (connections) {
+                                                    connections.add(c);
+                                                }
+                                                synchronized (NetworkController.getConnections()) {
+                                                    NetworkController.getConnections().add(c);
+                                                }
                                             }
-                                            synchronized (NetworkController.getConnections()) {
-                                                NetworkController.getConnections().add(c);
-                                            }
+                                        }catch(Exception e){}
+                                    });
+                                    t.setDaemon(true);
+                                    t.start();
+                                    //create connection
+                                } else if (connections.size() >= Parameters.peerLimit && Downloaded < length) {
+                                    int closed = 0, i = 0;
+                                    while (closed < 0 && i < Parameters.peerLimit)
+                                        if (connections.get(i).getState() != ConnectionState.REQUEST) {
+                                            connections.get(i++).closeSocket();
+                                            closed++;
                                         }
-                                        peers.remove(entry.getKey());
-                                        counter.decrement();
-                                    } catch (Exception e) {
-                                        peers.remove(entry.getKey());
-                                        counter.decrement();
-                                        return;
-                                    }
-                                });
-                                t.setDaemon(true);
-                                t.start();
-                            }
-                            else {
-                                sleep = true;
-
+                                } else
+                                    break;
                             }
                         }
-                   }
-                   if (sleep){
-                       try {
-                           Thread.sleep(1000);
-                       } catch (InterruptedException ie) {
-                           if (kill) return;
-                       }
-                   }
-                   else
-                       Thread.yield();
-                } else
-                    return;
+                    }
+                    try {
+                        Thread.sleep(1000);
+                    } catch (InterruptedException ie) {
+                        if (kill) return;
+                    }
+                }
             }
         }
+
         public PeerManager() {
             kill = false;
         }
+
         public void start() {
-            counter = new AtomicCounter();
             peerThread = new Thread(this);
             peerThread.start();
-            gb = new Thread(() -> {
-                while (true) {
+            gb = new Thread(()->{
+                while (true){
                     synchronized (connections) {
                         for (int i = 0; i < connections.size(); i++)
                             if (connections.get(i).failed()) {
@@ -403,8 +410,7 @@ public class Torrent implements Serializable {
                         Thread.sleep(1000);
                     } catch (InterruptedException ie) {
                         if (kill) return;
-                    }
-                }
+                    }}
             });
             gb.setDaemon(true);
             gb.start();
