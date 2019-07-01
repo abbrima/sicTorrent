@@ -7,38 +7,62 @@ import java.net.Socket;
 import java.net.SocketException;
 import java.util.concurrent.TimeoutException;
 
+
 public class Server implements Runnable {
     ServerSocket server;
     int port;
+    private Thread serverThread;
 
-    public void kill()
-    {
+    public void kill() {
         try {
             server.close();
         } catch (IOException ioe) {
         }
     }
+    private void createServer(){
+        server = null;
+        System.out.println("Creating");
+        Thread t = new Thread(() -> {
+            while (true) {
+                try {
+                    int n = 0;
+                    this.port = 6881;
+                    while (n <= 8) {
+                        try {
+                            server = new ServerSocket(port + n);
+                            Info.setPort(port);
+                            break;
+                        } catch (IOException e) {
+                            n++;
+                        }
+                    }
+                    if (n > 8) {
+                        throw new IOException();
+                    }
+                    start();
+                    return;
+                } catch (IOException ioe) {
+                    try{Thread.sleep(30000);}catch(Exception e){
 
-    public Server() throws IOException
-    {
-        int n = 0;
-        this.port = 6881;
-        while (n <= 8) {
-            try {
-                server = new ServerSocket(port+n);
-                Info.setPort(port);
-                break;
-            } catch (IOException e) {
-                n++;
+                    }
+                }
             }
-        }
-        if (n > 8) {
-            throw new IOException();
-        }
+        });
+        t.setDaemon(true);
+        t.start();
     }
 
-    public void run()
-    {
+    public Server() {
+        createServer();
+    }
+
+    public void start(){
+        serverThread = new Thread(this);
+        serverThread.setDaemon(true);
+        serverThread.start();
+    }
+
+    public void run() {
         while (true) {
             try {
                 Socket client = server.accept();
@@ -48,7 +72,7 @@ public class Server implements Runnable {
                 else
                     client.close();
             } catch (IOException ioe) {
-                return;
+                createServer();
             }
         }
     }

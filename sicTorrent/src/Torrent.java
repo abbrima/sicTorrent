@@ -699,6 +699,7 @@ public class Torrent implements Serializable {
 
         synchronized (peers) {
             peers.notifyAll();
+            peers.clear();
         }
         status = TorrentStatus.INACTIVE;
         synchronized (connections) {

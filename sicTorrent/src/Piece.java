@@ -114,7 +114,7 @@ public class Piece implements Serializable {
             if (status == BlockStatus.READY && !endgame) {
                 t = new Thread(() -> {
                     try {
-                        Thread.sleep(15000);
+                        Thread.sleep(30000);
                         cancelRequest();
                     } catch (InterruptedException e) {
                     }

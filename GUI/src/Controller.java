@@ -34,6 +34,12 @@ public class Controller implements Initializable,Announcable {
     public void announceFinished(Torrent torrent){
         System.out.println(torrent.getName() + "\n HAS FINISHED!!");
     }
+    public void announcePaused(Torrent torrent){
+
+    }
+    public void announceResumed(Torrent torrent){
+
+    }
     void setSidePanelButtonBackground(Button btn,boolean enable){
         if (enable)
              btn.setStyle("-fx-background-color:  #FF9800;");
@@ -270,7 +276,7 @@ public class Controller implements Initializable,Announcable {
                 TableRow<Torrent> row = new TableRow<>();
                 row.setOnMouseClicked(event -> {
                     if (event.getClickCount() == 1 && event.getButton().equals(MouseButton.PRIMARY) && row.getItem() != null)
-                    { currentTorrent = row.getItem();            setTorrentControlButtons(currentTorrent.getStatus());
+                    { currentTorrent = row.getItem();         setTorrentControlButtons(currentTorrent.getStatus());
                     }
                     if (event.getClickCount() == 1 && event.getButton().equals(MouseButton.SECONDARY) && row.getItem() != null) {
 
@@ -356,11 +362,13 @@ public class Controller implements Initializable,Announcable {
                 FilesMenu.hide();
             });
             Download.setOnAction(e -> {
-                if (currentFile.getStatus()!=FileStatus.DOWNLOADED) {
-                    if (Download.isSelected())
-                        currentTorrent.doNotDownload(currentFile);
-                    else
-                        currentTorrent.downloadFile(currentFile);
+               if (currentFile.getStatus()!=FileStatus.DOWNLOADED) {
+                   if (!Download.isSelected()) {
+                       currentTorrent.doNotDownload(currentFile);
+                   }
+                    else {
+                       currentTorrent.downloadFile(currentFile);
+                   }
                 }
             });
 
@@ -405,6 +413,9 @@ public class Controller implements Initializable,Announcable {
         }
         RefreshTimer T = new RefreshTimer();
         T.start();
+
+        for (Torrent t:NetworkController.getTorrents())
+            t.setUI(this);
     }
 
     public void setRefresh() {

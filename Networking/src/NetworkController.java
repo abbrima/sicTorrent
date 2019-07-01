@@ -11,7 +11,6 @@ public class NetworkController {
     private static ArrayList<Torrent> torrents;
     private static List<Connection> connections;
     private static Server server;
-    private static Thread serverThread;
 
     public static List<Connection> getConnections() {
         return connections;
@@ -19,9 +18,7 @@ public class NetworkController {
 
     public static void startServer() throws IOException {
         server = new Server();
-        serverThread = new Thread(server);
-        serverThread.setDaemon(true);
-        serverThread.start();
+        server.start();
     }
 
     public static void killServer() {

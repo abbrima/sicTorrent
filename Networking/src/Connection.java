@@ -134,6 +134,10 @@ public class Connection implements Runnable {
                     Thread t = new Thread(() -> {
                         try {
                             Thread.sleep(30000);
+                            try {
+                                request();
+                            }catch(Exception ie){}
+                            Thread.sleep(90000);
                             closeSocket();
                         } catch (InterruptedException ie) {
                             return;
@@ -173,6 +177,11 @@ public class Connection implements Runnable {
                                 break;
                             case 7: //piece
                                 receivePiece(prefix);
+                                break;
+                            case 8:
+                                istream.readInt();
+                                istream.readInt();
+                                istream.readInt();
                                 break;
                             default:
                                 closeSocket();
