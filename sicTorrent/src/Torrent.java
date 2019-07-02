@@ -700,7 +700,9 @@ public class Torrent implements Serializable {
     public void killThreads() {
         if (status == TorrentStatus.INACTIVE)
             return;
+        if (trackermanager!=null)
         trackermanager.kill();
+        if (peermanager!=null)
         peermanager.kill();
 
         synchronized (peers) {
