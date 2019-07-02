@@ -142,7 +142,7 @@ public class Main extends Application {
     public static void main(String[] args) throws Exception {
         File fl = new File("Err.txt");
         fl.createNewFile();
-       // System.setErr(new PrintStream(fl));
+        System.setErr(new PrintStream(fl));
         launch(args);
     }
 }
