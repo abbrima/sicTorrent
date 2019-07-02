@@ -18,7 +18,6 @@ public class NetworkController {
 
     public static void startServer() throws IOException {
         server = new Server();
-        server.start();
     }
 
     public static void killServer() {
@@ -31,12 +30,6 @@ public class NetworkController {
         for (Torrent t:torrents){
             t.killThreads();
         }
-        try {
-            File fl = new File("torrents.list");
-            fl.createNewFile();
-            ObjectOutputStream obs = new ObjectOutputStream(new FileOutputStream(fl));
-            obs.writeObject(torrents);
-        }catch (IOException ioe){}
     }
     public static void addTorrent(Torrent t) {
         torrents.add(t);

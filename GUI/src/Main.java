@@ -91,8 +91,26 @@ public class Main extends Application {
                         NetworkController.killServer();
                         NetworkController.killTorrents();
                         //save torrent objects
+                        try {
+                            File fll = new File("torrents.list");
+                            fll.createNewFile();
+                            ObjectOutputStream obs = new ObjectOutputStream(new FileOutputStream(fll));
+                            obs.writeObject(NetworkController.getTorrents());
+                        }catch (IOException ioe){}
                     });
-                    loadStage.hide();
+                    primaryStage.setOnHiding(event -> {
+                            t.interrupt();
+                            NetworkController.killServer();
+                            NetworkController.killTorrents();
+                            //save torrent objects
+                        try {
+                            File fll = new File("torrents.list");
+                            fll.createNewFile();
+                            ObjectOutputStream obs = new ObjectOutputStream(new FileOutputStream(fll));
+                            obs.writeObject(NetworkController.getTorrents());
+                        }catch (IOException ioe){}
+                    });
+                    loadStage.close();
                     primaryStage.show();
                     primaryStage.setMaximized(true);
                    }catch(Exception e){}
@@ -106,7 +124,7 @@ public class Main extends Application {
     public static void main(String[] args) throws Exception {
         File fl = new File("Err.txt");
         fl.createNewFile();
-        System.setErr(new PrintStream(fl));
+       // System.setErr(new PrintStream(fl));
         launch(args);
     }
 }

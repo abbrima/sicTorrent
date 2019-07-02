@@ -1,4 +1,6 @@
 import javafx.application.Platform;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -31,8 +33,23 @@ import javafx.stage.*;
 
 public class Controller implements Initializable,Announcable {
 
+
+
     public void announceFinished(Torrent torrent){
         System.out.println(torrent.getName() + "\n HAS FINISHED!!");
+        boolean exit = true;
+        if (Parameters.closeOnFinish)
+            for (Torrent t:NetworkController.getTorrents())
+            {
+                if (!t.isFinished())
+                {
+                    exit = false;
+                    break;
+                }
+            }
+        if (exit){
+            primaryStage.close();
+        }
     }
     public void announcePaused(Torrent torrent){
 
@@ -73,6 +90,7 @@ public class Controller implements Initializable,Announcable {
     @FXML private Button PauseTorrentButton;
     @FXML private Button ResumeTorrentButton;
 
+    @FXML public CheckBox closeAfterTorrentsFinish;
     @FXML
     private TableView<DownloadFile> Files;
     @FXML
@@ -372,6 +390,16 @@ public class Controller implements Initializable,Announcable {
                 }
             });
 
+            closeAfterTorrentsFinish.setSelected(Parameters.closeOnFinish);
+            closeAfterTorrentsFinish.selectedProperty().addListener(
+                    new ChangeListener<Boolean>(){
+                        @Override
+                        public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
+                            Parameters.closeOnFinish=newValue;
+                        }
+                    }
+            );
+
             setSidePanelButtonBackground(btnTorrents,true);
 
             FileName.setCellValueFactory(new PropertyValueFactory<DownloadFile, String>("path"));
@@ -523,6 +551,9 @@ public class Controller implements Initializable,Announcable {
 
     public void addTorrentBtnPress(ActionEvent e) {
         FileChooser chooser = new FileChooser();
+        FileChooser.ExtensionFilter extFilter =
+                new FileChooser.ExtensionFilter("Torrent files (*.torrent)", "*.torrent");
+        chooser.getExtensionFilters().add(extFilter);
         File dir = new File("files/");
         if (dir.exists())
             chooser.setInitialDirectory(dir);

@@ -33,8 +33,12 @@ public class Torrent implements Serializable {
                 oldDownloaded = Downloaded;
                 oldUploaded = Uploaded;
                 try{Thread.sleep(1000);}catch(InterruptedException ie){return;}
-                DownSpeed = Funcs.lengthToStr(Downloaded-oldDownloaded) + "/s";
-                UpSpeed = Funcs.lengthToStr(Uploaded-oldUploaded) + "/s";
+                synchronized (Downloaded) {
+                    DownSpeed = Funcs.lengthToStr(Downloaded - oldDownloaded) + "/s";
+                }
+                synchronized (Uploaded) {
+                    UpSpeed = Funcs.lengthToStr(Uploaded - oldUploaded) + "/s";
+                }
             }
         });
         speedCalculator.setDaemon(true);
@@ -232,6 +236,8 @@ public class Torrent implements Serializable {
                                     return;
                                 }
                             }
+                            if (Thread.interrupted())
+                                continue;
                             try {
                                 Thread.sleep(tracker.getInterval() * 1000);
                             } catch (IllegalArgumentException ieess) {
@@ -656,7 +662,8 @@ public class Torrent implements Serializable {
                 if (!files.get(findex + 1).getPieces().contains(finish))
                     finish.doNotDownload();
             } catch (Exception e) {
-                finish.doNotDownload();
+                if (finish!=null)
+                   finish.doNotDownload();
             }
         }
     }

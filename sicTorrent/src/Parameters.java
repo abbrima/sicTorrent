@@ -3,4 +3,5 @@ public class Parameters {
     public static int peerLimit = 30;
     public static boolean closeOnFinish = false;
     public static boolean scheduleEnabled = false;
+
 }

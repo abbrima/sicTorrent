@@ -133,11 +133,11 @@ public class Connection implements Runnable {
                 } else {
                     Thread t = new Thread(() -> {
                         try {
-                            Thread.sleep(30000);
-                            try {
-                                request();
-                            }catch(Exception ie){}
-                            Thread.sleep(90000);
+                           for (int i=0;i<6;i++)
+                           {
+                               Thread.sleep(20000);
+                               try{request();}catch(Exception e){}
+                           }
                             closeSocket();
                         } catch (InterruptedException ie) {
                             return;

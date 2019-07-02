@@ -195,10 +195,11 @@ class UDPTracker extends Tracker {
         DataInputStream istream = new DataInputStream(bais);
 
         int action = istream.readInt();
+        if (TransactionID!=null)
         synchronized(TransactionID) {
             if (istream.readInt() != TransactionID)
                 System.out.println("Incorrect transaction ID");
-        }
+        }else istream.readInt();
         if (action == 3) {
             istream.close();
             BufferedReader reader = new BufferedReader(new InputStreamReader(bais));

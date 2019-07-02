@@ -21,7 +21,6 @@ public class Server implements Runnable {
     }
     private void createServer(){
         server = null;
-        System.out.println("Creating");
         Thread t = new Thread(() -> {
             while (true) {
                 try {
@@ -73,6 +72,7 @@ public class Server implements Runnable {
                     client.close();
             } catch (IOException ioe) {
                 createServer();
+                return;
             }
         }
     }
