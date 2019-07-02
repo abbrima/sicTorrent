@@ -47,6 +47,7 @@ public class Torrent implements Serializable {
         this.name = name;
     }
     private void stopCalculatingSpeeds(){
+        if (speedCalculator!=null)
         speedCalculator.interrupt();
     }
     public void setUI(Announcable ui){
@@ -705,11 +706,13 @@ public class Torrent implements Serializable {
         if (peermanager!=null)
         peermanager.kill();
 
+        if (peers!=null)
         synchronized (peers) {
             peers.notifyAll();
             peers.clear();
         }
         status = TorrentStatus.INACTIVE;
+        if (connections!=null)
         synchronized (connections) {
             for (Connection c : connections) {
                 {
@@ -724,10 +727,12 @@ public class Torrent implements Serializable {
         }
         DownSpeed = Funcs.lengthToStr(0) + "/s";
         UpSpeed = Funcs.lengthToStr(0) + "/s";
+        if (connections!=null)
         connections.clear();
         stopCalculatingSpeeds();
         for (Piece p : pieces)
             p.cancelGet();
+        if (trackerlist!=null)
         for (Tracker t : trackerlist)
             t.setStatus(TrackerStatus.NONE);
         if (Downloaded == length)

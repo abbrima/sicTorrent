@@ -16,6 +16,6 @@ public class AboutController implements Initializable {
     }
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        VersionText.setText(Info.version.charAt(0) + "." + Info.version.substring(1));
+        VersionText.setText("Version "+Info.version.charAt(0) + "." + Info.version.substring(1));
     }
 }

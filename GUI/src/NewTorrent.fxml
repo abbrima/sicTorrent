@@ -4,21 +4,26 @@
 <?import javafx.scene.control.CheckBox?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.Pane?>
 <?import javafx.scene.text.Text?>
 
-<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="239.0" prefWidth="503.0" style="-fx-background-color: #405ed6;" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="NewTorrentController">
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="266.0" prefWidth="544.0" style="-fx-background-color: #405ed6;" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="NewTorrentController">
    <children>
-      <Text fill="#fff3e0" layoutX="13.0" layoutY="58.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Name" textAlignment="CENTER" />
-      <Text fill="#fff3e0" layoutX="13.0" layoutY="114.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Infohash" textAlignment="CENTER" />
-      <Text fill="#fff3e0" layoutX="13.0" layoutY="167.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Total size" textAlignment="CENTER" />
-      <Text fill="#fff3e0" layoutX="184.0" layoutY="164.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Number of Files" textAlignment="CENTER" />
-      <TextField fx:id="Name" layoutX="85.0" layoutY="41.0" prefHeight="25.0" prefWidth="404.0" />
-      <TextField fx:id="Infohash" editable="false" layoutX="86.0" layoutY="94.0" prefHeight="25.0" prefWidth="404.0" />
-      <TextField fx:id="Size" editable="false" layoutX="86.0" layoutY="147.0" prefHeight="25.0" prefWidth="66.0" />
-      <TextField fx:id="FileCount" editable="false" layoutX="279.0" layoutY="147.0" prefHeight="25.0" prefWidth="74.0" />
-      <Button layoutX="353.0" layoutY="200.0" mnemonicParsing="false" onAction="#cancelPrompt" style="-fx-background-color: FF9800;" text="CLOSE" textFill="#fff3e0" />
-      <Button layoutX="414.0" layoutY="200.0" mnemonicParsing="false" onAction="#addTorrent" style="-fx-background-color: FF9800;" text="ADD" textFill="#fff3e0" />
-      <Text fill="#fff3e0" layoutX="386.0" layoutY="164.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Sequential" textAlignment="CENTER" />
-      <CheckBox fx:id="box" layoutX="461.0" layoutY="147.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="23.0" />
+      <Pane layoutX="13.0" layoutY="41.0" AnchorPane.bottomAnchor="30.0" AnchorPane.leftAnchor="30.0" AnchorPane.rightAnchor="30.0" AnchorPane.topAnchor="30.0">
+         <children>
+            <Text fill="#fff3e0" layoutX="14.0" layoutY="25.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Name" textAlignment="CENTER" />
+            <Text fill="#fff3e0" layoutX="7.0" layoutY="78.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Infohash" textAlignment="CENTER" />
+            <Text fill="#fff3e0" layoutX="5.0" layoutY="132.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Total size" textAlignment="CENTER" />
+            <Text fill="#fff3e0" layoutX="171.0" layoutY="130.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Number of Files" textAlignment="CENTER" />
+            <TextField fx:id="Name" layoutX="72.0" layoutY="8.0" prefHeight="17.0" prefWidth="392.0" />
+            <TextField fx:id="Infohash" editable="false" layoutX="73.0" layoutY="61.0" prefHeight="17.0" prefWidth="392.0" />
+            <TextField fx:id="Size" editable="false" layoutX="73.0" layoutY="115.0" prefHeight="16.0" prefWidth="66.0" />
+            <TextField fx:id="FileCount" editable="false" layoutX="299.0" layoutY="114.0" prefHeight="25.0" prefWidth="41.0" />
+            <Button layoutX="314.0" layoutY="159.0" mnemonicParsing="false" onAction="#cancelPrompt" style="-fx-background-color: FF9800;" text="CLOSE" textFill="#fff3e0" />
+            <Button layoutX="401.0" layoutY="159.0" mnemonicParsing="false" onAction="#addTorrent" style="-fx-background-color: FF9800;" text="ADD" textFill="#fff3e0" />
+            <Text fill="#fff3e0" layoutX="365.0" layoutY="132.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Sequential" textAlignment="CENTER" />
+            <CheckBox fx:id="box" layoutX="453.0" layoutY="114.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="23.0" />
+         </children>
+      </Pane>
    </children>
 </AnchorPane>

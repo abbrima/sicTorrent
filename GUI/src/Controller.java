@@ -52,10 +52,12 @@ public class Controller implements Initializable,Announcable {
     }
     public void announcePaused(Torrent torrent){
         //check schedular
-
+        if (torrent == currentTorrent)
+            setTorrentControlButtons(torrent.getStatus());
     }
     public void announceResumed(Torrent torrent){
-
+        if (torrent == currentTorrent)
+            setTorrentControlButtons(torrent.getStatus());
     }
     void setSidePanelButtonBackground(Button btn,boolean enable){
         if (enable)

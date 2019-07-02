@@ -36,7 +36,7 @@ public class NewTorrentController implements Initializable {
         box.setSelected(torrent.getLinear());
     }
     @FXML void addTorrent(){
-        if (!Name.getText().equals(""))
+        if (Name.getText().trim().length() != 0)
         {
                 torrent.setName(Name.getText());
                 torrent.setLinear(box.isSelected());
