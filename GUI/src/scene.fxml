@@ -28,6 +28,68 @@
             <children>
                 <StackPane GridPane.hgrow="ALWAYS" GridPane.vgrow="ALWAYS">
                     <children>
+                  <Pane fx:id="settGrid" prefHeight="200.0" prefWidth="200.0" style="-fx-background-color: #fff3e0;">
+                     <children>
+                        <CheckBox fx:id="closeAfterTorrentsFinish" alignment="TOP_RIGHT" layoutX="55.0" layoutY="30.0" mnemonicParsing="false" text="Close program when all active downloads are done">
+                           <font>
+                              <Font size="18.0" />
+                           </font>
+                        </CheckBox>
+                        <Label layoutX="53.0" layoutY="125.0" text="Download directory">
+                           <font>
+                              <Font size="18.0" />
+                           </font>
+                        </Label>
+                        <TextField fx:id="DownloadPath" layoutX="248.0" layoutY="124.0" prefHeight="30.0" prefWidth="314.0" />
+                        <Button fx:id="BrowseButton" alignment="CENTER" graphicTextGap="15.0" layoutX="605.0" layoutY="119.0" mnemonicParsing="false" onAction="#BrowseButtonClicked" prefHeight="38.0" prefWidth="84.0" style="-fx-background-color: #405ed6;" text="Browse" textAlignment="CENTER" textFill="WHITE" wrapText="true">
+                           <effect>
+                              <Blend mode="LIGHTEN" />
+                           </effect>
+                           <font>
+                              <Font size="18.0" />
+                           </font>
+                           <opaqueInsets>
+                              <Insets />
+                           </opaqueInsets>
+                        </Button>
+                        <Separator layoutX="1.0" layoutY="82.0" prefHeight="19.0" prefWidth="935.0" />
+                        <Separator layoutX="-3.0" layoutY="176.0" prefHeight="20.0" prefWidth="939.0" />
+                        <Label layoutX="92.0" layoutY="203.0" text="Scheduler">
+                           <font>
+                              <Font size="18.0" />
+                           </font>
+                        </Label>
+                        <ComboBox fx:id="FromTime" layoutX="205.0" layoutY="267.0" prefHeight="25.0" prefWidth="195.0" />
+                        <Label layoutX="81.0" layoutY="271.0" text="Start">
+                           <font>
+                              <Font size="18.0" />
+                           </font>
+                        </Label>
+                        <ComboBox fx:id="ToTime" layoutX="620.0" layoutY="267.0" prefHeight="25.0" prefWidth="198.0" />
+                        <Label layoutX="493.0" layoutY="265.0" text="Finish">
+                           <font>
+                              <Font size="18.0" />
+                           </font>
+                        </Label>
+                        <Separator layoutX="-2.0" layoutY="333.0" prefHeight="19.0" prefWidth="937.0" />
+                        <CheckBox fx:id="SchedularBox" alignment="TOP_RIGHT" layoutX="55.0" layoutY="203.0" mnemonicParsing="false">
+                           <font>
+                              <Font size="18.0" />
+                           </font>
+                        </CheckBox>
+                        <Button fx:id="AboutBtn" alignment="CENTER" graphicTextGap="15.0" layoutX="605.0" layoutY="24.0" mnemonicParsing="false" onAction="#About" prefHeight="38.0" prefWidth="84.0" style="-fx-background-color: #405ed6;" text="About" textAlignment="CENTER" textFill="WHITE" wrapText="true">
+                           <effect>
+                              <Blend mode="LIGHTEN" />
+                           </effect>
+                           <font>
+                              <Font size="18.0" />
+                           </font>
+                           <opaqueInsets>
+                              <Insets />
+                           </opaqueInsets>
+                        </Button>
+                     </children>
+                  </Pane>
                         <GridPane fx:id="torrnetGrid" prefHeight="660.0" prefWidth="935.0" style="-fx-background-color: #fff;">
                             <children>
                                 <HBox prefHeight="68.0" prefWidth="935.0">
@@ -153,68 +215,6 @@
                                 <RowConstraints maxHeight="497.0" minHeight="10.0" prefHeight="345.0" vgrow="SOMETIMES" />
                             </rowConstraints>
                         </GridPane>
-                  <Pane fx:id="settGrid" prefHeight="200.0" prefWidth="200.0" style="-fx-background-color: #fff3e0;">
-                     <children>
-                        <CheckBox fx:id="closeAfterTorrentsFinish" alignment="TOP_RIGHT" layoutX="55.0" layoutY="30.0" mnemonicParsing="false" text="Close program when all active downloads are done">
-                           <font>
-                              <Font size="18.0" />
-                           </font>
-                        </CheckBox>
-                        <Label layoutX="53.0" layoutY="125.0" text="Download directory">
-                           <font>
-                              <Font size="18.0" />
-                           </font>
-                        </Label>
-                        <TextField fx:id="DownloadPath" layoutX="248.0" layoutY="124.0" prefHeight="30.0" prefWidth="314.0" />
-                        <Button fx:id="BrowseButton" alignment="CENTER" graphicTextGap="15.0" layoutX="605.0" layoutY="119.0" mnemonicParsing="false" onAction="#BrowseButtonClicked" prefHeight="38.0" prefWidth="84.0" style="-fx-background-color: #405ed6;" text="Browse" textAlignment="CENTER" textFill="WHITE" wrapText="true">
-                           <effect>
-                              <Blend mode="LIGHTEN" />
-                           </effect>
-                           <font>
-                              <Font size="18.0" />
-                           </font>
-                           <opaqueInsets>
-                              <Insets />
-                           </opaqueInsets>
-                        </Button>
-                        <Separator layoutX="1.0" layoutY="82.0" prefHeight="19.0" prefWidth="935.0" />
-                        <Separator layoutX="-3.0" layoutY="176.0" prefHeight="20.0" prefWidth="939.0" />
-                        <Label layoutX="92.0" layoutY="203.0" text="Scheduler">
-                           <font>
-                              <Font size="18.0" />
-                           </font>
-                        </Label>
-                        <ComboBox layoutX="205.0" layoutY="267.0" prefHeight="25.0" prefWidth="195.0" />
-                        <Label layoutX="81.0" layoutY="271.0" text="Start">
-                           <font>
-                              <Font size="18.0" />
-                           </font>
-                        </Label>
-                        <ComboBox layoutX="620.0" layoutY="267.0" prefHeight="25.0" prefWidth="198.0" />
-                        <Label layoutX="493.0" layoutY="265.0" text="Finish">
-                           <font>
-                              <Font size="18.0" />
-                           </font>
-                        </Label>
-                        <Separator layoutX="-2.0" layoutY="333.0" prefHeight="19.0" prefWidth="937.0" />
-                        <CheckBox fx:id="SchedulerBox" alignment="TOP_RIGHT" layoutX="55.0" layoutY="203.0" mnemonicParsing="false">
-                           <font>
-                              <Font size="18.0" />
-                           </font>
-                        </CheckBox>
-                        <Button fx:id="AboutBtn" alignment="CENTER" graphicTextGap="15.0" layoutX="605.0" layoutY="24.0" mnemonicParsing="false" onAction="#About" prefHeight="38.0" prefWidth="84.0" style="-fx-background-color: #405ed6;" text="About" textAlignment="CENTER" textFill="WHITE" wrapText="true">
-                           <effect>
-                              <Blend mode="LIGHTEN" />
-                           </effect>
-                           <font>
-                              <Font size="18.0" />
-                           </font>
-                           <opaqueInsets>
-                              <Insets />
-                           </opaqueInsets>
-                        </Button>
-                     </children>
-                  </Pane>
                     </children>
                 </StackPane>
             </children>

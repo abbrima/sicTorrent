@@ -10,11 +10,11 @@ import javafx.fxml.Initializable;
 
 import java.awt.*;
 import java.io.File;
+import java.time.LocalTime;
 import java.util.*;
 
 import java.net.URL;
 
-import javafx.geometry.Insets;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -28,17 +28,16 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
-import javafx.scene.paint.Color;
 import javafx.stage.*;
 
 public class Controller implements Initializable,Announcable {
 
-
+    private mSchedular schedular;
 
     public void announceFinished(Torrent torrent){
         System.out.println(torrent.getName() + "\n HAS FINISHED!!");
         boolean exit = true;
-        if (Parameters.closeOnFinish)
+        if (mParameters.closeOnFinish)
             for (Torrent t:NetworkController.getTorrents())
             {
                 if (!t.isFinished())
@@ -52,6 +51,7 @@ public class Controller implements Initializable,Announcable {
         }
     }
     public void announcePaused(Torrent torrent){
+        //check schedular
 
     }
     public void announceResumed(Torrent torrent){
@@ -84,6 +84,7 @@ public class Controller implements Initializable,Announcable {
     @FXML
     private Button Refresh;
 
+
     @FXML Button BrowseButton;
     @FXML TextField DownloadPath;
 
@@ -114,6 +115,8 @@ public class Controller implements Initializable,Announcable {
     private TableColumn<Torrent, String> TorrentDownloaded;
     @FXML
     private TableColumn<Torrent, String> TorrentUploaded;
+
+    @FXML private CheckBox SchedularBox;
 
     private ContextMenu TorrentContextMenu;
     private Menu DownloadMode;
@@ -166,6 +169,8 @@ public class Controller implements Initializable,Announcable {
     @FXML
     private Button addTorrentBtn;
 
+    @FXML private ComboBox<LocalTime> FromTime;
+    @FXML private ComboBox<LocalTime> ToTime;
     @FXML
     private Button btnSettings;
 
@@ -200,7 +205,51 @@ public class Controller implements Initializable,Announcable {
         ResumeTorrentButton.setDisable(true);
         PauseTorrentButton.setDisable(true);
         DownloadPath.setEditable(false);
-        DownloadPath.setText(Parameters.downloadDir);
+        DownloadPath.setText(mParameters.downloadDir);
+        schedular = new mSchedular();
+        schedular.start();
+        try {
+            for (int i=0;i<24;i++)
+            {
+                FromTime.getItems().add(LocalTime.of(i,0));
+                ToTime.getItems().add(LocalTime.of(i,0));
+            }
+        }catch(Exception e){
+            e.printStackTrace();
+        }
+        FromTime.getSelectionModel().select(mParameters.start);
+        ToTime.getSelectionModel().select(mParameters.finish);
+
+        FromTime.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<LocalTime>() {
+            @Override
+            public void changed(ObservableValue<? extends LocalTime> observable, LocalTime oldValue, LocalTime newValue) {
+                mParameters.start = newValue;
+                schedular.forceStart();
+            }
+        });
+        ToTime.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<LocalTime>() {
+            @Override
+            public void changed(ObservableValue<? extends LocalTime> observable, LocalTime oldValue, LocalTime newValue) {
+                mParameters.finish = newValue;
+                schedular.forceStart();
+            }
+        });
+
+        FromTime.setDisable(!mParameters.scheduleEnabled);
+        ToTime.setDisable(!mParameters.scheduleEnabled);
+
+        SchedularBox.setSelected(mParameters.scheduleEnabled);
+      try {
+          SchedularBox.selectedProperty().addListener(new ChangeListener<Boolean>() {
+              @Override
+              public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
+                  mParameters.scheduleEnabled = newValue;
+                  FromTime.setDisable(!mParameters.scheduleEnabled);
+                  ToTime.setDisable(!mParameters.scheduleEnabled);
+              }
+          });
+      }catch(Exception e){e.printStackTrace();}
+
         if (NetworkController.getTorrents().size() > 0)
         {
             currentTorrent = NetworkController.getTorrents().get(0);
@@ -390,12 +439,12 @@ public class Controller implements Initializable,Announcable {
                 }
             });
 
-            closeAfterTorrentsFinish.setSelected(Parameters.closeOnFinish);
+            closeAfterTorrentsFinish.setSelected(mParameters.closeOnFinish);
             closeAfterTorrentsFinish.selectedProperty().addListener(
                     new ChangeListener<Boolean>(){
                         @Override
                         public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
-                            Parameters.closeOnFinish=newValue;
+                            mParameters.closeOnFinish=newValue;
                         }
                     }
             );
@@ -418,7 +467,7 @@ public class Controller implements Initializable,Announcable {
                             row.getItem() != null && row.getItem().getStatus() == FileStatus.DOWNLOADED) {
                         Desktop desktop = Desktop.getDesktop();
                         try {
-                            desktop.open(new File(Parameters.downloadDir + row.getItem().getPath()));
+                            desktop.open(new File(mParameters.downloadDir + row.getItem().getPath()));
                         } catch (Exception ex) {
                             ex.printStackTrace();
                         }
@@ -444,6 +493,7 @@ public class Controller implements Initializable,Announcable {
 
         for (Torrent t:NetworkController.getTorrents())
             t.setUI(this);
+        NetworkController.invokeTorrents();
     }
 
     public void setRefresh() {
@@ -675,14 +725,17 @@ public class Controller implements Initializable,Announcable {
 
     @FXML void BrowseButtonClicked(){
         DirectoryChooser chooser = new DirectoryChooser();
-        chooser.setInitialDirectory(new File(Parameters.downloadDir));
+        chooser.setInitialDirectory(new File(mParameters.downloadDir));
         try{
             File fl = chooser.showDialog(primaryStage);
             if (fl.exists() && fl.canExecute() && fl.canRead() && fl.canWrite())
             {
-                Parameters.downloadDir = fl.getPath();
+                mParameters.downloadDir = fl.getPath();
                 DownloadPath.setText(fl.getPath());
             }
         }catch(Exception e){e.printStackTrace();}
+    }
+    public static void showSchedulePrompt(boolean stopped){
+        System.out.println(stopped);
     }
 }

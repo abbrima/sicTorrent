@@ -20,11 +20,12 @@ import javafx.stage.StageStyle;
 import java.io.*;
 import java.net.InetAddress;
 import java.net.Socket;
+import java.time.LocalTime;
 import java.util.ArrayList;
 
 public class Main extends Application {
     public static Stage loadStage;
-
+    private static Thread t;
     @Override
     public void start(Stage primaryStage) throws Exception {
         loadStage = new Stage();
@@ -56,12 +57,22 @@ public class Main extends Application {
                     try {
                         ArrayList<Torrent> torrents = (ArrayList<Torrent>) ois.readObject();
                         NetworkController.addTorrents(torrents);
-                        NetworkController.invokeTorrents();
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
                 }
-                Thread t = new Thread(() -> {
+                fl = new File("params.settings");
+                if (fl.exists()){
+                    ObjectInputStream ois = new ObjectInputStream(new FileInputStream(fl));
+                    try{
+                        mParameters.downloadDir = (String)ois.readObject();
+                        mParameters.closeOnFinish = (Boolean)ois.readObject();
+                        mParameters.scheduleEnabled = (Boolean)ois.readObject();
+                        mParameters.start = (LocalTime)ois.readObject();
+                        mParameters.finish = (LocalTime)ois.readObject();
+                    }catch(Exception e){}
+                }
+                t = new Thread(() -> {
                     while (true) {
                         try {
                             Thread.sleep(30000);
@@ -87,28 +98,10 @@ public class Main extends Application {
                     primaryStage.setTitle("SicTorrent");
                     primaryStage.setScene(new Scene(root, 1280, 720));
                     primaryStage.setOnCloseRequest(event -> {
-                        t.interrupt();
-                        NetworkController.killServer();
-                        NetworkController.killTorrents();
-                        //save torrent objects
-                        try {
-                            File fll = new File("torrents.list");
-                            fll.createNewFile();
-                            ObjectOutputStream obs = new ObjectOutputStream(new FileOutputStream(fll));
-                            obs.writeObject(NetworkController.getTorrents());
-                        }catch (IOException ioe){}
+                       wrapUpAndClose();
                     });
                     primaryStage.setOnHiding(event -> {
-                            t.interrupt();
-                            NetworkController.killServer();
-                            NetworkController.killTorrents();
-                            //save torrent objects
-                        try {
-                            File fll = new File("torrents.list");
-                            fll.createNewFile();
-                            ObjectOutputStream obs = new ObjectOutputStream(new FileOutputStream(fll));
-                            obs.writeObject(NetworkController.getTorrents());
-                        }catch (IOException ioe){}
+                           wrapUpAndClose();
                     });
                     loadStage.close();
                     primaryStage.show();
@@ -119,8 +112,33 @@ public class Main extends Application {
             }
         }).start();
     }
+    public static void wrapUpAndClose(){
+        t.interrupt();
+        NetworkController.killServer();
+        NetworkController.killTorrents();
+        //save torrent objects
+        try {
+            File fl = new File("torrents.list");
+            fl.createNewFile();
+            ObjectOutputStream obs = new ObjectOutputStream(new FileOutputStream(fl));
+            obs.writeObject(NetworkController.getTorrents());
+        }catch (IOException ioe){}
+        //save Settings
+        try{
+            File fl = new File("params.settings");
+            fl.createNewFile();
+            ObjectOutputStream obs = new ObjectOutputStream(new FileOutputStream(fl));
 
+            obs.writeObject(mParameters.downloadDir);
+            obs.writeObject(mParameters.closeOnFinish);
+            obs.writeObject(mParameters.scheduleEnabled);
+            obs.writeObject(mParameters.start);
+            obs.writeObject(mParameters.finish);
+        }
+        catch(IOException ioe){
 
+        }
+    }
     public static void main(String[] args) throws Exception {
         File fl = new File("Err.txt");
         fl.createNewFile();

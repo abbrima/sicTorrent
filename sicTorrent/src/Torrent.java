@@ -2,7 +2,6 @@
 
 import java.io.IOException;
 import java.io.Serializable;
-import java.net.MalformedURLException;
 import java.net.UnknownHostException;
 import java.util.*;
 import java.util.concurrent.*;
@@ -20,7 +19,7 @@ public class Torrent implements Serializable {
     private long oldDownloaded,oldUploaded;
     public void addConnection(Connection c) throws Exception {
         synchronized (connections) {
-            if (connections.size() < Parameters.peerLimit && status == TorrentStatus.ACTIVE)
+            if (connections.size() < mParameters.peerLimit && status == TorrentStatus.ACTIVE)
                 connections.add(c);
             else
                 throw new Exception();
@@ -357,7 +356,7 @@ public class Torrent implements Serializable {
                         for (String ip : list) {
                             //try
                             {
-                                if (connections.size() < Parameters.peerLimit && !NetworkController.ipExists(ip) && !kill) {
+                                if (connections.size() < mParameters.peerLimit && !NetworkController.ipExists(ip) && !kill) {
                                     Thread t = new Thread(() -> {
                                         try {
                                             Connection c = new Connection(Torrent.this, ip, peers.get(ip));
@@ -375,9 +374,9 @@ public class Torrent implements Serializable {
                                     t.setDaemon(true);
                                     t.start();
                                     //create connection
-                                } else if (connections.size() >= Parameters.peerLimit && Downloaded < length) {
+                                } else if (connections.size() >= mParameters.peerLimit && Downloaded < length) {
                                     int closed = 0, i = 0;
-                                    while (closed < 0 && i < Parameters.peerLimit)
+                                    while (closed < 0 && i < mParameters.peerLimit)
                                         if (connections.get(i).getState() != ConnectionState.REQUEST) {
                                             connections.get(i++).closeSocket();
                                             closed++;
@@ -537,7 +536,7 @@ public class Torrent implements Serializable {
 
     public Torrent(Parcel parcel) {
         this();
-        downloadDir = Parameters.downloadDir;
+        downloadDir = mParameters.downloadDir;
         Downloaded = (long) 0;
         Uploaded = (long) 0;
         bandwidthcontroller = new BandwidthController(this);
@@ -733,7 +732,8 @@ public class Torrent implements Serializable {
             progress = "Finished";
         else
             progress = "Paused";
-
+        if (ui!=null)
+            ui.announcePaused(this);
     }
 
     public ArrayList<Tracker> getTrackers() {
@@ -760,6 +760,8 @@ public class Torrent implements Serializable {
             p.cancelGet();
         status = TorrentStatus.ACTIVE;
         startCalculatingSpeeds();
+        if (ui!=null)
+            ui.announceResumed(this);
     }
 
     public void broadcastHave(Piece p) {
