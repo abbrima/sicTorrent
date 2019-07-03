@@ -1,11 +1,9 @@
 import java.time.LocalTime;
 
-import static java.time.temporal.ChronoUnit.*;
-
 public class mSchedular implements Runnable{
    private Thread thrd;
-
-   public mSchedular(){}
+   private PromptInterface ui;
+   public mSchedular(PromptInterface ui){this.ui=ui;}
 
    public void start(){
        thrd = new Thread(this);
@@ -36,8 +34,10 @@ public class mSchedular implements Runnable{
        while (true){
            if (between())
            {
-               if (mParameters.scheduleEnabled)
-                  NetworkController.invokeTorrents();
+               if (mParameters.scheduleEnabled) {
+                   NetworkController.invokeTorrents();
+                   ui.prompt("Scheduler has started torrents");
+               }
                try{
                    Thread.sleep(difference(LocalTime.now(),mParameters.finish) + 2000);
                }catch(InterruptedException ie){
@@ -46,8 +46,10 @@ public class mSchedular implements Runnable{
            }
            else
            {
-               if (mParameters.scheduleEnabled)
+               if (mParameters.scheduleEnabled) {
                    NetworkController.killTorrents();
+                   ui.prompt("Scheduler has stopped torrents");
+               }
                try{
                    Thread.sleep(difference(LocalTime.now(),mParameters.start));
                }catch(InterruptedException ie){

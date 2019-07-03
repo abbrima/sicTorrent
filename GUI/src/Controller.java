@@ -30,52 +30,79 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
 import javafx.stage.*;
 
-public class Controller implements Initializable,Announcable {
+public class Controller implements Initializable, Announcable,PromptInterface {
 
     private mSchedular schedular;
 
-    public void announceFinished(Torrent torrent){
+    public void prompt(String msg){
+        new Thread(new Task() {
+            protected Object call() {
+                try {
+                    PopupController.msg=msg;
+                    Parent root = FXMLLoader.load(getClass().getResource("Popup.fxml"));
+                    Platform.runLater(() -> {
+                        Stage prompt = new Stage();
+                        prompt.initStyle(StageStyle.UNDECORATED);
+
+                        Scene scene = new Scene(root);
+                        prompt.setScene(scene);
+                        prompt.initModality(Modality.APPLICATION_MODAL);
+                        Rectangle2D primScreenBounds = Screen.getPrimary().getVisualBounds();
+                        prompt.show();
+                        prompt.setX((primScreenBounds.getWidth() - prompt.getWidth()) / 2);
+                        prompt.setY((primScreenBounds.getHeight() - prompt.getHeight()) / 2);
+                        PopupController.stage = prompt;
+                    });
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                return null;
+            }
+        }).start();
+    }
+    public void announceFinished(Torrent torrent) {
         System.out.println(torrent.getName() + "\n HAS FINISHED!!");
         boolean exit = true;
         if (mParameters.closeOnFinish)
-            for (Torrent t:NetworkController.getTorrents())
-            {
-                if (!t.isFinished())
-                {
+            for (Torrent t : NetworkController.getTorrents()) {
+                if (!t.isFinished()) {
                     exit = false;
                     break;
                 }
             }
-        if (exit){
+        if (exit) {
             primaryStage.close();
         }
     }
-    public void announcePaused(Torrent torrent){
+
+    public void announcePaused(Torrent torrent) {
         //check schedular
         if (torrent == currentTorrent)
             setTorrentControlButtons(torrent.getStatus());
     }
-    public void announceResumed(Torrent torrent){
+
+    public void announceResumed(Torrent torrent) {
         if (torrent == currentTorrent)
             setTorrentControlButtons(torrent.getStatus());
     }
-    void setSidePanelButtonBackground(Button btn,boolean enable){
+
+    void setSidePanelButtonBackground(Button btn, boolean enable) {
         if (enable)
-             btn.setStyle("-fx-background-color:  #FF9800;");
+            btn.setStyle("-fx-background-color:  #FF9800;");
         else
-             btn.setStyle("-fx-background-color:  #EF6C00;");
+            btn.setStyle("-fx-background-color:  #EF6C00;");
     }
-    void setTorrentControlButtons(TorrentStatus status){
-        if (status == TorrentStatus.ACTIVE)
-        {
+
+    void setTorrentControlButtons(TorrentStatus status) {
+        if (status == TorrentStatus.ACTIVE) {
             ResumeTorrentButton.setDisable(true);
             PauseTorrentButton.setDisable(false);
-        }
-        else{
+        } else {
             ResumeTorrentButton.setDisable(false);
             PauseTorrentButton.setDisable(true);
         }
     }
+
     public static Stage primaryStage;
     @FXML
     private TableView<Tracker> trackers;
@@ -87,13 +114,18 @@ public class Controller implements Initializable,Announcable {
     private Button Refresh;
 
 
-    @FXML Button BrowseButton;
-    @FXML TextField DownloadPath;
+    @FXML
+    Button BrowseButton;
+    @FXML
+    TextField DownloadPath;
 
-    @FXML private Button PauseTorrentButton;
-    @FXML private Button ResumeTorrentButton;
+    @FXML
+    private Button PauseTorrentButton;
+    @FXML
+    private Button ResumeTorrentButton;
 
-    @FXML public CheckBox closeAfterTorrentsFinish;
+    @FXML
+    public CheckBox closeAfterTorrentsFinish;
     @FXML
     private TableView<DownloadFile> Files;
     @FXML
@@ -118,7 +150,8 @@ public class Controller implements Initializable,Announcable {
     @FXML
     private TableColumn<Torrent, String> TorrentUploaded;
 
-    @FXML private CheckBox SchedularBox;
+    @FXML
+    private CheckBox SchedularBox;
 
     private ContextMenu TorrentContextMenu;
     private Menu DownloadMode;
@@ -171,8 +204,10 @@ public class Controller implements Initializable,Announcable {
     @FXML
     private Button addTorrentBtn;
 
-    @FXML private ComboBox<LocalTime> FromTime;
-    @FXML private ComboBox<LocalTime> ToTime;
+    @FXML
+    private ComboBox<LocalTime> FromTime;
+    @FXML
+    private ComboBox<LocalTime> ToTime;
     @FXML
     private Button btnSettings;
 
@@ -208,15 +243,14 @@ public class Controller implements Initializable,Announcable {
         PauseTorrentButton.setDisable(true);
         DownloadPath.setEditable(false);
         DownloadPath.setText(mParameters.downloadDir);
-        schedular = new mSchedular();
+        schedular = new mSchedular(this);
         schedular.start();
         try {
-            for (int i=0;i<24;i++)
-            {
-                FromTime.getItems().add(LocalTime.of(i,0));
-                ToTime.getItems().add(LocalTime.of(i,0));
+            for (int i = 0; i < 24; i++) {
+                FromTime.getItems().add(LocalTime.of(i, 0));
+                ToTime.getItems().add(LocalTime.of(i, 0));
             }
-        }catch(Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
         FromTime.getSelectionModel().select(mParameters.start);
@@ -241,19 +275,21 @@ public class Controller implements Initializable,Announcable {
         ToTime.setDisable(!mParameters.scheduleEnabled);
 
         SchedularBox.setSelected(mParameters.scheduleEnabled);
-      try {
-          SchedularBox.selectedProperty().addListener(new ChangeListener<Boolean>() {
-              @Override
-              public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
-                  mParameters.scheduleEnabled = newValue;
-                  FromTime.setDisable(!mParameters.scheduleEnabled);
-                  ToTime.setDisable(!mParameters.scheduleEnabled);
-              }
-          });
-      }catch(Exception e){e.printStackTrace();}
+        try {
+            SchedularBox.selectedProperty().addListener(new ChangeListener<Boolean>() {
+                @Override
+                public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
+                    mParameters.scheduleEnabled = newValue;
+                    FromTime.setDisable(!mParameters.scheduleEnabled);
+                    ToTime.setDisable(!mParameters.scheduleEnabled);
+                    schedular.forceStart();
+                }
+            });
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
-        if (NetworkController.getTorrents().size() > 0)
-        {
+        if (NetworkController.getTorrents().size() > 0) {
             currentTorrent = NetworkController.getTorrents().get(0);
             setTorrentControlButtons(currentTorrent.getStatus());
         }
@@ -274,8 +310,16 @@ public class Controller implements Initializable,Announcable {
             _Unlimitedu = new CheckMenuItem("Unlimited");
             _256u = new CheckMenuItem("256 KB/s");
 
-            downLimitarr[0] = _32d; downLimitarr[1] = _64d; downLimitarr[2] = _128d; downLimitarr[3] = _256d; downLimitarr[4] = _Unlimitedd;
-            upLimitarr[0] = _32u;   upLimitarr[1] = _64u;   upLimitarr[2]   = _128u; upLimitarr[3]   = _256u; upLimitarr[4]   = _Unlimitedu;
+            downLimitarr[0] = _32d;
+            downLimitarr[1] = _64d;
+            downLimitarr[2] = _128d;
+            downLimitarr[3] = _256d;
+            downLimitarr[4] = _Unlimitedd;
+            upLimitarr[0] = _32u;
+            upLimitarr[1] = _64u;
+            upLimitarr[2] = _128u;
+            upLimitarr[3] = _256u;
+            upLimitarr[4] = _Unlimitedu;
 
             DownLimit = new Menu("Downstream Limit");
             DownLimit.getItems().addAll(_32d, _64d, _128d, _256d, _Unlimitedd);
@@ -344,45 +388,55 @@ public class Controller implements Initializable,Announcable {
             Torrents.setRowFactory(e -> {
                 TableRow<Torrent> row = new TableRow<>();
                 row.setOnMouseClicked(event -> {
-                    if (event.getClickCount() == 1 && event.getButton().equals(MouseButton.PRIMARY) && row.getItem() != null)
-                    { currentTorrent = row.getItem();         setTorrentControlButtons(currentTorrent.getStatus());
+                    if (event.getClickCount() == 1 && event.getButton().equals(MouseButton.PRIMARY) && row.getItem() != null) {
+                        currentTorrent = row.getItem();
+                        setTorrentControlButtons(currentTorrent.getStatus());
                     }
                     if (event.getClickCount() == 1 && event.getButton().equals(MouseButton.SECONDARY) && row.getItem() != null) {
 
-                            currentTorrent = row.getItem();
-                            setTorrentControlButtons(currentTorrent.getStatus());
-                            SequentialMode.setSelected(row.getItem().getLinear());
-                            RandomMode.setSelected(!row.getItem().getLinear());
-                            for (CheckMenuItem item:downLimitarr)
-                                item.setSelected(false);
-                            for (CheckMenuItem item:upLimitarr)
-                                item.setSelected(false);
-                            switch(row.getItem().getBandwidthcontroller().getDown()){
-                                case 32:
-                                    _32d.setSelected(true);
-                                    break;
-                                case 64:
-                                    _64d.setSelected(true); break;
-                                case 128:
-                                    _128d.setSelected(true); break;
-                                case 256:
-                                    _256d.setSelected(true); break;
-                                case -1:
-                                    _Unlimitedd.setSelected(true); break;
-                            }
-                            switch(row.getItem().getBandwidthcontroller().getUp()){
-                                case 32:
-                                    _32u.setSelected(true); break;
-                                case 64:
-                                    _64u.setSelected(true); break;
-                                case 128:
-                                    _128u.setSelected(true); break;
-                                case 256:
-                                    _256u.setSelected(true); break;
-                                case -1:
-                                    _Unlimitedu.setSelected(true); break;
-                            }
-                            TorrentContextMenu.show(row, event.getScreenX(), event.getScreenY());
+                        currentTorrent = row.getItem();
+                        setTorrentControlButtons(currentTorrent.getStatus());
+                        SequentialMode.setSelected(row.getItem().getLinear());
+                        RandomMode.setSelected(!row.getItem().getLinear());
+                        for (CheckMenuItem item : downLimitarr)
+                            item.setSelected(false);
+                        for (CheckMenuItem item : upLimitarr)
+                            item.setSelected(false);
+                        switch (row.getItem().getBandwidthcontroller().getDown()) {
+                            case 32:
+                                _32d.setSelected(true);
+                                break;
+                            case 64:
+                                _64d.setSelected(true);
+                                break;
+                            case 128:
+                                _128d.setSelected(true);
+                                break;
+                            case 256:
+                                _256d.setSelected(true);
+                                break;
+                            case -1:
+                                _Unlimitedd.setSelected(true);
+                                break;
+                        }
+                        switch (row.getItem().getBandwidthcontroller().getUp()) {
+                            case 32:
+                                _32u.setSelected(true);
+                                break;
+                            case 64:
+                                _64u.setSelected(true);
+                                break;
+                            case 128:
+                                _128u.setSelected(true);
+                                break;
+                            case 256:
+                                _256u.setSelected(true);
+                                break;
+                            case -1:
+                                _Unlimitedu.setSelected(true);
+                                break;
+                        }
+                        TorrentContextMenu.show(row, event.getScreenX(), event.getScreenY());
                     }
                 });
                 return row;
@@ -431,27 +485,26 @@ public class Controller implements Initializable,Announcable {
                 FilesMenu.hide();
             });
             Download.setOnAction(e -> {
-               if (currentFile.getStatus()!=FileStatus.DOWNLOADED) {
-                   if (!Download.isSelected()) {
-                       currentTorrent.doNotDownload(currentFile);
-                   }
-                    else {
-                       currentTorrent.downloadFile(currentFile);
-                   }
+                if (currentFile.getStatus() != FileStatus.DOWNLOADED) {
+                    if (!Download.isSelected()) {
+                        currentTorrent.doNotDownload(currentFile);
+                    } else {
+                        currentTorrent.downloadFile(currentFile);
+                    }
                 }
             });
 
             closeAfterTorrentsFinish.setSelected(mParameters.closeOnFinish);
             closeAfterTorrentsFinish.selectedProperty().addListener(
-                    new ChangeListener<Boolean>(){
+                    new ChangeListener<Boolean>() {
                         @Override
                         public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
-                            mParameters.closeOnFinish=newValue;
+                            mParameters.closeOnFinish = newValue;
                         }
                     }
             );
 
-            setSidePanelButtonBackground(btnTorrents,true);
+            setSidePanelButtonBackground(btnTorrents, true);
 
             FileName.setCellValueFactory(new PropertyValueFactory<DownloadFile, String>("path"));
             FileSize.setCellValueFactory(new PropertyValueFactory<>("LengthString"));
@@ -463,7 +516,7 @@ public class Controller implements Initializable,Announcable {
                     if (event.getClickCount() == 1 && event.getButton().equals(MouseButton.SECONDARY)
                             && row.getItem() != null) {
                         currentFile = row.getItem();
-                        Download.setSelected(row.getItem().getStatus()!=FileStatus.DONOTDOWNLOAD);
+                        Download.setSelected(row.getItem().getStatus() != FileStatus.DONOTDOWNLOAD);
                         FilesMenu.show(row, event.getScreenX(), event.getScreenY());
                     } else if (event.getClickCount() == 2 && event.getButton().equals(MouseButton.PRIMARY) &&
                             row.getItem() != null && row.getItem().getStatus() == FileStatus.DOWNLOADED) {
@@ -493,7 +546,7 @@ public class Controller implements Initializable,Announcable {
         RefreshTimer T = new RefreshTimer();
         T.start();
 
-        for (Torrent t:NetworkController.getTorrents())
+        for (Torrent t : NetworkController.getTorrents())
             t.setUI(this);
         NetworkController.invokeTorrents();
     }
@@ -538,14 +591,14 @@ public class Controller implements Initializable,Announcable {
 
         if (event.getSource() == btnTorrents) {
             labelStatus.setText("Torrents");
-            setSidePanelButtonBackground(btnTorrents,true);
-            setSidePanelButtonBackground(btnSettings,false);
+            setSidePanelButtonBackground(btnTorrents, true);
+            setSidePanelButtonBackground(btnSettings, false);
             //paneStatus.setBackground(new Background(new BackgroundFill(Color.rgb(0, 80, 58), CornerRadii.EMPTY, Insets.EMPTY)));
             torrnetGrid.toFront();
         } else if (event.getSource() == btnSettings) {
             labelStatus.setText("Settings");
-            setSidePanelButtonBackground(btnTorrents,false);
-            setSidePanelButtonBackground(btnSettings,true);
+            setSidePanelButtonBackground(btnTorrents, false);
+            setSidePanelButtonBackground(btnSettings, true);
             //paneStatus.setBackground(new Background(new BackgroundFill(Color.rgb(170, 0, 14), CornerRadii.EMPTY, Insets.EMPTY)));
             settGrid.toFront();
         }
@@ -566,26 +619,23 @@ public class Controller implements Initializable,Announcable {
             if (NetworkController.getTorrents().size() > 0) {
                 currentTorrent = NetworkController.getTorrents().get(0);
                 setTorrentControlButtons(currentTorrent.getStatus());
-            }
-            else
-            {currentTorrent = null;
-            PauseTorrentButton.setDisable(true);
-            ResumeTorrentButton.setDisable(true);
+            } else {
+                currentTorrent = null;
+                PauseTorrentButton.setDisable(true);
+                ResumeTorrentButton.setDisable(true);
             }
         }
     }
 
     public void pauseTorrent(ActionEvent e) {
-        if (currentTorrent != null)
-        {
+        if (currentTorrent != null) {
             currentTorrent.killThreads();
             setTorrentControlButtons(currentTorrent.getStatus());
         }
     }
 
     public void resumeTorrent(ActionEvent e) {
-        if (currentTorrent != null)
-        {
+        if (currentTorrent != null) {
             currentTorrent.invokeThreads();
             setTorrentControlButtons(currentTorrent.getStatus());
         }
@@ -623,7 +673,7 @@ public class Controller implements Initializable,Announcable {
                     try {
                         NewTorrentController.torrent = torrent;
                         Parent root = FXMLLoader.load(getClass().getResource("NewTorrent.fxml"));
-                        Platform.runLater(()->{
+                        Platform.runLater(() -> {
                             Stage prompt = new Stage();
                             prompt.initStyle(StageStyle.UNDECORATED);
 
@@ -635,20 +685,19 @@ public class Controller implements Initializable,Announcable {
                             prompt.setX((primScreenBounds.getWidth() - prompt.getWidth()) / 2);
                             prompt.setY((primScreenBounds.getHeight() - prompt.getHeight()) / 2);
                             NewTorrentController.promptStage = prompt;
-                            prompt.setOnHiding(e->{
-                                if (NewTorrentController.add)
-                                {
-                                    Platform.runLater(()->{
+                            prompt.setOnHiding(e -> {
+                                if (NewTorrentController.add) {
+                                    Platform.runLater(() -> {
                                         NetworkController.addTorrent(torrent);
                                         torrent.invokeThreads();
-                                     setTorrentControlButtons(currentTorrent.getStatus());
-                                      Torrents.getItems().clear();
-                                      Torrents.getItems().addAll(NetworkController.getTorrents());});
-                                }
-                                else if (NetworkController.getTorrents().size()>0)
-                                    currentTorrent=NetworkController.getTorrents().get(0);
+                                        setTorrentControlButtons(currentTorrent.getStatus());
+                                        Torrents.getItems().clear();
+                                        Torrents.getItems().addAll(NetworkController.getTorrents());
+                                    });
+                                } else if (NetworkController.getTorrents().size() > 0)
+                                    currentTorrent = NetworkController.getTorrents().get(0);
                                 else
-                                    currentTorrent=null;
+                                    currentTorrent = null;
                             });
                         });
                     } catch (Exception e) {
@@ -665,20 +714,19 @@ public class Controller implements Initializable,Announcable {
     }
 
 
-
     private void addPeer() {
 
         new Thread(new Task() {
             protected Object call() {
                 try {
                     Parent root = FXMLLoader.load(getClass().getResource("NewPeerPrompt.fxml"));
-                    Platform.runLater(()->{
-                    Stage prompt = new Stage();
+                    Platform.runLater(() -> {
+                        Stage prompt = new Stage();
                         prompt.initStyle(StageStyle.UNDECORATED);
 
                         Scene scene = new Scene(root);
-                    prompt.setScene(scene);
-                    prompt.initModality(Modality.APPLICATION_MODAL);
+                        prompt.setScene(scene);
+                        prompt.initModality(Modality.APPLICATION_MODAL);
                         Rectangle2D primScreenBounds = Screen.getPrimary().getVisualBounds();
                         prompt.show();
                         prompt.setX((primScreenBounds.getWidth() - prompt.getWidth()) / 2);
@@ -693,13 +741,14 @@ public class Controller implements Initializable,Announcable {
         }).start();
     }
 
-    @FXML private void About() {
+    @FXML
+    private void About() {
 
         new Thread(new Task() {
             protected Object call() {
                 try {
                     Parent root = FXMLLoader.load(getClass().getResource("About.fxml"));
-                    Platform.runLater(()->{
+                    Platform.runLater(() -> {
                         Stage prompt = new Stage();
                         prompt.initStyle(StageStyle.UNDECORATED);
 
@@ -720,24 +769,26 @@ public class Controller implements Initializable,Announcable {
         }).start();
     }
 
-    @FXML private void AddTorrent() {
+    @FXML
+    private void AddTorrent() {
 
 
     }
 
-    @FXML void BrowseButtonClicked(){
+    @FXML
+    void BrowseButtonClicked() {
         DirectoryChooser chooser = new DirectoryChooser();
         chooser.setInitialDirectory(new File(mParameters.downloadDir));
-        try{
+        try {
             File fl = chooser.showDialog(primaryStage);
-            if (fl.exists() && fl.canExecute() && fl.canRead() && fl.canWrite())
-            {
+            if (fl.exists() && fl.canExecute() && fl.canRead() && fl.canWrite()) {
                 mParameters.downloadDir = fl.getPath();
                 DownloadPath.setText(fl.getPath());
             }
-        }catch(Exception e){e.printStackTrace();}
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
-    public static void showSchedulePrompt(boolean stopped){
-        System.out.println(stopped);
-    }
+
+
 }
